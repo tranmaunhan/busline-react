@@ -13,7 +13,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://103.176.179.139:10000',
+        target: 'https://localhost:7183:10000',
         changeOrigin: true,
         secure: false,
       },
