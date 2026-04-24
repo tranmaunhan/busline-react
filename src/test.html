@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="vi" class="h-full">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VéXe.vn</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- ICON -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    .slide-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      transition: opacity 1s;
+    }
+
+    .active {
+      opacity: 1;
+    }
+
+    .inactive {
+      opacity: 0;
+    }
+  </style>
+</head>
+
+<body class="h-full bg-gray-900">
+
+  <div class="relative w-full h-screen overflow-hidden">
+
+    <!-- ================= NAV ================= -->
+    <div class="absolute top-0 left-0 right-0 z-30 flex justify-between items-center px-6 py-4 text-white">
+
+      <!-- Logo -->
+      <div class="text-xl font-bold">
+        VéXe<span class="text-orange-500">.vn</span>
+      </div>
+
+      <!-- User Icon -->
+      <button class="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-xl hover:bg-white/20 transition">
+        <i data-lucide="user"></i>
+        <span class="hidden md:block">Đăng nhập</span>
+      </button>
+    </div>
+
+    <!-- ================= SLIDES (ẢNH) ================= -->
+    <!-- 👉 Bạn chỉ cần thay link ảnh ở đây -->
+
+    <div id="slide-0" class="slide-bg active"
+      style="background-image: url('https://picsum.photos/1920/1080?random=1');">
+    </div>
+
+    <div id="slide-1" class="slide-bg inactive"
+      style="background-image: url('https://picsum.photos/1920/1080?random=2');">
+    </div>
+
+    <div id="slide-2" class="slide-bg inactive"
+      style="background-image: url('https://picsum.photos/1920/1080?random=3');">
+    </div>
+
+    <!-- overlay -->
+    <div class="absolute inset-0 bg-black/50"></div>
+
+    <!-- TEXT -->
+    <div class="absolute inset-0 flex flex-col items-center justify-start pt-[10%] text-center text-white">
+      <p class="uppercase text-sm opacity-70">Đặt vé dễ dàng</p>
+      <h1 id="heading" class="text-5xl font-bold mt-3 max-w-3xl">
+        Khám phá Việt Nam
+      </h1>
+    </div>
+
+    <!-- ================= FORM ================= -->
+    <div class="absolute left-1/2 -translate-x-1/2 bottom-[42%] w-[95%] max-w-5xl">
+
+      <form onsubmit="handleSearch(event)" class="bg-white rounded-3xl shadow-2xl p-6">
+
+        <div class="grid md:grid-cols-4 gap-3 items-end">
+
+          <div>
+            <label class="text-xs text-gray-500">Nơi đi</label>
+            <select id="from" class="w-full border rounded-xl p-3">
+              <option value="">Chọn...</option>
+              <option>Sóc Trăng</option>
+              <option>TP.HCM</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-xs text-gray-500">Nơi đến</label>
+            <select id="to" class="w-full border rounded-xl p-3">
+              <option value="">Chọn...</option>
+              <option>Sóc Trăng</option>
+              <option>TP.HCM</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-xs text-gray-500">Ngày</label>
+            <input id="date" type="date" class="w-full border rounded-xl p-3" />
+          </div>
+
+          <div>
+            <button id="btn" class="w-full bg-orange-600 text-white p-3 rounded-xl">
+              Tìm vé
+            </button>
+          </div>
+
+        </div>
+
+      </form>
+    </div>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    /* ================= SLIDE ================= */
+    const slides = [
+      document.getElementById("slide-0"),
+      document.getElementById("slide-1"),
+      document.getElementById("slide-2")
+    ];
+
+    const texts = [
+      "Khám phá Việt Nam",
+      "Đặt vé nhanh chóng",
+      "Hàng trăm tuyến đường"
+    ];
+
+    let current = 0;
+
+    function changeSlide(i) {
+      slides[current].classList.remove("active");
+      slides[current].classList.add("inactive");
+
+      current = i;
+
+      slides[current].classList.remove("inactive");
+      slides[current].classList.add("active");
+
+      document.getElementById("heading").innerText = texts[current];
+    }
+
+    function autoSlide() {
+      changeSlide((current + 1) % slides.length);
+    }
+
+    setInterval(autoSlide, 4000);
+
+    /* ================= SWAP ================= */
+    function swap() {
+      let a = document.getElementById("from");
+      let b = document.getElementById("to");
+
+      let temp = a.value;
+      a.value = b.value;
+      b.value = temp;
+    }
+
+    /* ================= SEARCH ================= */
+    function handleSearch(e) {
+      e.preventDefault();
+
+      const from = document.getElementById("from").value;
+      const to = document.getElementById("to").value;
+      const date = document.getElementById("date").value;
+
+      if (!from || !to || !date) {
+        alert("Vui lòng nhập đầy đủ thông tin!");
+        return;
+      }
+
+      const btn = document.getElementById("btn");
+      btn.innerText = "Đang tìm...";
+      btn.disabled = true;
+
+      setTimeout(() => {
+        btn.innerText = "Tìm vé";
+        btn.disabled = false;
+
+        alert(`Tìm vé từ ${from} → ${to} ngày ${date}`);
+      }, 1500);
+    }
+
+    document.getElementById("date").valueAsDate = new Date();
+  </script>
+
+</body>
+
+</html>

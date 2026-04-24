@@ -1,0 +1,36 @@
+.slide-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  transition: opacity 1s;
+}
+
+.slide-bg.active {
+  opacity: 1;
+}
+
+.slide-bg.inactive {
+  opacity: 0;
+}
+
+body {
+  margin: 0;
+}
+
+/* Modal animations */
+@keyframes slide-in-from-bottom-4 {
+  from {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-in {
+  animation: slide-in-from-bottom-4 0.3s ease-out;
+}
