@@ -1,22 +1,162 @@
 import axios from 'axios'
 
+export interface AuthUser {
+    id: number
+    username: string
+    fullName: string
+    email: string
+    phone: string
+    status: string
+    roles: string[]
+}
+
+export interface LoginResponse {
+    accessToken: string
+    tokenType: string
+    expiresInMs: number
+    user: AuthUser
+}
+
+export interface Location {
+    id: number
+    name: string
+    address: string
+    type: string
+}
+
+export interface TripSearchParams {
+    pickupLocationId: number
+    dropoffLocationId: number
+    departureDate: string
+}
+
+export interface TripSearchResult {
+    tripId: number
+    departureTime: string
+    routeOrigin: string
+    routeDestination: string
+    licensePlate: string
+    vehicleType: string
+    price: number
+}
+
+export interface TripSeatMapSeat {
+    tripSeatId: number
+    seatCode: string
+    rowIndex: number
+    colIndex: number
+    deck: string
+    seatType: string
+    status: number
+}
+
+export interface TripSeatMapResponse {
+    tripId: number
+    departureTime: string
+    tripStatus: number
+    vehicleId: number
+    licensePlate: string
+    vehicleBrand: string
+    vehicleTypeName: string
+    totalSeats: number
+    routeId: number
+    originName: string
+    destinationName: string
+    totalDistanceKm: number
+    totalDurationMinutes: number
+    routeStops: string[]
+    seats: TripSeatMapSeat[]
+}
+
+interface TripSeatMapApiSeat {
+    trip_seat_id: number
+    seat_status: number
+    seat_code: string
+    row_index: number
+    col_index: number
+    deck: string
+    seat_type: string
+}
+
+interface TripSeatMapApiResponse {
+    tripId: number
+    departureTime: string
+    tripStatus: number
+    vehicleId: number
+    licensePlate: string
+    vehicleBrand: string
+    vehicleTypeName: string
+    totalSeats: number
+    routeId: number
+    originName: string
+    destinationName: string
+    totalDistanceKm: number
+    totalDurationMinutes: number
+    routeStops: string[]
+    seatLayout: TripSeatMapApiSeat[]
+}
+
+const normalizeDeck = (deck: string) => deck?.trim().toUpperCase() || 'LOWER'
+const normalizeSeatType = (seatType: string) => seatType?.trim().toUpperCase() || 'SEAT'
+
+const normalizeTripSeatMap = (data: TripSeatMapApiResponse): TripSeatMapResponse => ({
+    tripId: data.tripId,
+    departureTime: data.departureTime,
+    tripStatus: data.tripStatus,
+    vehicleId: data.vehicleId,
+    licensePlate: data.licensePlate,
+    vehicleBrand: data.vehicleBrand,
+    vehicleTypeName: data.vehicleTypeName,
+    totalSeats: data.totalSeats,
+    routeId: data.routeId,
+    originName: data.originName,
+    destinationName: data.destinationName,
+    totalDistanceKm: data.totalDistanceKm,
+    totalDurationMinutes: data.totalDurationMinutes,
+    routeStops: data.routeStops ?? [],
+    seats: (data.seatLayout ?? [])
+        .map((seat) => ({
+            tripSeatId: seat.trip_seat_id,
+            seatCode: seat.seat_code,
+            rowIndex: seat.row_index,
+            colIndex: seat.col_index,
+            deck: normalizeDeck(seat.deck),
+            seatType: normalizeSeatType(seat.seat_type),
+            status: Number(seat.seat_status),
+        }))
+        .sort((left, right) => {
+            const deckOrder = (deck: string) => {
+                if (deck === 'LOWER') return 0
+                if (deck === 'UPPER') return 1
+                return 2
+            }
+
+            return (
+                deckOrder(left.deck) - deckOrder(right.deck) ||
+                left.rowIndex - right.rowIndex ||
+                left.colIndex - right.colIndex ||
+                left.seatCode.localeCompare(right.seatCode)
+            )
+        }),
+})
+
 // Base API configuration
 const api = axios.create({
-    // baseURL: 'https://localhost:7183/api',
-    baseURL: 'https://localhost:7183:10000/api',
+    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://103.176.179.139:8080/api',
     timeout: 10000,
     headers: {
         'Content-Type': 'application/json',
     },
 })
-
+// http://103.176.179.139:8080/swagger-ui/index.html
 // Request interceptor for adding auth token if needed
 api.interceptors.request.use(
     (config) => {
         // Add auth token if available
         const token = localStorage.getItem('authToken')
         if (token) {
-            config.headers.Authorization = `Bearer ${token}`
+            const tokenType = localStorage.getItem('authTokenType') || 'Bearer'
+            config.headers.Authorization = `${tokenType} ${token}`
         }
         return config
     },
@@ -34,6 +174,9 @@ api.interceptors.response.use(
         if (error.response?.status === 401) {
             // Handle unauthorized access
             localStorage.removeItem('authToken')
+            localStorage.removeItem('authTokenType')
+            localStorage.removeItem('authExpiresAt')
+            localStorage.removeItem('userData')
             // Redirect to login if needed
         }
         return Promise.reject(error)
@@ -42,8 +185,8 @@ api.interceptors.response.use(
 
 // Auth API endpoints
 export const authAPI = {
-    login: async (credentials: { identifier: string; password: string }) => {
-        const response = await api.post('/Auth/login', credentials)
+    login: async (credentials: { username: string; password: string }): Promise<LoginResponse> => {
+        const response = await api.post('/auth/login', credentials)
         return response.data
     },
 
@@ -60,18 +203,59 @@ export const authAPI = {
 
 // Locations API endpoints
 export const locationsAPI = {
-    getPickupOptions: async () => {
-        const response = await api.get('/Locations/pickup-options')
+    getLocations: async (): Promise<Location[]> => {
+        const response = await api.get('/locations')
         return response.data
     },
 }
 
 // Trips API endpoints
 export const tripsAPI = {
-    getFullRoute: async (params: { originId: number; destinationId: number; date: string }) => {
-        const response = await api.get('/Trips/fullroute', { params })
-        console.log(response.data);
+    searchTrips: async (params: TripSearchParams): Promise<TripSearchResult[]> => {
+        const response = await api.get('/trips/search', { params })
+        return response.data
+    },
 
+    getSeatMap: async (tripId: number): Promise<TripSeatMapResponse> => {
+        const response = await api.get<TripSeatMapApiResponse>(`/trips/${tripId}/details`)
+        return normalizeTripSeatMap(response.data)
+    },
+}
+
+export interface CreateBookingRequest {
+    tripId: number
+    tripSeatIds: number[]
+    pickupLocationId: number
+    dropoffLocationId: number
+}
+
+export interface TicketResponse {
+    ticketId: number
+    tripSeatId: number
+    seatCode: string
+    deck: string
+    seatType: string
+    price: number
+}
+
+export interface BookingResponse {
+    bookingId: number
+    bookingTime: string
+    status: string
+    totalAmount: number
+    tripId: number
+    tripDepartureTime: string
+    routeOrigin: string
+    routeDestination: string
+    pickupLocationName: string
+    dropoffLocationName: string
+    tickets: TicketResponse[]
+}
+
+// Bookings API endpoints
+export const bookingsAPI = {
+    createBooking: async (request: CreateBookingRequest): Promise<BookingResponse> => {
+        const response = await api.post<BookingResponse>('/bookings', request)
         return response.data
     },
 }

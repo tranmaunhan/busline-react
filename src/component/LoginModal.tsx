@@ -1,17 +1,18 @@
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { authAPI } from '../api/config'
+import type { AuthUser } from '../api/config'
 
 interface LoginModalProps {
     show: boolean
     onClose: () => void
-    onLoginSuccess?: (userData: any) => void
+    onLoginSuccess?: (userData: AuthUser) => void
 }
 
 export default function LoginModal({ show, onClose, onLoginSuccess }: LoginModalProps) {
     const [formData, setFormData] = useState({
-        identifier: '',
-        password: ''
+        username: '',
+        password: '',
     })
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
@@ -20,11 +21,11 @@ export default function LoginModal({ show, onClose, onLoginSuccess }: LoginModal
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
-            [name]: value
+            [name]: value,
         }))
-        // Clear error when user starts typing
+
         if (error) setError('')
     }
 
@@ -36,42 +37,28 @@ export default function LoginModal({ show, onClose, onLoginSuccess }: LoginModal
         try {
             const response = await authAPI.login(formData)
 
-            // Store auth token and user data
-            if (response.token) {
-                localStorage.setItem('authToken', response.token)
-                localStorage.setItem('userData', JSON.stringify({
-                    userId: response.userId,
-                    username: response.username,
-                    fullName: response.fullName,
-                    email: response.email
-                }))
+            if (response.accessToken && response.user) {
+                localStorage.setItem('authToken', response.accessToken)
+                localStorage.setItem('authTokenType', response.tokenType)
+                localStorage.setItem('authExpiresAt', String(Date.now() + response.expiresInMs))
+                localStorage.setItem('userData', JSON.stringify(response.user))
             }
 
-            // Call success callback with user data
             if (onLoginSuccess) {
-                onLoginSuccess({
-                    userId: response.userId,
-                    username: response.username,
-                    fullName: response.fullName,
-                    email: response.email,
-                    token: response.token
-                })
+                onLoginSuccess(response.user)
             }
 
-            // Close modal
             onClose()
-
-            // Reset form
-            setFormData({ identifier: '', password: '' })
-
+            setFormData({ username: '', password: '' })
         } catch (err: any) {
             console.error('Login error:', err)
+
             if (err.response?.data?.message) {
                 setError(err.response.data.message)
             } else if (err.message) {
                 setError(err.message)
             } else {
-                setError('Đăng nhập thất bại. Vui lòng thử lại.')
+                setError('Dang nhap that bai. Vui long thu lai.')
             }
         } finally {
             setIsLoading(false)
@@ -80,127 +67,121 @@ export default function LoginModal({ show, onClose, onLoginSuccess }: LoginModal
 
     const fillDemoData = () => {
         setFormData({
-            identifier: 'xiaomir4b@gmail.com',
-            password: '123456'
+            username: 'nhanbaymau',
+            password: '123456',
         })
         setError('')
     }
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md relative overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
-
-                {/* Header */}
-                <div className="bg-gradient-to-br from-orange-500 via-orange-400 to-orange-300 px-8 pt-8 pb-6 text-center">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/25 p-4 backdrop-blur-sm">
+            <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-sky-100 bg-white shadow-[0_24px_80px_rgba(148,163,184,0.24)] animate-in slide-in-from-bottom-4 duration-300">
+                <div className="bg-[linear-gradient(180deg,_#eff6ff_0%,_#ffffff_55%,_#f8fbff_100%)] px-8 pb-6 pt-8 text-center">
                     <div className="flex items-center justify-center gap-2 mb-2">
-                        <div className="text-4xl font-bold text-white">VéXe</div>
-                        <div className="text-4xl font-bold text-orange-100">.vn</div>
+                        <div className="text-4xl font-bold text-slate-900">VeXe</div>
+                        <div className="text-4xl font-bold text-orange-500">.vn</div>
                     </div>
-                    <p className="text-orange-100 text-sm">Đặt vé xe - Yên tâm đi lại</p>
+                    <p className="text-sm text-slate-500">Dat ve xe - Yen tam di lai</p>
                 </div>
 
-                {/* Form */}
                 <form onSubmit={handleSubmit} className="px-8 py-8">
-                    {/* Error Message */}
                     {error && (
                         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
                             {error}
                         </div>
                     )}
 
-                    {/* Email/Phone */}
                     <div className="mb-5">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Email hoặc Số điện thoại
+                            Ten dang nhap
                         </label>
                         <input
                             type="text"
-                            name="identifier"
-                            value={formData.identifier}
+                            name="username"
+                            value={formData.username}
                             onChange={handleInputChange}
-                            className="w-full border-2 text-gray-700 border-gray-200 rounded-lg px-4 py-3 text-base transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
-                            placeholder="Nhập email hoặc số điện thoại"
+                            className="w-full rounded-xl border-2 border-sky-100 bg-sky-50/70 px-4 py-3 text-base text-slate-700 outline-none transition-all focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
+                            placeholder="Nhap ten dang nhap"
                             required
                             disabled={isLoading}
                         />
                     </div>
 
-                    {/* Password */}
                     <div className="mb-2">
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Mật khẩu
+                            Mat khau
                         </label>
                         <input
                             type="password"
                             name="password"
                             value={formData.password}
                             onChange={handleInputChange}
-                            className="text-gray-700 w-full border-2 border-gray-200 rounded-lg px-4 py-3 text-base transition-all focus:border-orange-500 focus:ring-2 focus:ring-orange-100 outline-none"
+                            className="w-full rounded-xl border-2 border-sky-100 bg-sky-50/70 px-4 py-3 text-base text-slate-700 outline-none transition-all focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
                             placeholder="••••••••"
                             required
                             disabled={isLoading}
                         />
                     </div>
 
-                    {/* Demo Data Button */}
                     <div className="text-right mb-4">
                         <button
                             type="button"
                             onClick={fillDemoData}
-                            className="text-sm text-blue-500 hover:text-blue-600 font-medium transition"
+                            className="text-sm font-medium text-sky-600 transition hover:text-sky-700"
                             disabled={isLoading}
                         >
-                            Dùng dữ liệu demo
+                            Dung du lieu demo
                         </button>
                     </div>
 
-                    {/* Forgot Password */}
                     <div className="text-right mb-6">
-                        <a href="#" className="text-sm text-orange-500 hover:text-orange-600 font-medium transition">
-                            Quên mật khẩu?
+                        <a href="#" className="text-sm font-medium text-orange-500 transition hover:text-orange-600">
+                            Quen mat khau?
                         </a>
                     </div>
 
-                    {/* Login Button */}
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="w-full bg-gradient-to-r from-orange-500 to-orange-400 text-white py-3 px-6 rounded-lg font-semibold text-base hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 mb-6 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        className="mb-6 flex w-full items-center justify-center gap-2 rounded-xl bg-orange-500 px-6 py-3 text-base font-semibold text-white shadow-[0_14px_30px_rgba(249,115,22,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {isLoading ? (
                             <>
                                 <Loader2 className="w-4 h-4 animate-spin" />
-                                Đang đăng nhập...
+                                Dang dang nhap...
                             </>
                         ) : (
-                            'Đăng Nhập'
+                            'Dang nhap'
                         )}
                     </button>
 
-                    {/* Sign Up Link */}
                     <p className="text-center text-sm text-gray-600">
-                        Chưa có tài khoản?{' '}
-                        <a href="#" className="text-orange-500 hover:text-orange-600 font-semibold transition">
-                            Đăng ký ngay
+                        Chua co tai khoan?{' '}
+                        <a href="#" className="font-semibold text-orange-500 transition hover:text-orange-600">
+                            Dang ky ngay
                         </a>
                     </p>
                 </form>
 
-                {/* Footer */}
-                <div className="bg-gray-50 px-8 py-4 border-t border-gray-200">
-                    <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
-                        <a href="#" className="hover:text-orange-500 transition">Điều khoản</a>
+                <div className="border-t border-sky-100 bg-sky-50/60 px-8 py-4">
+                    <div className="flex items-center justify-center gap-4 text-xs text-slate-500">
+                        <a href="#" className="transition hover:text-orange-500">
+                            Dieu khoan
+                        </a>
                         <span>•</span>
-                        <a href="#" className="hover:text-orange-500 transition">Chính sách</a>
+                        <a href="#" className="transition hover:text-orange-500">
+                            Chinh sach
+                        </a>
                         <span>•</span>
-                        <a href="#" className="hover:text-orange-500 transition">Liên hệ</a>
+                        <a href="#" className="transition hover:text-orange-500">
+                            Lien he
+                        </a>
                     </div>
                 </div>
 
-                {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="absolute right-4 top-4 text-slate-400 transition-colors hover:text-orange-500"
                     disabled={isLoading}
                 >
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
