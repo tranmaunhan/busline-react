@@ -50,7 +50,7 @@ const slides = [
 
 const slideTexts = [
   'Không ngừng hoàn thiện để thành công',
-  'Đặt vé nhanh chống',
+  'Đặt vé nhanh chóng',
   'Minh bạch rõ ràng',
 ]
 
@@ -334,7 +334,7 @@ function App() {
 
   const handleLoginClick = () => {
     if (user) {
-      alert(`Xin chao ${user.fullName || user.email || 'User'}!`)
+      alert(`Xin chào ${user.fullName || user.email || 'User'}!`)
     } else {
       setShowLoginModal(true)
     }
@@ -342,7 +342,7 @@ function App() {
 
   const handleLoginSuccess = (userData: AuthUser) => {
     setUser(userData)
-    alert('Dang nhap thanh cong!')
+    alert('Đăng nhập thành công!')
   }
 
   const handleLogout = () => {
@@ -351,7 +351,7 @@ function App() {
     localStorage.removeItem('authTokenType')
     localStorage.removeItem('authExpiresAt')
     localStorage.removeItem('userData')
-    alert('Da dang xuat!')
+    alert('Đã đăng xuất!')
   }
 
   const closeLoginModal = () => {
@@ -369,13 +369,13 @@ function App() {
     event.preventDefault()
 
     if (!user) {
-      alert('Vui long dang nhap truoc khi tim ve!')
+      alert('Vui lòng đăng nhập trước khi tìm vé!')
       setShowLoginModal(true)
       return
     }
 
     if (!from || !to || !date) {
-      alert('Vui long nhap day du thong tin!')
+      alert('Vui lòng nhập đầy đủ thông tin!')
       return
     }
 
@@ -383,7 +383,7 @@ function App() {
     const destinationId = Number(to)
 
     if (!originId || !destinationId) {
-      alert('Khong tim thay thong tin diem di hoac diem den!')
+      alert('Không tìm thấy thông tin điểm đi hoặc điểm đến!')
       return
     }
 
@@ -402,7 +402,7 @@ function App() {
       setTrips(data)
     } catch (error) {
       console.error('Error searching trips:', error)
-      alert('Co loi xay ra khi tim chuyen xe. Vui long thu lai!')
+      alert('Có lỗi xảy ra khi tìm chuyến xe. Vui lòng thử lại!')
       setTrips([])
     } finally {
       setLoadingTrips(false)
@@ -423,7 +423,7 @@ function App() {
       if (seatMapRequestRef.current !== requestId) return
       console.error('Error loading seat map:', error)
       setSeatMap(null)
-      setSeatMapError('Khong the tai so do ghe cho chuyen nay. Vui long thu lai.')
+      setSeatMapError('Không thể tải sơ đồ ghế cho chuyến này. Vui lòng thử lại.')
     } finally {
       if (seatMapRequestRef.current !== requestId) return
       setLoadingSeatMap(false)
@@ -520,13 +520,13 @@ function App() {
                 onClick={handleLogout}
                 className="ml-2 rounded-full bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-orange-600"
               >
-                Thoat
+                Thoát
               </button>
             </>
           ) : (
             <button className="flex items-center gap-2 font-medium text-slate-700 transition hover:text-orange-600" onClick={handleLoginClick}>
               <span className="text-xl"></span>
-              <span className="hidden md:block">Dang nhap</span>
+              <span className="hidden md:block">Đăng nhập</span>
             </button>
           )}
         </div>
@@ -548,7 +548,7 @@ function App() {
           {slideTexts[currentSlide]}
         </h1>
         <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
-          Trãi nghiệm đặt vé đơn giản, thông tin rõ ràng và minh bạch cùng Saigon.ST.
+          Trải nghiệm đặt vé đơn giản, thông tin rõ ràng và minh bạch cùng Saigon.ST.
         </p>
       </div>
 
@@ -556,7 +556,7 @@ function App() {
         <form onSubmit={handleSearch} className="rounded-[2rem] border border-sky-100 bg-white p-6 shadow-[0_24px_70px_rgba(148,163,184,0.18)] backdrop-blur">
           <div className="grid md:grid-cols-4 gap-3 items-end">
             <div>
-              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Noi di</label>
+              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Nơi đi</label>
               <select
                 id="from"
                 value={from}
@@ -565,7 +565,7 @@ function App() {
                 disabled={loadingLocations}
               >
                 <option value="">
-                  {loadingLocations ? 'Dang tai...' : 'Chon diem di...'}
+                  {loadingLocations ? 'Đang tải...' : 'Chọn điểm đi...'}
                 </option>
                 {originGroups.map(([type, items]) => (
                   <optgroup key={type} label={locationTypeLabels[type] || type}>
@@ -580,7 +580,7 @@ function App() {
             </div>
 
             <div>
-              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Noi den</label>
+              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Nơi đến</label>
               <select
                 id="to"
                 value={to}
@@ -589,7 +589,7 @@ function App() {
                 disabled={loadingLocations}
               >
                 <option value="">
-                  {loadingLocations ? 'Dang tai...' : from ? 'Chon diem den...' : 'Chon diem di truoc'}
+                  {loadingLocations ? 'Đang tải...' : from ? 'Chọn điểm đến...' : 'Chọn điểm đi trước'}
                 </option>
                 {destinationGroups.map(([type, items]) => (
                   <optgroup key={type} label={locationTypeLabels[type] || type}>
@@ -604,7 +604,7 @@ function App() {
             </div>
 
             <div>
-              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Ngay</label>
+              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Ngày</label>
               <div className="relative">
                 <input
                   id="date"
@@ -619,11 +619,11 @@ function App() {
                   onBlur={() => {
                     const iso = parseDisplayToISO(displayDate)
                     if (!iso) {
-                      setDateError('Dinh dang ngay khong hop le (dd/mm/yyyy)')
+                      setDateError('Định dạng ngày không hợp lệ (dd/mm/yyyy)')
                       return
                     }
                     if (iso < todayIso) {
-                      setDateError('Khong the chon ngay da qua')
+                      setDateError('Không thể chọn ngày đã qua')
                       return
                     }
                     commitSearchDate(iso)
@@ -679,7 +679,7 @@ function App() {
                   : 'rounded-2xl bg-slate-200 text-slate-400 cursor-not-allowed'
                   }`}
               >
-                {loadingTrips ? 'Dang tim...' : user ? 'Tim ve' : 'Dang nhap de tim ve'}
+                {loadingTrips ? 'Đang tìm...' : user ? 'Tìm vé' : 'Đăng nhập de tim ve'}
               </button>
             </div>
           </div>
@@ -690,13 +690,13 @@ function App() {
         <div className="absolute left-1/2 top-[50%] w-[95%] max-w-5xl -translate-x-1/2 text-slate-900">
           <div className="rounded-[2rem] border border-sky-100 bg-white/90 p-6 shadow-[0_24px_70px_rgba(148,163,184,0.18)] backdrop-blur">
             <h3 className="mb-4 text-xl font-bold text-slate-800">
-              Ket qua tim kiem chuyen xe
+              Kết quả tìm kiếm chuyến xe
             </h3>
 
             {loadingTrips ? (
               <div className="text-center py-8">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                <p className="mt-2 text-slate-600">Dang tim chuyen xe...</p>
+                <p className="mt-2 text-slate-600">Đang tìm chuyến xe...</p>
               </div>
             ) : trips.length > 0 ? (
               <div className="space-y-4">
@@ -727,8 +727,8 @@ function App() {
                           </div>
                         </div>
                         <div className="flex items-center justify-between text-sm text-slate-600">
-                          <span>Bien so: {trip.licensePlate}</span>
-                          <span>Loai xe: {trip.vehicleType}</span>
+                          <span>Biển số: {trip.licensePlate}</span>
+                          <span>Loại xe: {trip.vehicleType}</span>
                           <span className="font-semibold text-orange-600">{formatCurrency(trip.price)}</span>
                         </div>
                       </div>
@@ -738,7 +738,7 @@ function App() {
                           onClick={() => handleSelectTrip(trip)}
                           className="rounded-xl bg-orange-500 px-6 py-2.5 font-semibold text-white shadow-[0_14px_28px_rgba(249,115,22,0.28)] transition hover:-translate-y-0.5 hover:bg-orange-600"
                         >
-                          Dat ve
+                          Đặt vé
                         </button>
                       </div>
                     </div>
@@ -747,8 +747,8 @@ function App() {
               </div>
             ) : (
               <div className="py-8 text-center text-slate-500">
-                <p>Khong tim thay chuyen xe nao phu hop.</p>
-                <p className="text-sm mt-1">Hay thu thay doi ngay hoac tuyen duong khac.</p>
+                <p>Không tìm thấy chuyến xe nào phù hợp.</p>
+                <p className="text-sm mt-1">Hãy thử thay đổi ngày hoặc tuyến đường khác.</p>
               </div>
             )}
           </div>
