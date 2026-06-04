@@ -142,7 +142,7 @@ const normalizeTripSeatMap = (data: TripSeatMapApiResponse): TripSeatMapResponse
 
 // Base API configuration
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://103.176.179.139:8080/api',
+    baseURL: 'https://api.aihost.io.vn/api',
     timeout: 10000,
     headers: {
         'Content-Type': 'application/json',
