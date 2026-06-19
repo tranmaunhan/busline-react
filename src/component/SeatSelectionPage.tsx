@@ -167,7 +167,6 @@ export default function SeatSelectionPage({
             setShuttleNote('')
         }
     }
-    console.log('seatMap:', seatMap)
     return (
         <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(186,230,253,0.45),_transparent_24%),radial-gradient(circle_at_top_right,_rgba(219,234,254,0.58),_transparent_26%),linear-gradient(180deg,_#f8fbff_0%,_#eef6ff_34%,_#ffffff_100%)] text-slate-900">
             <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
