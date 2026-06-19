@@ -212,11 +212,13 @@ export const locationsAPI = {
 export const tripsAPI = {
     searchTrips: async (params: TripSearchParams): Promise<TripSearchResult[]> => {
         const response = await api.get('/trips/search', { params })
+        console.log('Dữ liệu trả về chuyến', response)
         return response.data
     },
 
     getSeatMap: async (tripId: number): Promise<TripSeatMapResponse> => {
         const response = await api.get<TripSeatMapApiResponse>(`/trips/${tripId}/details`)
+        console.log('Dữ liệu trả sơ đồ trả về', response)
         return normalizeTripSeatMap(response.data)
     },
 }
