@@ -185,22 +185,21 @@ api.interceptors.response.use(
 
 // Auth API endpoints
 export const authAPI = {
-    login: async (credentials: { username: string; password: string }): Promise<LoginResponse> => {
+    login: async (credentials: { email: string; password: string }): Promise<LoginResponse> => {
         const response = await api.post('/auth/login', credentials)
         return response.data
     },
 
     logout: async () => {
-        const response = await api.post('/Auth/logout')
+        const response = await api.post('/auth/logout')
         return response.data
     },
 
     register: async (userData: any) => {
-        const response = await api.post('/Auth/register', userData)
+        const response = await api.post('/auth/register', userData)
         return response.data
     },
 }
-
 // Locations API endpoints
 export const locationsAPI = {
     getLocations: async (): Promise<Location[]> => {

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Mail, Lock, X } from 'lucide-react'
 import { authAPI } from '../api/config'
 import type { AuthUser } from '../api/config'
 
@@ -11,9 +11,10 @@ interface LoginModalProps {
 
 export default function LoginModal({ show, onClose, onLoginSuccess }: LoginModalProps) {
     const [formData, setFormData] = useState({
-        username: '',
+        email: '',
         password: '',
     })
+
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
 
@@ -21,6 +22,7 @@ export default function LoginModal({ show, onClose, onLoginSuccess }: LoginModal
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
+
         setFormData((prev) => ({
             ...prev,
             [name]: value,
@@ -40,16 +42,23 @@ export default function LoginModal({ show, onClose, onLoginSuccess }: LoginModal
             if (response.accessToken && response.user) {
                 localStorage.setItem('authToken', response.accessToken)
                 localStorage.setItem('authTokenType', response.tokenType)
-                localStorage.setItem('authExpiresAt', String(Date.now() + response.expiresInMs))
+                localStorage.setItem(
+                    'authExpiresAt',
+                    String(Date.now() + response.expiresInMs)
+                )
                 localStorage.setItem('userData', JSON.stringify(response.user))
-            }
 
-            if (onLoginSuccess) {
-                onLoginSuccess(response.user)
-            }
+                onLoginSuccess?.(response.user)
 
-            onClose()
-            setFormData({ username: '', password: '' })
+                setFormData({
+                    email: '',
+                    password: '',
+                })
+
+                onClose()
+            } else {
+                setError('Dữ liệu đăng nhập không hợp lệ.')
+            }
         } catch (err: any) {
             console.error('Login error:', err)
 
@@ -58,7 +67,7 @@ export default function LoginModal({ show, onClose, onLoginSuccess }: LoginModal
             } else if (err.message) {
                 setError(err.message)
             } else {
-                setError('Dang nhap that bai. Vui long thu lai.')
+                setError('Đăng nhập thất bại. Vui lòng thử lại.')
             }
         } finally {
             setIsLoading(false)
@@ -67,127 +76,151 @@ export default function LoginModal({ show, onClose, onLoginSuccess }: LoginModal
 
     const fillDemoData = () => {
         setFormData({
-            username: 'nhanbaymau',
+            email: 'nhanbaymau@gmail.com',
             password: '123456',
         })
         setError('')
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/25 p-4 backdrop-blur-sm">
-            <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-sky-100 bg-white shadow-[0_24px_80px_rgba(148,163,184,0.24)] animate-in slide-in-from-bottom-4 duration-300">
-                <div className="bg-[linear-gradient(180deg,_#eff6ff_0%,_#ffffff_55%,_#f8fbff_100%)] px-8 pb-6 pt-8 text-center">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                        <div className="text-4xl font-bold text-slate-900">VeXe</div>
-                        <div className="text-4xl font-bold text-orange-500">.vn</div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4 backdrop-blur-sm">
+            <div className="relative w-full max-w-[420px] rounded-3xl bg-white shadow-2xl">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    disabled={isLoading}
+                    className="absolute right-5 top-5 rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed"
+                >
+                    <X className="h-5 w-5" />
+                </button>
+
+                <div className="px-8 pt-10 text-center">
+                    <div className="mb-3 flex items-center justify-center">
+                        <span className="text-3xl font-extrabold tracking-tight text-slate-900">
+                            VeXe
+                        </span>
+                        <span className="text-3xl font-extrabold tracking-tight text-orange-500">
+                            .vn
+                        </span>
                     </div>
-                    <p className="text-sm text-slate-500">Dat ve xe - Yen tam di lai</p>
+
+                    <h2 className="text-xl font-bold text-slate-900">
+                        Đăng nhập tài khoản
+                    </h2>
+
+                    <p className="mt-2 text-sm leading-6 text-slate-500">
+                        Đăng nhập để đặt vé, quản lý chuyến đi và theo dõi lịch sử đặt vé của bạn.
+                    </p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="px-8 py-8">
                     {error && (
-                        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                        <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
                             {error}
                         </div>
                     )}
 
                     <div className="mb-5">
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Ten dang nhap
+                        <label className="mb-2 block text-sm font-semibold text-slate-700">
+                            Email
                         </label>
-                        <input
-                            type="text"
-                            name="username"
-                            value={formData.username}
-                            onChange={handleInputChange}
-                            className="w-full rounded-xl border-2 border-sky-100 bg-sky-50/70 px-4 py-3 text-base text-slate-700 outline-none transition-all focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
-                            placeholder="Nhap ten dang nhap"
-                            required
-                            disabled={isLoading}
-                        />
+
+                        <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50 px-4 transition focus-within:border-orange-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100">
+                            <Mail className="mr-3 h-5 w-5 text-slate-400" />
+
+                            <input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                placeholder="Nhập email của bạn"
+                                required
+                                disabled={isLoading}
+                                className="w-full bg-transparent py-3.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed"
+                            />
+                        </div>
                     </div>
 
-                    <div className="mb-2">
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                            Mat khau
+                    <div className="mb-3">
+                        <label className="mb-2 block text-sm font-semibold text-slate-700">
+                            Mật khẩu
                         </label>
-                        <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleInputChange}
-                            className="w-full rounded-xl border-2 border-sky-100 bg-sky-50/70 px-4 py-3 text-base text-slate-700 outline-none transition-all focus:border-orange-400 focus:bg-white focus:ring-4 focus:ring-orange-100"
-                            placeholder="••••••••"
-                            required
-                            disabled={isLoading}
-                        />
+
+                        <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50 px-4 transition focus-within:border-orange-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100">
+                            <Lock className="mr-3 h-5 w-5 text-slate-400" />
+
+                            <input
+                                type="password"
+                                name="password"
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                placeholder="Nhập mật khẩu"
+                                required
+                                disabled={isLoading}
+                                className="w-full bg-transparent py-3.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed"
+                            />
+                        </div>
                     </div>
 
-                    <div className="text-right mb-4">
+                    <div className="mb-6 flex items-center justify-between">
                         <button
                             type="button"
                             onClick={fillDemoData}
-                            className="text-sm font-medium text-sky-600 transition hover:text-sky-700"
                             disabled={isLoading}
+                            className="text-sm font-medium text-sky-600 transition hover:text-sky-700 disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                            Dung du lieu demo
-                        </button>
-                    </div>
 
-                    <div className="text-right mb-6">
-                        <a href="#" className="text-sm font-medium text-orange-500 transition hover:text-orange-600">
-                            Quen mat khau?
+                        </button>
+
+                        <a
+                            href="#"
+                            className="text-sm font-medium text-orange-500 transition hover:text-orange-600"
+                        >
+                            Quên mật khẩu?
                         </a>
                     </div>
 
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="mb-6 flex w-full items-center justify-center gap-2 rounded-xl bg-orange-500 px-6 py-3 text-base font-semibold text-white shadow-[0_14px_30px_rgba(249,115,22,0.25)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-orange-600 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+                        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-500/25 transition hover:-translate-y-0.5 hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                         {isLoading ? (
                             <>
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                Dang dang nhap...
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                Đang đăng nhập...
                             </>
                         ) : (
-                            'Dang nhap'
+                            'Đăng nhập'
                         )}
                     </button>
 
-                    <p className="text-center text-sm text-gray-600">
-                        Chua co tai khoan?{' '}
-                        <a href="#" className="font-semibold text-orange-500 transition hover:text-orange-600">
-                            Dang ky ngay
+                    <p className="mt-6 text-center text-sm text-slate-500">
+                        Chưa có tài khoản?{' '}
+                        <a
+                            href="#"
+                            className="font-semibold text-orange-500 transition hover:text-orange-600"
+                        >
+                            Đăng ký ngay
                         </a>
                     </p>
                 </form>
 
-                <div className="border-t border-sky-100 bg-sky-50/60 px-8 py-4">
-                    <div className="flex items-center justify-center gap-4 text-xs text-slate-500">
+                <div className="border-t border-slate-100 px-8 py-5">
+                    <div className="flex items-center justify-center gap-4 text-xs text-slate-400">
                         <a href="#" className="transition hover:text-orange-500">
-                            Dieu khoan
+                            Điều khoản
                         </a>
                         <span>•</span>
                         <a href="#" className="transition hover:text-orange-500">
-                            Chinh sach
+                            Chính sách
                         </a>
                         <span>•</span>
                         <a href="#" className="transition hover:text-orange-500">
-                            Lien he
+                            Liên hệ
                         </a>
                     </div>
                 </div>
-
-                <button
-                    onClick={onClose}
-                    className="absolute right-4 top-4 text-slate-400 transition-colors hover:text-orange-500"
-                    disabled={isLoading}
-                >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
             </div>
         </div>
     )
