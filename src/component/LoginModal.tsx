@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Loader2, Mail, Lock, X } from 'lucide-react'
 import { authAPI } from '../api/config'
 import type { AuthUser } from '../api/config'
+import { useToast } from './Toast'
 
 interface LoginModalProps {
     show: boolean
@@ -11,6 +12,7 @@ interface LoginModalProps {
 }
 
 export default function LoginModal({ show, onClose, onLoginSuccess, onRegisterClick }: LoginModalProps) {
+    const { showToast } = useToast()
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -58,18 +60,20 @@ export default function LoginModal({ show, onClose, onLoginSuccess, onRegisterCl
 
                 onClose()
             } else {
-                setError('Dữ liệu đăng nhập không hợp lệ.')
+                const msg = 'Dữ liệu đăng nhập không hợp lệ.'
+                setError(msg)
+                showToast(msg, 'error')
             }
         } catch (err: any) {
             console.error('Login error:', err)
-
+            let msg = 'Đăng nhập thất bại. Vui lòng thử lại.'
             if (err.response?.data?.message) {
-                setError(err.response.data.message)
+                msg = err.response.data.message
             } else if (err.message) {
-                setError(err.message)
-            } else {
-                setError('Đăng nhập thất bại. Vui lòng thử lại.')
+                msg = err.message
             }
+            setError(msg)
+            showToast(msg, 'error')
         } finally {
             setIsLoading(false)
         }

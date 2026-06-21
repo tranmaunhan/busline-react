@@ -10,6 +10,7 @@ import BookingSuccessModal from './component/BookingSuccessModal'
 import routePlaceholder from '../public/34p.jpg'
 import { locationsAPI, tripsAPI } from './api/config'
 import type { AuthUser, Location, TripSearchResult, TripSeatMapResponse, TripSeatMapSeat, BookingResponse } from './api/config'
+import { useToast } from './component/Toast'
 import './App.css'
 
 const formatDateDisplay = (iso: string) => {
@@ -90,18 +91,7 @@ interface PersistedBookingFlow {
 }
 
 const loadPersistedBookingFlow = (): PersistedBookingFlow | null => {
-  if (typeof window === 'undefined') return null
-
-  try {
-    const raw = window.sessionStorage.getItem(BOOKING_FLOW_STORAGE_KEY)
-    if (!raw) return null
-
-    return JSON.parse(raw) as PersistedBookingFlow
-  } catch (error) {
-    console.error('Error restoring booking flow:', error)
-    window.sessionStorage.removeItem(BOOKING_FLOW_STORAGE_KEY)
-    return null
-  }
+  return null
 }
 
 const persistBookingFlow = (state: PersistedBookingFlow) => {
@@ -198,6 +188,7 @@ function SeatSelectionRoute({
 }
 
 function App() {
+  const { showToast } = useToast()
   // Load persisted booking flow only once (useRef prevents re-parsing on every render)
   const restoredRef = useRef(loadPersistedBookingFlow())
   const restoredBookingFlow = restoredRef.current
@@ -337,7 +328,7 @@ function App() {
 
   const handleLoginClick = () => {
     if (user) {
-      alert(`Xin chào ${user.fullName || user.email || 'User'}!`)
+      showToast(`Xin chào ${user.fullName || user.email || 'User'}!`, 'info')
     } else {
       setShowLoginModal(true)
     }
@@ -345,7 +336,7 @@ function App() {
 
   const handleLoginSuccess = (userData: AuthUser) => {
     setUser(userData)
-    alert('Đăng nhập thành công!')
+    showToast('Đăng nhập thành công!', 'success')
   }
 
   const handleLogout = () => {
@@ -354,7 +345,7 @@ function App() {
     localStorage.removeItem('authTokenType')
     localStorage.removeItem('authExpiresAt')
     localStorage.removeItem('userData')
-    alert('Đã đăng xuất!')
+    showToast('Đã đăng xuất thành công!', 'success')
   }
 
   const closeLoginModal = () => {
@@ -386,13 +377,13 @@ function App() {
     event.preventDefault()
 
     if (!user) {
-      alert('Vui lòng đăng nhập trước khi tìm vé!')
+      showToast('Vui lòng đăng nhập trước khi tìm vé!', 'warning')
       setShowLoginModal(true)
       return
     }
 
     if (!from || !to || !date) {
-      alert('Vui lòng nhập đầy đủ thông tin!')
+      showToast('Vui lòng nhập đầy đủ thông tin!', 'warning')
       return
     }
 
@@ -400,7 +391,7 @@ function App() {
     const destinationId = Number(to)
 
     if (!originId || !destinationId) {
-      alert('Không tìm thấy thông tin điểm đi hoặc điểm đến!')
+      showToast('Không tìm thấy thông tin điểm đi hoặc điểm đến!', 'error')
       return
     }
 
@@ -419,7 +410,7 @@ function App() {
       setTrips(data)
     } catch (error) {
       console.error('Error searching trips:', error)
-      alert('Có lỗi xảy ra khi tìm chuyến xe. Vui lòng thử lại!')
+      showToast('Có lỗi xảy ra khi tìm chuyến xe. Vui lòng thử lại!', 'error')
       setTrips([])
     } finally {
       setLoadingTrips(false)

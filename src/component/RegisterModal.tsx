@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Loader2, User, Mail, Phone, Lock, X } from 'lucide-react'
 import { authAPI } from '../api/config'
+import { useToast } from './Toast'
 
 interface RegisterModalProps {
     show: boolean
@@ -9,6 +10,7 @@ interface RegisterModalProps {
 }
 
 export default function RegisterModal({ show, onClose, onLoginClick }: RegisterModalProps) {
+    const { showToast } = useToast()
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
@@ -41,7 +43,9 @@ export default function RegisterModal({ show, onClose, onLoginClick }: RegisterM
         setSuccessMessage('')
 
         if (formData.password !== formData.confirmPassword) {
-            setError('Mật khẩu xác nhận không trùng khớp.')
+            const msg = 'Mật khẩu xác nhận không trùng khớp.'
+            setError(msg)
+            showToast(msg, 'warning')
             setIsLoading(false)
             return
         }
@@ -57,7 +61,9 @@ export default function RegisterModal({ show, onClose, onLoginClick }: RegisterM
 
             await authAPI.register(payload)
 
-            setSuccessMessage('Đăng ký tài khoản thành công! Bạn có thể đăng nhập ngay.')
+            const successMsg = 'Đăng ký tài khoản thành công! Đang chuyển hướng...'
+            setSuccessMessage(successMsg)
+            showToast('Đăng ký tài khoản thành công! Bạn có thể đăng nhập ngay.', 'success')
             setFormData({
                 fullName: '',
                 email: '',
@@ -73,14 +79,14 @@ export default function RegisterModal({ show, onClose, onLoginClick }: RegisterM
             }, 2500)
         } catch (err: any) {
             console.error('Registration error:', err)
-
+            let errMsg = 'Đăng ký thất bại. Vui lòng thử lại.'
             if (err.response?.data?.message) {
-                setError(err.response.data.message)
+                errMsg = err.response.data.message
             } else if (err.message) {
-                setError(err.message)
-            } else {
-                setError('Đăng ký thất bại. Vui lòng thử lại.')
+                errMsg = err.message
             }
+            setError(errMsg)
+            showToast(errMsg, 'error')
         } finally {
             setIsLoading(false)
         }
