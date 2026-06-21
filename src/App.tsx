@@ -3,6 +3,7 @@ import type { FormEvent } from 'react'
 import { CalendarDays } from 'lucide-react'
 import { Navigate, Route, Routes, useMatch, useNavigate, useParams } from 'react-router-dom'
 import LoginModal from './component/LoginModal'
+import RegisterModal from './component/RegisterModal'
 import SeatSelectionPage from './component/SeatSelectionPage'
 import BookingConfirmModal from './component/BookingConfirmModal'
 import BookingSuccessModal from './component/BookingSuccessModal'
@@ -216,6 +217,7 @@ function App() {
   const seatMapRequestRef = useRef(0)
   const todayIso = defaultDateIso
   const [showLoginModal, setShowLoginModal] = useState(false)
+  const [showRegisterModal, setShowRegisterModal] = useState(false)
   const [user, setUser] = useState<AuthUser | null>(null)
   const [locations, setLocations] = useState<Location[]>([])
   const [loadingLocations, setLoadingLocations] = useState(true)
@@ -357,6 +359,20 @@ function App() {
 
   const closeLoginModal = () => {
     setShowLoginModal(false)
+  }
+
+  const closeRegisterModal = () => {
+    setShowRegisterModal(false)
+  }
+
+  const handleRegisterClick = () => {
+    setShowLoginModal(false)
+    setShowRegisterModal(true)
+  }
+
+  const handleLoginClickFromRegister = () => {
+    setShowRegisterModal(false)
+    setShowLoginModal(true)
   }
 
   useEffect(() => {
@@ -799,7 +815,18 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
 
-      <LoginModal show={showLoginModal} onClose={closeLoginModal} onLoginSuccess={handleLoginSuccess} />
+      <LoginModal
+        show={showLoginModal}
+        onClose={closeLoginModal}
+        onLoginSuccess={handleLoginSuccess}
+        onRegisterClick={handleRegisterClick}
+      />
+
+      <RegisterModal
+        show={showRegisterModal}
+        onClose={closeRegisterModal}
+        onLoginClick={handleLoginClickFromRegister}
+      />
 
       {selectedTrip && bookingConfirmData && (
         <BookingConfirmModal
