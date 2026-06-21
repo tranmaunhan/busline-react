@@ -521,12 +521,12 @@ function App() {
       {/* Main content wrapper — flexbox, not absolute */}
       <div className="relative z-10 flex min-h-screen flex-col">
         {/* ===== HEADER ===== */}
-        <header className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
-          <div className="rounded-full border border-sky-100 bg-white/90 px-3 py-1.5 text-lg font-bold text-slate-900 shadow-[0_10px_30px_rgba(148,163,184,0.16)] backdrop-blur sm:px-4 sm:py-2 sm:text-xl">
+        <header className="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
+          <div className="rounded-full border border-sky-100 bg-white/90 px-3 py-1.5 text-base font-bold text-slate-900 shadow-[0_10px_30px_rgba(148,163,184,0.16)] backdrop-blur sm:px-4 sm:py-2 sm:text-xl">
             Saigon<span className="text-orange-500">.ST</span>
           </div>
 
-          <div className="flex items-center gap-2 rounded-2xl border border-sky-100 bg-white/90 px-3 py-1.5 text-slate-700 shadow-[0_10px_30px_rgba(148,163,184,0.16)] backdrop-blur transition hover:bg-white sm:px-4 sm:py-2">
+          <div className="flex items-center gap-2 rounded-2xl border border-sky-100 bg-white/90 px-2.5 py-1.5 text-slate-700 shadow-[0_10px_30px_rgba(148,163,184,0.16)] backdrop-blur transition hover:bg-white sm:px-4 sm:py-2">
             {user ? (
               <>
                 <User className="h-5 w-5 text-slate-500 shrink-0" />
@@ -553,19 +553,19 @@ function App() {
         </header>
 
         {/* ===== HERO SECTION ===== */}
-        <div className="flex flex-col items-center px-4 pt-4 text-center sm:pt-8">
-          <p className="rounded-full border border-sky-100 bg-white/100 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-sky-700 shadow-sm backdrop-blur sm:px-4 sm:text-xs">Saigon.ST Busline</p>
-          <h1 id="heading" className="mt-3 max-w-3xl text-3xl font-black tracking-tight text-slate-900 text-balance sm:mt-4 sm:text-4xl lg:text-5xl">
+        <div className="flex flex-col items-center px-4 pt-3 text-center sm:pt-8">
+          <p className="hidden rounded-full border border-sky-100 bg-white/100 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-sky-700 shadow-sm backdrop-blur sm:inline-flex sm:px-4 sm:text-xs">Saigon.ST Busline</p>
+          <h1 id="heading" className="mt-2 max-w-3xl text-2xl font-black tracking-tight text-slate-900 text-balance sm:mt-4 sm:text-4xl lg:text-5xl">
             {slideTexts[currentSlide]}
           </h1>
-          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:mt-4 sm:text-base sm:leading-7">
+          <p className="mt-3 hidden max-w-2xl text-sm leading-6 text-slate-600 sm:mt-4 sm:block sm:text-base sm:leading-7">
             Trải nghiệm đặt vé đơn giản, thông tin rõ ràng và minh bạch cùng Saigon.ST.
           </p>
         </div>
 
         {/* ===== SEARCH FORM ===== */}
-        <div className="mx-auto mt-6 w-full max-w-5xl px-3 sm:mt-8 sm:px-4">
-          <form onSubmit={handleSearch} className="rounded-2xl border border-sky-100 bg-white p-4 shadow-[0_24px_70px_rgba(148,163,184,0.18)] backdrop-blur sm:rounded-[2rem] sm:p-6">
+        <div className="mx-auto mt-5 w-full max-w-5xl px-3 sm:mt-8 sm:px-4">
+          <form onSubmit={handleSearch} className="rounded-2xl border border-sky-100 bg-white p-3 shadow-[0_24px_70px_rgba(148,163,184,0.18)] backdrop-blur sm:rounded-[2rem] sm:p-6">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 items-end">
               <div>
                 <label htmlFor="from" className="mb-1 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Nơi đi</label>
@@ -706,9 +706,9 @@ function App() {
 
         {/* ===== SEARCH RESULTS ===== */}
         {(hasSearchedTrips || loadingTrips) && (
-          <div className="mx-auto mt-6 w-full max-w-5xl px-3 pb-8 sm:mt-8 sm:px-4 sm:pb-12">
-            <div className="rounded-2xl border border-sky-100 bg-white/90 p-4 shadow-[0_24px_70px_rgba(148,163,184,0.18)] backdrop-blur sm:rounded-[2rem] sm:p-6">
-              <h3 className="mb-4 text-lg font-bold text-slate-800 sm:text-xl">
+          <div className="mx-auto mt-5 w-full max-w-5xl px-3 pb-8 sm:mt-8 sm:px-4 sm:pb-12">
+            <div className="rounded-2xl border border-sky-100 bg-white/90 p-3 shadow-[0_24px_70px_rgba(148,163,184,0.18)] backdrop-blur sm:rounded-[2rem] sm:p-6">
+              <h3 className="mb-3 text-base font-bold text-slate-800 sm:mb-4 sm:text-xl">
                 Kết quả tìm kiếm chuyến xe
               </h3>
 
@@ -722,13 +722,13 @@ function App() {
                   {trips.map((trip) => (
                     <div
                       key={trip.tripId}
-                      className="rounded-xl border border-sky-100 bg-[linear-gradient(135deg,_#ffffff_0%,_#f7fbff_100%)] p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_18px_35px_rgba(148,163,184,0.16)] sm:rounded-[1.5rem] sm:p-5"
+                      className="rounded-xl border border-sky-100 bg-[linear-gradient(135deg,_#ffffff_0%,_#f7fbff_100%)] p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_18px_35px_rgba(148,163,184,0.16)] sm:rounded-[1.5rem] sm:p-5"
                     >
                       {/* Mobile: stack vertically. Tablet+: side by side */}
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-3 mb-2 sm:gap-4">
-                            <div className="rounded-xl border border-orange-100 bg-orange-50 px-3 py-2 text-xl font-bold text-orange-500 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-2xl">
+                          <div className="mb-2 flex items-center gap-3 sm:gap-4">
+                            <div className="rounded-xl border border-orange-100 bg-orange-50 px-3 py-2 text-lg font-bold text-orange-500 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-2xl">
                               {new Date(trip.departureTime).toLocaleTimeString('vi-VN', {
                                 hour: '2-digit',
                                 minute: '2-digit',
@@ -742,7 +742,7 @@ function App() {
                               </div>
                             </div>
                           </div>
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 sm:text-sm">
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-slate-600 sm:gap-x-4 sm:text-sm">
                             <span>Biển số: {trip.licensePlate}</span>
                             <span>Loại xe: {trip.vehicleType}</span>
                             <span className="font-semibold text-orange-600">{formatCurrency(trip.price)}</span>

@@ -167,19 +167,30 @@ export default function SeatSelectionPage({
             setShuttleNote('')
         }
     }
+
+    const handleProceedSelection = () => {
+        onProceed?.(selectedSeats, {
+            useShuttleService,
+            shuttleNote: shuttleNote.trim(),
+            pickupLocationId,
+            dropoffLocationId,
+            pickupLocationName,
+            dropoffLocationName,
+        })
+    }
     return (
-        <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(186,230,253,0.45),_transparent_24%),radial-gradient(circle_at_top_right,_rgba(219,234,254,0.58),_transparent_26%),linear-gradient(180deg,_#f8fbff_0%,_#eef6ff_34%,_#ffffff_100%)] text-slate-900">
+        <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(186,230,253,0.45),_transparent_24%),radial-gradient(circle_at_top_right,_rgba(219,234,254,0.58),_transparent_26%),linear-gradient(180deg,_#f8fbff_0%,_#eef6ff_34%,_#ffffff_100%)] pb-28 text-slate-900 xl:pb-0">
             <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
                 <button
                     type="button"
                     onClick={onBack}
-                    className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-orange-200 hover:bg-white hover:text-orange-600"
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-sky-100 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-orange-200 hover:bg-white hover:text-orange-600 sm:w-auto"
                 >
                     <ArrowLeft className="h-4 w-4" />
                     Quay lại danh sách chuyến
                 </button>
 
-                <section className="relative mt-5 overflow-hidden rounded-[2rem] border border-sky-100 bg-[linear-gradient(135deg,_#ffffff_0%,_#f8fbff_52%,_#edf6ff_100%)] p-6 shadow-[0_28px_90px_rgba(148,163,184,0.12)]">
+                <section className="relative mt-5 overflow-hidden rounded-[2rem] border border-sky-100 bg-[linear-gradient(135deg,_#ffffff_0%,_#f8fbff_52%,_#edf6ff_100%)] p-4 shadow-[0_28px_90px_rgba(148,163,184,0.12)] sm:p-6">
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(125,211,252,0.16),_transparent_28%)]" />
                     <div className="absolute -right-10 top-8 h-40 w-40 rounded-full bg-sky-200/35 blur-3xl" />
                     <div className="absolute left-0 top-0 h-32 w-32 rounded-full bg-blue-100/70 blur-3xl" />
@@ -197,7 +208,7 @@ export default function SeatSelectionPage({
                                 </h1>
 
                                 {seatMap?.routeStops?.length ? (
-                                    <div className="mt-4 rounded-[1.5rem] border border-sky-100 bg-white/88 p-4 shadow-sm">
+                                    <div className="mt-4 hidden rounded-[1.5rem] border border-sky-100 bg-white/88 p-4 shadow-sm sm:block">
                                         <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-700">
                                             Lộ trình tổng quan
                                         </div>
@@ -218,13 +229,13 @@ export default function SeatSelectionPage({
                                 ) : null}
 
 
-                                <div className="mt-5 flex flex-wrap gap-3 text-sm text-slate-700">
+                                <div className="mt-5 flex flex-wrap gap-2 text-sm text-slate-700 sm:gap-3">
                                     <div className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2 ring-1 ring-sky-100 shadow-sm">
                                         <Clock3 className="h-4 w-4 text-orange-500" />
                                         {formatDateTime(seatMap?.departureTime || trip.departureTime)}
                                     </div>
 
-                                    <div className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2 ring-1 ring-sky-100 shadow-sm">
+                                    <div className="hidden items-center gap-2 rounded-2xl bg-white px-4 py-2 ring-1 ring-sky-100 shadow-sm sm:inline-flex">
                                         <MapPin className="h-4 w-4 text-orange-500" />
                                         {seatMap?.licensePlate || trip.licensePlate}
                                     </div>
@@ -241,7 +252,7 @@ export default function SeatSelectionPage({
                                 </div>
                             </div>
 
-                            <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                                 <div className="rounded-[1.5rem] bg-white p-4 ring-1 ring-sky-100 shadow-sm">
                                     <div className="text-xs uppercase tracking-[0.24em] text-slate-400">Số chỗ trống</div>
                                     <div className="mt-2 text-3xl font-black text-slate-900">{availableSeatCount}</div>
@@ -250,14 +261,14 @@ export default function SeatSelectionPage({
                                     </div>
                                 </div>
 
-                                <div className="rounded-[1.5rem] bg-white p-4 ring-1 ring-sky-100 shadow-sm">
+                                <div className="hidden rounded-[1.5rem] bg-white p-4 ring-1 ring-sky-100 shadow-sm sm:block">
                                     <div className="text-xs uppercase tracking-[0.24em] text-slate-400">Tổng số ghế</div>
                                     <div className="mt-2 text-xl font-bold text-slate-900">
                                         {seatMap?.totalSeats ?? '--'}
                                     </div>
                                 </div>
 
-                                <div className="rounded-[1.5rem] bg-white p-4 ring-1 ring-sky-100 shadow-sm">
+                                <div className="hidden rounded-[1.5rem] bg-white p-4 ring-1 ring-sky-100 shadow-sm sm:block">
                                     <div className="text-xs uppercase tracking-[0.24em] text-slate-400">Quãng đường</div>
                                     <div className="mt-2 text-xl font-bold text-slate-900">
                                         {seatMap?.totalDistanceKm ? `${seatMap.totalDistanceKm} km` : '--'}
@@ -273,7 +284,7 @@ export default function SeatSelectionPage({
                             </div>
                         </div>
 
-                        <div className="relative overflow-hidden rounded-[1.75rem] border border-sky-100 bg-white/92 p-4 shadow-sm">
+                        <div className="relative hidden overflow-hidden rounded-[1.75rem] border border-sky-100 bg-white/92 p-4 shadow-sm xl:block">
                             <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(125,211,252,0.14),_transparent_40%)]" />
                             {routePreviewImage ? (
                                 <img
@@ -343,7 +354,7 @@ export default function SeatSelectionPage({
                 </section>
 
                 <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.7fr)_380px]">
-                    <section className="overflow-hidden rounded-[2rem] border border-sky-100 bg-white p-6 shadow-[0_22px_70px_rgba(148,163,184,0.12)]">
+                    <section className="overflow-hidden rounded-[2rem] border border-sky-100 bg-white p-4 shadow-[0_22px_70px_rgba(148,163,184,0.12)] sm:p-6">
                         {loading ? (
                             <div className="flex min-h-[420px] flex-col items-center justify-center rounded-[1.75rem] border border-dashed border-slate-200 bg-slate-50 text-slate-500">
                                 <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
@@ -365,7 +376,7 @@ export default function SeatSelectionPage({
                         ) : seatMap ? (
                             <>
                                 <div className="flex flex-wrap items-center justify-between gap-4">
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="hidden flex-wrap gap-2 sm:flex">
                                         <span className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-2 text-xs font-medium text-slate-600">
                                             <span className="h-3 w-3 rounded bg-white ring-1 ring-slate-300"></span>
                                             Còn trống
@@ -441,7 +452,7 @@ export default function SeatSelectionPage({
                                                             >
                                                                 <div className="flex h-full flex-col justify-between items-center sm:items-start">
                                                                     <div className="text-sm font-bold sm:text-base">{seat.seatCode}</div>
-                                                                    <div className={`text-[9px] sm:text-[11px] uppercase tracking-wider sm:tracking-[0.22em] ${isSelected ? 'text-white/80' : available ? 'text-slate-500' : 'text-slate-400'}`}>
+                                                                    <div className={`hidden text-[11px] uppercase tracking-[0.22em] sm:block ${isSelected ? 'text-white/80' : available ? 'text-slate-500' : 'text-slate-400'}`}>
                                                                         {seatTypeLabels[seat.seatType] || seat.seatType}
                                                                     </div>
                                                                 </div>
@@ -465,7 +476,7 @@ export default function SeatSelectionPage({
                         )}
                     </section>
 
-                    <aside className="rounded-[2rem] border border-sky-100 bg-white p-6 text-slate-900 shadow-[0_22px_70px_rgba(148,163,184,0.12)]">
+                    <aside className="rounded-[2rem] border border-sky-100 bg-white p-4 text-slate-900 shadow-[0_22px_70px_rgba(148,163,184,0.12)] sm:p-6">
                         <div className="text-xs uppercase tracking-[0.28em] text-slate-400">Thông tin đặt chỗ</div>
                         <h2 className="mt-3 text-2xl font-black">Tóm tắt lựa chọn</h2>
 
@@ -477,7 +488,7 @@ export default function SeatSelectionPage({
                             <div className="rounded-[1.5rem] bg-sky-50/70 p-4 ring-1 ring-sky-100">
                                 <div className="flex items-center justify-between gap-3">
                                     <div className="text-sm font-semibold text-slate-900">Dịch vụ trung chuyển</div>
-                                    <div className="group relative">
+                                    <div className="group relative hidden sm:block">
                                         <button
                                             type="button"
                                             aria-label="Thông tin dịch vụ trung chuyển"
@@ -563,7 +574,7 @@ export default function SeatSelectionPage({
                             </div>
                         </div>
 
-                        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+                        <div className="mt-6 hidden gap-3 sm:grid sm:grid-cols-2 xl:grid-cols-1">
                             <div className="rounded-[1.5rem] bg-slate-50 p-4 ring-1 ring-sky-100">
                                 <div className="text-xs uppercase tracking-[0.22em] text-slate-400">Còn trống</div>
                                 <div className="mt-2 text-2xl font-black">{availableSeatCount}/{seatMap?.totalSeats ?? '--'}</div>
@@ -573,21 +584,34 @@ export default function SeatSelectionPage({
                         <button
                             type="button"
                             disabled={selectedSeats.length === 0}
-                            onClick={() =>
-                                onProceed?.(selectedSeats, {
-                                    useShuttleService,
-                                    shuttleNote: shuttleNote.trim(),
-                                    pickupLocationId,
-                                    dropoffLocationId,
-                                    pickupLocationName,
-                                    dropoffLocationName,
-                                })
-                            }
-                            className="mt-8 w-full rounded-[1.25rem] bg-orange-500 px-5 py-4 text-base font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                            onClick={handleProceedSelection}
+                            className="mt-8 hidden w-full rounded-[1.25rem] bg-orange-500 px-5 py-4 text-base font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400 xl:block"
                         >
                             {selectedSeats.length > 0 ? `Tiếp tục với ${selectedSeats.length} ghế` : 'Chọn ghế để tiếp tục'}
                         </button>
                     </aside>
+                </div>
+            </div>
+
+            <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-[0_-12px_30px_rgba(15,23,42,0.08)] backdrop-blur xl:hidden">
+                <div className="mx-auto flex max-w-7xl items-center gap-3">
+                    <div className="min-w-0 flex-1">
+                        <div className="text-xs uppercase tracking-[0.16em] text-slate-400">Da chon</div>
+                        <div className="mt-1 text-sm font-semibold text-slate-800">
+                            {selectedSeats.length > 0
+                                ? `${selectedSeats.length} ghe - ${formatCurrency(selectedTotalAmount)}`
+                                : 'Chon ghe de tiep tuc'}
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        disabled={selectedSeats.length === 0}
+                        onClick={handleProceedSelection}
+                        className="rounded-[1rem] bg-orange-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+                    >
+                        Tiep tuc
+                    </button>
                 </div>
             </div>
         </div>

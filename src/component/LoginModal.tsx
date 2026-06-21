@@ -88,8 +88,8 @@ export default function LoginModal({ show, onClose, onLoginSuccess, onRegisterCl
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
-            <div className="relative w-full max-w-[420px] rounded-2xl bg-white shadow-2xl animate-scale-in sm:rounded-3xl">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/60 p-3 backdrop-blur-sm sm:items-center sm:p-4">
+            <div className="relative max-h-[96vh] w-full max-w-[420px] overflow-hidden rounded-[1.5rem] bg-white shadow-2xl animate-scale-in sm:rounded-3xl">
                 <button
                     type="button"
                     onClick={onClose}
@@ -99,7 +99,7 @@ export default function LoginModal({ show, onClose, onLoginSuccess, onRegisterCl
                     <X className="h-5 w-5" />
                 </button>
 
-                <div className="px-6 pt-8 text-center sm:px-8 sm:pt-10">
+                <div className="px-5 pt-7 text-center sm:px-8 sm:pt-10">
                     <div className="mb-3 flex items-center justify-center">
                         <span className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
                             Saigon
@@ -113,12 +113,12 @@ export default function LoginModal({ show, onClose, onLoginSuccess, onRegisterCl
                         Đăng nhập tài khoản
                     </h2>
 
-                    <p className="mt-2 text-xs leading-5 text-slate-500 sm:text-sm sm:leading-6">
+                    <p className="mt-2 hidden text-xs leading-5 text-slate-500 sm:block sm:text-sm sm:leading-6">
                         Đăng nhập để đặt vé, quản lý chuyến đi và theo dõi lịch sử đặt vé của bạn.
                     </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="px-6 py-6 sm:px-8 sm:py-8">
+                <form onSubmit={handleSubmit} className="max-h-[calc(96vh-150px)] overflow-y-auto px-5 py-5 sm:max-h-none sm:px-8 sm:py-8">
                     {error && (
                         <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-xs text-red-600 sm:mb-5 sm:px-4 sm:py-3 sm:text-sm">
                             {error}
@@ -167,12 +167,12 @@ export default function LoginModal({ show, onClose, onLoginSuccess, onRegisterCl
                         </div>
                     </div>
 
-                    <div className="mb-5 flex items-center justify-between sm:mb-6">
+                    <div className="mb-5 flex items-center justify-end sm:mb-6 sm:justify-between">
                         <button
                             type="button"
                             onClick={fillDemoData}
                             disabled={isLoading}
-                            className="text-xs font-medium text-sky-600 transition hover:text-sky-700 disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm"
+                            className="hidden text-xs font-medium text-sky-600 transition hover:text-sky-700 disabled:cursor-not-allowed disabled:opacity-60 sm:inline sm:text-sm"
                         >
 
                         </button>
@@ -215,7 +215,7 @@ export default function LoginModal({ show, onClose, onLoginSuccess, onRegisterCl
                     </p>
                 </form>
 
-                <div className="border-t border-slate-100 px-6 py-4 sm:px-8 sm:py-5">
+                <div className="hidden border-t border-slate-100 px-6 py-4 sm:block sm:px-8 sm:py-5">
                     <div className="flex items-center justify-center gap-4 text-[10px] text-slate-400 sm:text-xs">
                         <a href="#" className="transition hover:text-orange-500">
                             Điều khoản
