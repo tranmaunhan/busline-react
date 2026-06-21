@@ -62,6 +62,7 @@ export default function BookingConfirmModal({
                 pickupLocationId,
                 dropoffLocationId,
             })
+            console.log('Booking create response:', response)
 
             onBookingSuccess(response)
             onClose()
@@ -82,25 +83,24 @@ export default function BookingConfirmModal({
     const totalAmount = selectedSeats.length * trip.price
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
-            <div className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-sky-100 bg-white shadow-[0_24px_80px_rgba(148,163,184,0.24)] animate-in fade-in zoom-in-95 duration-200">
-                
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
+            <div className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-sky-100 bg-white shadow-[0_24px_80px_rgba(148,163,184,0.24)] animate-in fade-in zoom-in-95 duration-300">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    disabled={isLoading}
+                    className="absolute right-4 top-4 z-10 rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed sm:right-5 sm:top-5"
+                >
+                    <X className="h-5 w-5" />
+                </button>
+
                 {/* Header */}
-                <div className="bg-[linear-gradient(135deg,_#eff6ff_0%,_#ffffff_100%)] border-b border-sky-50 px-6 py-5 flex items-center justify-between">
-                    <div>
-                        <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                            <Ticket className="h-5 w-5 text-orange-500" />
-                            Xác nhận đặt vé &amp; Giữ chỗ
-                        </h3>
-                        <p className="text-xs text-slate-500 mt-1">Vui lòng kiểm tra lại thông tin trước khi xác nhận.</p>
-                    </div>
-                    <button
-                        onClick={onClose}
-                        className="rounded-full p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
-                        disabled={isLoading}
-                    >
-                        <X className="h-5 w-5" />
-                    </button>
+                <div className="bg-[linear-gradient(135deg,_#eff6ff_0%,_#ffffff_100%)] border-b border-sky-50 px-6 py-5">
+                    <h3 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                        <Ticket className="h-5 w-5 text-orange-500" />
+                        Xác nhận đặt vé &amp; Giữ chỗ
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1">Vui lòng kiểm tra lại thông tin trước khi xác nhận.</p>
                 </div>
 
                 {/* Content */}

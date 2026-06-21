@@ -241,6 +241,7 @@ export interface TicketResponse {
 
 export interface BookingResponse {
     bookingId: number
+    bookingCode: string
     bookingTime: string
     status: string
     totalAmount: number

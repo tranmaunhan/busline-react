@@ -88,7 +88,7 @@ export default function LoginModal({ show, onClose, onLoginSuccess, onRegisterCl
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-sm">
             <div className="relative w-full max-w-[420px] rounded-2xl bg-white shadow-2xl animate-scale-in sm:rounded-3xl">
                 <button
                     type="button"

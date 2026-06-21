@@ -176,7 +176,7 @@ export default function SeatSelectionPage({
                     className="inline-flex items-center gap-2 rounded-full border border-sky-100 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:border-orange-200 hover:bg-white hover:text-orange-600"
                 >
                     <ArrowLeft className="h-4 w-4" />
-                    Quay lai danh sach chuyen
+                    Quay lại danh sách chuyến
                 </button>
 
                 <section className="relative mt-5 overflow-hidden rounded-[2rem] border border-sky-100 bg-[linear-gradient(135deg,_#ffffff_0%,_#f8fbff_52%,_#edf6ff_100%)] p-6 shadow-[0_28px_90px_rgba(148,163,184,0.12)]">
@@ -278,15 +278,15 @@ export default function SeatSelectionPage({
                             {routePreviewImage ? (
                                 <img
                                     src={routePreviewImage}
-                                    alt={`Hinh mo ta lo trinh ${displayOrigin} den ${displayDestination}`}
+                                    alt={`Hình mô tả lộ trình ${displayOrigin} đến ${displayDestination}`}
                                     className="relative h-full min-h-[260px] w-full rounded-[1.25rem] object-cover shadow-sm"
                                 />
                             ) : (
                                 <div className="relative flex min-h-[260px] flex-col justify-between rounded-[1.25rem] border border-dashed border-sky-200 bg-[linear-gradient(180deg,_#ffffff_0%,_#f1f7ff_100%)] p-5">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <div className="text-xs uppercase tracking-[0.24em] text-sky-600">Anh mo ta lo trinh</div>
-                                            <div className="mt-2 text-xl font-bold text-slate-900">Vi tri cho hinh anh tuyen duong</div>
+                                            <div className="text-xs uppercase tracking-[0.24em] text-sky-600">Ảnh mô tả lộ trình</div>
+                                            <div className="mt-2 text-xl font-bold text-slate-900">Vị trí cho hình ảnh tuyến đường</div>
                                         </div>
                                         <div className="rounded-2xl bg-sky-50 p-3 ring-1 ring-sky-100">
                                             <ImageIcon className="h-7 w-7 text-sky-500" />
@@ -297,7 +297,7 @@ export default function SeatSelectionPage({
                                         <div className="flex items-center gap-3 text-slate-900">
                                             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-orange-500 font-bold text-white">A</span>
                                             <div className="min-w-0 flex-1">
-                                                <div className="text-xs uppercase tracking-[0.18em] text-slate-400">Diem don</div>
+                                                <div className="text-xs uppercase tracking-[0.18em] text-slate-400">Điểm đón</div>
                                                 <div className="truncate text-sm font-semibold">{pickupLocationName || displayOrigin}</div>
                                             </div>
                                         </div>
@@ -311,7 +311,7 @@ export default function SeatSelectionPage({
                                         <div className="flex items-center gap-3 text-slate-900">
                                             <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 font-bold text-slate-700">B</span>
                                             <div className="min-w-0 flex-1">
-                                                <div className="text-xs uppercase tracking-[0.18em] text-slate-400">Diem tra</div>
+                                                <div className="text-xs uppercase tracking-[0.18em] text-slate-400">Điểm trả</div>
                                                 <div className="truncate text-sm font-semibold">{dropoffLocationName || displayDestination}</div>
                                             </div>
                                         </div>
@@ -333,7 +333,7 @@ export default function SeatSelectionPage({
                                         </div>
                                     ) : (
                                         <p className="mt-5 text-sm leading-6 text-slate-500">
-                                            Khu vuc nay danh cho anh ban do, anh xe, hoac anh mo ta hanh trinh. Khi co URL anh, chi can truyen vao `routeImageUrl`.
+                                            Khu vực này dành cho ảnh bản đồ, ảnh xe, hoặc ảnh mô tả hành trình. Khi có URL ảnh, chỉ cần truyền vào `routeImageUrl`.
                                         </p>
                                     )}
                                 </div>
@@ -347,19 +347,19 @@ export default function SeatSelectionPage({
                         {loading ? (
                             <div className="flex min-h-[420px] flex-col items-center justify-center rounded-[1.75rem] border border-dashed border-slate-200 bg-slate-50 text-slate-500">
                                 <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
-                                <p className="mt-4 text-lg font-semibold text-slate-700">Dang tai so do ghe...</p>
-                                <p className="mt-2 text-sm">He thong dang lay du lieu chuyen xe ban da chon.</p>
+                                <p className="mt-4 text-lg font-semibold text-slate-700">Đang tải sơ đồ ghế...</p>
+                                <p className="mt-2 text-sm">Hệ thống đang lấy dữ liệu chuyến xe bạn đã chọn.</p>
                             </div>
                         ) : error ? (
                             <div className="rounded-[1.75rem] border border-red-200 bg-red-50 p-8 text-center">
-                                <div className="text-lg font-semibold text-red-700">Khong the tai so do ghe</div>
+                                <div className="text-lg font-semibold text-red-700">Không thể tải sơ đồ ghế</div>
                                 <p className="mt-2 text-sm text-red-600">{error}</p>
                                 <button
                                     type="button"
                                     onClick={onRetry}
                                     className="mt-5 rounded-full bg-red-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-700"
                                 >
-                                    Thu tai lai
+                                    Thử tải lại
                                 </button>
                             </div>
                         ) : seatMap ? (
@@ -403,10 +403,10 @@ export default function SeatSelectionPage({
                                         <span className="text-orange-600">{deckLabels[activeDeck] || activeDeck}</span>
                                     </div>
 
-                                    <div className="mt-5 rounded-[1.5rem] border border-sky-100 bg-white p-4 sm:p-5">
+                                    <div className="mt-5 rounded-[1.5rem] border border-sky-100 bg-white p-3 sm:p-5">
                                         {deckSeats.length > 0 ? (
                                             <div
-                                                className="grid gap-3"
+                                                className="grid gap-2 sm:gap-3"
                                                 style={{ gridTemplateColumns: `repeat(${Math.max(maxCol, 1)}, minmax(0, 1fr))` }}
                                             >
                                                 {Array.from({ length: maxRow }, (_, rowOffset) => rowOffset + 1).flatMap((row) =>
@@ -418,7 +418,7 @@ export default function SeatSelectionPage({
                                                             return (
                                                                 <div
                                                                     key={`${activeDeck}-${row}-${col}`}
-                                                                    className="h-20 rounded-[1.25rem] border border-dashed border-sky-100 bg-sky-50/60 sm:h-24"
+                                                                    className="h-16 rounded-xl border border-dashed border-sky-100 bg-sky-50/60 sm:h-24 sm:rounded-[1.25rem]"
                                                                 />
                                                             )
                                                         }
@@ -432,16 +432,16 @@ export default function SeatSelectionPage({
                                                                 type="button"
                                                                 onClick={() => handleToggleSeat(seat)}
                                                                 disabled={!available}
-                                                                className={`h-20 rounded-[1.25rem] border p-3 text-left transition sm:h-24 ${isSelected
+                                                                className={`h-16 rounded-xl border p-1.5 text-center transition sm:h-24 sm:rounded-[1.25rem] sm:p-3 sm:text-left ${isSelected
                                                                     ? 'border-orange-300 bg-orange-500 text-white shadow-[0_14px_24px_rgba(249,115,22,0.24)]'
                                                                     : available
                                                                         ? 'border-sky-100 bg-white text-slate-800 hover:-translate-y-0.5 hover:border-orange-300 hover:bg-sky-50'
                                                                         : 'cursor-not-allowed border-slate-200 bg-slate-100 text-slate-400'
                                                                     }`}
                                                             >
-                                                                <div className="flex h-full flex-col justify-between">
-                                                                    <div className="text-base font-bold">{seat.seatCode}</div>
-                                                                    <div className={`text-[11px] uppercase tracking-[0.22em] ${isSelected ? 'text-white/80' : available ? 'text-slate-500' : 'text-slate-400'}`}>
+                                                                <div className="flex h-full flex-col justify-between items-center sm:items-start">
+                                                                    <div className="text-sm font-bold sm:text-base">{seat.seatCode}</div>
+                                                                    <div className={`text-[9px] sm:text-[11px] uppercase tracking-wider sm:tracking-[0.22em] ${isSelected ? 'text-white/80' : available ? 'text-slate-500' : 'text-slate-400'}`}>
                                                                         {seatTypeLabels[seat.seatType] || seat.seatType}
                                                                     </div>
                                                                 </div>
@@ -460,7 +460,7 @@ export default function SeatSelectionPage({
                             </>
                         ) : (
                             <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-8 text-center text-slate-600">
-                                Chua co du lieu so do ghe cho chuyen nay.
+                                Chưa có dữ liệu sơ đồ ghế cho chuyến này.
                             </div>
                         )}
                     </section>
@@ -585,7 +585,7 @@ export default function SeatSelectionPage({
                             }
                             className="mt-8 w-full rounded-[1.25rem] bg-orange-500 px-5 py-4 text-base font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                         >
-                            {selectedSeats.length > 0 ? `Tiep tuc voi ${selectedSeats.length} ghe` : 'Chọn ghế để tiếp tục'}
+                            {selectedSeats.length > 0 ? `Tiếp tục với ${selectedSeats.length} ghế` : 'Chọn ghế để tiếp tục'}
                         </button>
                     </aside>
                 </div>

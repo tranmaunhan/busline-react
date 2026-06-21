@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { CalendarDays } from 'lucide-react'
+import { CalendarDays, MapPin, User } from 'lucide-react'
 import { Navigate, Route, Routes, useMatch, useNavigate, useParams } from 'react-router-dom'
 import LoginModal from './component/LoginModal'
 import RegisterModal from './component/RegisterModal'
@@ -529,7 +529,7 @@ function App() {
           <div className="flex items-center gap-2 rounded-2xl border border-sky-100 bg-white/90 px-3 py-1.5 text-slate-700 shadow-[0_10px_30px_rgba(148,163,184,0.16)] backdrop-blur transition hover:bg-white sm:px-4 sm:py-2">
             {user ? (
               <>
-                <span className="text-xl"></span>
+                <User className="h-5 w-5 text-slate-500 shrink-0" />
                 <span className="hidden sm:flex flex-col items-start leading-tight">
                   <span className="text-sm">{user.fullName || user.username || 'User'}</span>
                   <span className="text-xs text-slate-500">
@@ -545,7 +545,7 @@ function App() {
               </>
             ) : (
               <button className="flex items-center gap-1.5 font-medium text-slate-700 transition hover:text-orange-600 sm:gap-2" onClick={handleLoginClick}>
-                <span className="text-xl"></span>
+                <User className="h-5 w-5 text-slate-500 shrink-0" />
                 <span className="hidden sm:block text-sm">Đăng nhập</span>
               </button>
             )}
@@ -569,50 +569,56 @@ function App() {
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 items-end">
               <div>
                 <label htmlFor="from" className="mb-1 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Nơi đi</label>
-                <select
-                  id="from"
-                  value={from}
-                  onChange={(event) => handleFromChange(event.target.value)}
-                  className="w-full rounded-xl border border-sky-100 bg-sky-50/70 p-2.5 text-sm text-slate-700 outline-none transition focus:border-orange-300 focus:bg-white focus:ring-4 focus:ring-orange-100 sm:rounded-2xl sm:p-3"
-                  disabled={loadingLocations}
-                >
-                  <option value="">
-                    {loadingLocations ? 'Đang tải...' : 'Chọn điểm đi...'}
-                  </option>
-                  {originGroups.map(([type, items]) => (
-                    <optgroup key={type} label={locationTypeLabels[type] || type}>
-                      {items.map((location) => (
-                        <option key={location.id} value={String(location.id)}>
-                          {formatLocationLabel(location)}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
+                <div className="flex items-center rounded-xl border border-sky-100 bg-sky-50/70 px-3 transition focus-within:border-orange-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100 sm:rounded-2xl sm:px-4">
+                  <MapPin className="mr-2 h-4 w-4 text-slate-400 sm:mr-3 sm:h-5 sm:w-5 shrink-0" />
+                  <select
+                    id="from"
+                    value={from}
+                    onChange={(event) => handleFromChange(event.target.value)}
+                    className="w-full bg-transparent py-2.5 text-sm text-slate-700 outline-none disabled:cursor-not-allowed sm:py-3"
+                    disabled={loadingLocations}
+                  >
+                    <option value="">
+                      {loadingLocations ? 'Đang tải...' : 'Chọn điểm đi...'}
+                    </option>
+                    {originGroups.map(([type, items]) => (
+                      <optgroup key={type} label={locationTypeLabels[type] || type}>
+                        {items.map((location) => (
+                          <option key={location.id} value={String(location.id)}>
+                            {formatLocationLabel(location)}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div>
                 <label htmlFor="to" className="mb-1 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Nơi đến</label>
-                <select
-                  id="to"
-                  value={to}
-                  onChange={(event) => handleToChange(event.target.value)}
-                  className="w-full rounded-xl border border-sky-100 bg-sky-50/70 p-2.5 text-sm text-slate-700 outline-none transition focus:border-orange-300 focus:bg-white focus:ring-4 focus:ring-orange-100 sm:rounded-2xl sm:p-3"
-                  disabled={loadingLocations}
-                >
-                  <option value="">
-                    {loadingLocations ? 'Đang tải...' : from ? 'Chọn điểm đến...' : 'Chọn điểm đi trước'}
-                  </option>
-                  {destinationGroups.map(([type, items]) => (
-                    <optgroup key={type} label={locationTypeLabels[type] || type}>
-                      {items.map((location) => (
-                        <option key={location.id} value={String(location.id)}>
-                          {formatLocationLabel(location)}
-                        </option>
-                      ))}
-                    </optgroup>
-                  ))}
-                </select>
+                <div className="flex items-center rounded-xl border border-sky-100 bg-sky-50/70 px-3 transition focus-within:border-orange-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100 sm:rounded-2xl sm:px-4">
+                  <MapPin className="mr-2 h-4 w-4 text-slate-400 sm:mr-3 sm:h-5 sm:w-5 shrink-0" />
+                  <select
+                    id="to"
+                    value={to}
+                    onChange={(event) => handleToChange(event.target.value)}
+                    className="w-full bg-transparent py-2.5 text-sm text-slate-700 outline-none disabled:cursor-not-allowed sm:py-3"
+                    disabled={loadingLocations}
+                  >
+                    <option value="">
+                      {loadingLocations ? 'Đang tải...' : from ? 'Chọn điểm đến...' : 'Chọn điểm đi trước'}
+                    </option>
+                    {destinationGroups.map(([type, items]) => (
+                      <optgroup key={type} label={locationTypeLabels[type] || type}>
+                        {items.map((location) => (
+                          <option key={location.id} value={String(location.id)}>
+                            {formatLocationLabel(location)}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                </div>
               </div>
 
               <div>
@@ -836,7 +842,6 @@ function App() {
       <BookingSuccessModal
         show={showBookingSuccessModal}
         booking={bookingResult}
-        user={user}
         onClose={handleCloseBookingSuccess}
       />
     </>

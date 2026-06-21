@@ -1,12 +1,19 @@
-import { CheckCircle2, Ticket, Calendar, MapPin, User, Phone } from 'lucide-react'
-import type { BookingResponse, AuthUser } from '../api/config'
+import { useEffect, useMemo, useState } from 'react'
+import { Clock3, Copy, Download, QrCode, X } from 'lucide-react'
+import type { BookingResponse } from '../api/config'
 
 interface BookingSuccessModalProps {
     show: boolean
     booking: BookingResponse | null
-    user: AuthUser | null
     onClose: () => void
 }
+
+const PAYMENT_TIMEOUT_MINUTES = 15
+const BANK_ID = '970432'
+const ACCOUNT_NO = '0352789648'
+const ACCOUNT_NAME = 'TRAN MAU NHAN'
+const QR_TEMPLATE = 'compact2'
+const TRANSFER_CONTENT_PREFIX = 'SAIGONSTBKG'
 
 const formatCurrency = (value: number) =>
     new Intl.NumberFormat('vi-VN', {
@@ -15,153 +22,253 @@ const formatCurrency = (value: number) =>
         maximumFractionDigits: 0,
     }).format(value)
 
-const formatDateTime = (iso: string) => {
-    const date = new Date(iso)
-    if (Number.isNaN(date.getTime())) return '--'
-    return date.toLocaleString('vi-VN', {
-        hour: '2-digit',
-        minute: '2-digit',
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-    })
+const formatCountdown = (totalSeconds: number) => {
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
 }
+
+const buildVietQrUrl = (amount: number, transferContent: string) =>
+    `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-${QR_TEMPLATE}.png?amount=${amount}&addInfo=${encodeURIComponent(
+        transferContent
+    )}&accountName=${encodeURIComponent(ACCOUNT_NAME)}`
 
 export default function BookingSuccessModal({
     show,
     booking,
-    user,
     onClose,
 }: BookingSuccessModalProps) {
+    const [remainingSeconds, setRemainingSeconds] = useState(0)
+    const [copiedField, setCopiedField] = useState<string | null>(null)
+
+    const transferContent = useMemo(() => {
+        if (!booking?.bookingCode) return TRANSFER_CONTENT_PREFIX
+        return `${booking.bookingCode}`
+    }, [booking?.bookingCode])
+
+    const vietQrUrl = useMemo(() => {
+        if (!booking) return ''
+        return buildVietQrUrl(booking.totalAmount, transferContent)
+    }, [booking, transferContent])
+
+    useEffect(() => {
+        if (!show || !booking?.bookingTime) {
+            setRemainingSeconds(0)
+            return
+        }
+
+        const bookingTimestamp = new Date(booking.bookingTime).getTime()
+
+        if (Number.isNaN(bookingTimestamp)) {
+            setRemainingSeconds(PAYMENT_TIMEOUT_MINUTES * 60)
+            return
+        }
+
+        const expiredAt = bookingTimestamp + PAYMENT_TIMEOUT_MINUTES * 60 * 1000
+
+        const updateCountdown = () => {
+            const diff = Math.max(0, Math.floor((expiredAt - Date.now()) / 1000))
+            setRemainingSeconds(diff)
+        }
+
+        updateCountdown()
+
+        const timer = window.setInterval(updateCountdown, 1000)
+        return () => window.clearInterval(timer)
+    }, [show, booking?.bookingTime])
+
+    useEffect(() => {
+        if (!copiedField) return
+
+        const timer = window.setTimeout(() => setCopiedField(null), 1500)
+        return () => window.clearTimeout(timer)
+    }, [copiedField])
+
     if (!show || !booking) return null
 
+    const isExpired = remainingSeconds <= 0
+
+    const copyText = async (text: string, field: string) => {
+        try {
+            await navigator.clipboard.writeText(text)
+            setCopiedField(field)
+        } catch {
+            setCopiedField(null)
+        }
+    }
+
+    const handleDownloadQr = async () => {
+        try {
+            const response = await fetch(vietQrUrl)
+            const blob = await response.blob()
+            const url = URL.createObjectURL(blob)
+
+            const link = document.createElement('a')
+            link.href = url
+            link.download = `vietqr-${booking.bookingCode}.png`
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+
+            URL.revokeObjectURL(url)
+        } catch {
+            window.open(vietQrUrl, '_blank')
+        }
+    }
+
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4 backdrop-blur-sm">
-            <div className="relative w-full max-w-lg overflow-hidden rounded-[2rem] border border-sky-100 bg-white shadow-[0_24px_80px_rgba(148,163,184,0.24)] animate-in fade-in zoom-in-95 duration-300">
-                
-                {/* Lớp trang trí thành công */}
-                <div className="bg-[linear-gradient(135deg,_#eff6ff_0%,_#dbeafe_100%)] px-6 py-8 text-center relative overflow-hidden">
-                    {/* Bụi sao / Vòng tròn trang trí */}
-                    <div className="absolute -left-10 -top-10 h-32 w-32 rounded-full bg-blue-200/50 blur-2xl" />
-                    <div className="absolute -right-10 -bottom-10 h-32 w-32 rounded-full bg-orange-200/40 blur-2xl" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/70 p-3 backdrop-blur-sm">
+            <div className="relative max-h-[95vh] w-full max-w-3xl overflow-y-auto rounded-[2rem] bg-white shadow-[0_24px_90px_rgba(15,23,42,0.35)]">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="absolute right-4 top-4 z-20 rounded-full bg-white/90 p-2 text-slate-500 shadow hover:bg-slate-100 hover:text-slate-900"
+                    aria-label="Đóng"
+                >
+                    <X className="h-5 w-5" />
+                </button>
 
-                    <div className="relative flex flex-col items-center">
-                        <div className="mb-3 rounded-full bg-emerald-50 p-2 text-emerald-500 shadow-md ring-8 ring-emerald-500/10 animate-bounce">
-                            <CheckCircle2 className="h-10 w-10" />
-                        </div>
-                        <h3 className="text-2xl font-black text-slate-900">
-                            Đặt Vé Thành Công!
-                        </h3>
-                        <p className="text-sm text-slate-600 mt-1">Ghế của bạn đã được khóa và giữ chỗ thành công.</p>
-                        
-                        <div className="mt-3.5 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-500 font-bold text-xs uppercase tracking-wider text-white shadow-sm">
-                            Mã Booking: #{booking.bookingId}
-                        </div>
+                <div className="px-5 pb-6 pt-7 text-center sm:px-8">
+                    <div className="mx-auto inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700 ring-1 ring-emerald-200">
+                        <QrCode className="h-4 w-4" />
+                        Đặt chỗ thành công
                     </div>
-                </div>
 
-                {/* Nội dung dạng chiếc vé */}
-                <div className="bg-white px-6 py-6 space-y-5 relative">
-                    
-                    {/* Hàng răng cưa giả lập hai bên góc vé (Ticket Cutout) */}
-                    <div className="absolute -left-3 top-0 h-6 w-6 rounded-full bg-slate-900/40 translate-y-[-50%]" />
-                    <div className="absolute -right-3 top-0 h-6 w-6 rounded-full bg-slate-900/40 translate-y-[-50%]" />
+                    <h2 className="mt-4 text-2xl font-black text-slate-950 sm:text-3xl">
+                        Vui lòng thanh toán trong 15 phút
+                    </h2>
 
-                    {/* Thông tin chuyến đi */}
-                    <div className="space-y-4">
-                        <div className="flex justify-between items-start border-b border-dashed border-slate-100 pb-4">
+                    <p className="mt-2 text-sm text-slate-500">
+                        Quét mã QR bên dưới hoặc chuyển khoản đúng thông tin để hệ thống xác nhận vé tự động.
+                    </p>
+
+                    <div
+                        className={`mx-auto mt-5 flex w-fit items-center gap-3 rounded-2xl px-5 py-3 ${isExpired
+                            ? 'bg-red-50 text-red-700 ring-1 ring-red-200'
+                            : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'
+                            }`}
+                    >
+                        <Clock3 className="h-5 w-5" />
+                        <span className="text-sm font-bold">
+                            {isExpired ? 'Đã hết thời gian thanh toán' : 'Còn lại'}
+                        </span>
+                        <span className="text-3xl font-black tabular-nums">
+                            {formatCountdown(remainingSeconds)}
+                        </span>
+                    </div>
+
+                    <div className="mx-auto mt-6 max-w-[430px] rounded-[2rem] border border-slate-200 bg-white p-4 shadow-[0_16px_45px_rgba(15,23,42,0.12)]">
+                        <img
+                            src={vietQrUrl}
+                            alt="Mã QR thanh toán"
+                            className="aspect-square w-full rounded-[1.5rem] bg-white object-contain"
+                        />
+                    </div>
+
+                    <div className="mt-6 rounded-[1.5rem] bg-slate-50 p-4 text-left ring-1 ring-slate-200">
+                        <div className="grid gap-4 sm:grid-cols-2">
                             <div>
-                                <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Chuyến xe</span>
-                                <div className="text-base font-extrabold text-slate-800">
-                                    {booking.routeOrigin} → {booking.routeDestination}
+                                <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+                                    Số tiền
                                 </div>
-                            </div>
-                            <div className="text-right">
-                                <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Khởi hành</span>
-                                <div className="text-sm font-bold text-slate-800 flex items-center gap-1 justify-end mt-0.5">
-                                    <Calendar className="h-3.5 w-3.5 text-orange-500" />
-                                    {formatDateTime(booking.tripDepartureTime)}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Điểm đón trả cụ thể */}
-                        <div className="grid grid-cols-2 gap-4 text-xs">
-                            <div>
-                                <span className="text-slate-400 font-medium">Điểm đón khách</span>
-                                <p className="font-semibold text-slate-800 mt-1 flex items-start gap-1">
-                                    <MapPin className="h-3.5 w-3.5 text-orange-500 shrink-0 mt-0.5" />
-                                    {booking.pickupLocationName}
-                                </p>
-                            </div>
-                            <div>
-                                <span className="text-slate-400 font-medium">Điểm trả khách</span>
-                                <p className="font-semibold text-slate-800 mt-1 flex items-start gap-1">
-                                    <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0 mt-0.5" />
-                                    {booking.dropoffLocationName}
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Thông tin khách hàng */}
-                        {user && (
-                            <div className="bg-sky-50/40 rounded-xl p-3 border border-sky-100/50 grid grid-cols-2 gap-2 text-xs">
-                                <div className="flex items-center gap-1.5 text-slate-700">
-                                    <User className="h-3.5 w-3.5 text-sky-500" />
-                                    <span className="font-semibold truncate">{user.fullName || user.username}</span>
-                                </div>
-                                <div className="flex items-center gap-1.5 text-slate-700 justify-end">
-                                    <Phone className="h-3.5 w-3.5 text-sky-500" />
-                                    <span>{user.phone || 'Không có SĐT'}</span>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Chi tiết từng vé */}
-                        <div className="border-t border-slate-100 pt-4 space-y-2">
-                            <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Danh sách vé ({booking.tickets.length} ghế)</span>
-                            <div className="grid grid-cols-2 gap-2">
-                                {booking.tickets.map((ticket) => (
-                                    <div key={ticket.ticketId} className="flex justify-between items-center px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-xs">
-                                        <span className="font-bold text-slate-700 flex items-center gap-1">
-                                            <Ticket className="h-3.5 w-3.5 text-orange-400" />
-                                            {ticket.seatCode}
-                                        </span>
-                                        <span className="text-slate-500 font-medium">{formatCurrency(ticket.price)}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Tổng tiền và trạng thái */}
-                        <div className="border-t border-dashed border-slate-200 pt-4 flex justify-between items-center">
-                            <div>
-                                <span className="text-xs text-slate-500 font-medium">Tổng cộng</span>
-                                <div className="text-2xl font-black text-orange-500 mt-0.5">
+                                <div className="mt-1 text-2xl font-black text-slate-950">
                                     {formatCurrency(booking.totalAmount)}
                                 </div>
                             </div>
-                            <div className="text-right">
-                                <span className="text-[10px] uppercase tracking-wider text-slate-400 font-semibold block mb-1">Trạng thái</span>
-                                <span className="inline-flex items-center px-3 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold uppercase tracking-wider">
-                                    {booking.status}
-                                </span>
+
+                            <div>
+                                <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+                                    Ngân hàng
+                                </div>
+                                <div className="mt-1 text-lg font-bold text-slate-950">
+                                    VPBank
+                                </div>
+                            </div>
+
+                            <div>
+                                <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+                                    Số tài khoản
+                                </div>
+                                <div className="mt-1 flex items-center justify-between gap-3">
+                                    <div>
+                                        <div className="text-lg font-black tracking-wide text-slate-950">
+                                            {ACCOUNT_NO}
+                                        </div>
+                                        <div className="text-sm text-slate-500">
+                                            {ACCOUNT_NAME}
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => copyText(ACCOUNT_NO, 'accountNo')}
+                                        className="rounded-full bg-white p-2 text-slate-500 shadow hover:text-slate-900"
+                                        aria-label="Sao chép số tài khoản"
+                                    >
+                                        <Copy className="h-4 w-4" />
+                                    </button>
+                                </div>
+
+                                {copiedField === 'accountNo' && (
+                                    <div className="mt-1 text-xs font-semibold text-emerald-600">
+                                        Đã sao chép số tài khoản
+                                    </div>
+                                )}
+                            </div>
+
+                            <div>
+                                <div className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">
+                                    Nội dung chuyển khoản
+                                </div>
+                                <div className="mt-1 flex items-center justify-between gap-3">
+                                    <div className="break-all text-lg font-black tracking-wide text-slate-950">
+                                        {transferContent}
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => copyText(transferContent, 'transferContent')}
+                                        className="rounded-full bg-white p-2 text-slate-500 shadow hover:text-slate-900"
+                                        aria-label="Sao chép nội dung chuyển khoản"
+                                    >
+                                        <Copy className="h-4 w-4" />
+                                    </button>
+                                </div>
+
+                                {copiedField === 'transferContent' && (
+                                    <div className="mt-1 text-xs font-semibold text-emerald-600">
+                                        Đã sao chép nội dung chuyển khoản
+                                    </div>
+                                )}
                             </div>
                         </div>
-
                     </div>
-                </div>
 
-                {/* Footer */}
-                <div className="border-t border-slate-100 bg-slate-50/50 px-6 py-4 flex gap-3">
-                    <button
-                        onClick={onClose}
-                        className="flex-1 rounded-xl bg-slate-900 py-3 font-semibold text-white hover:bg-slate-800 transition text-center"
-                    >
-                        Quay về trang chủ
-                    </button>
-                </div>
+                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                        <button
+                            type="button"
+                            onClick={handleDownloadQr}
+                            className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3.5 text-sm font-bold text-slate-700 hover:bg-slate-50"
+                        >
+                            <Download className="h-4 w-4" />
+                            Tải mã QR
+                        </button>
 
+                        <button
+                            type="button"
+                            onClick={() => copyText(transferContent, 'transferContent')}
+                            className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] bg-slate-950 px-4 py-3.5 text-sm font-bold text-white hover:bg-slate-800"
+                        >
+                            <Copy className="h-4 w-4" />
+                            Sao chép nội dung CK
+                        </button>
+                    </div>
+
+                    <p className="mt-5 text-xs leading-5 text-slate-500">
+                        Lưu ý: Vui lòng chuyển khoản đúng số tiền và đúng nội dung để vé được xác nhận tự động.
+                    </p>
+                </div>
             </div>
         </div>
     )
