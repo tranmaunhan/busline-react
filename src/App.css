@@ -1,3 +1,4 @@
+/* ===== Design Tokens ===== */
 :root {
   color-scheme: light;
   --page-bg: #eef6ff;
@@ -9,16 +10,23 @@
   --accent-orange-hover: #ea580c;
 }
 
-* {
-  box-sizing: border-box;
+/* ===== Global Theme ===== */
+body {
+  background:
+    radial-gradient(circle at top left, rgba(186, 230, 253, 0.55), transparent 26%),
+    radial-gradient(circle at top right, rgba(219, 234, 254, 0.62), transparent 24%),
+    linear-gradient(180deg, #f8fbff 0%, #f3f8ff 48%, #eef5ff 100%);
+  color: var(--text-primary);
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
+/* ===== Slide Backgrounds ===== */
 .slide-bg {
   position: absolute;
   inset: 0;
   background-size: cover;
   background-position: center;
-  transition: opacity 1s;
+  transition: opacity 1s ease-in-out;
 }
 
 .slide-bg.active {
@@ -29,34 +37,82 @@
   opacity: 0;
 }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  background:
-    radial-gradient(circle at top left, rgba(186, 230, 253, 0.55), transparent 26%),
-    radial-gradient(circle at top right, rgba(219, 234, 254, 0.62), transparent 24%),
-    linear-gradient(180deg, #f8fbff 0%, #f3f8ff 48%, #eef5ff 100%);
-  color: var(--text-primary);
-  font-family: Inter, "Segoe UI", sans-serif;
-}
-
-#root {
-  min-height: 100vh;
-}
-
-/* Modal animations */
-@keyframes slide-in-from-bottom-4 {
+/* ===== Modal Animations ===== */
+@keyframes slide-in-from-bottom {
   from {
     opacity: 0;
     transform: translateY(1rem);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 .animate-in {
-  animation: slide-in-from-bottom-4 0.3s ease-out;
+  animation: slide-in-from-bottom 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out;
+}
+
+.animate-scale-in {
+  animation: scale-in 0.25s ease-out;
+}
+
+/* ===== Hero Heading Transition ===== */
+@keyframes heading-fade {
+  0% { opacity: 0; transform: translateY(8px); }
+  15% { opacity: 1; transform: translateY(0); }
+  85% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-8px); }
+}
+
+/* ===== Responsive Utilities ===== */
+
+/* Prevent text overflow on small screens */
+.text-balance {
+  text-wrap: balance;
+}
+
+/* Safe area padding for mobile notches */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ===== Mobile-specific adjustments ===== */
+@media (max-width: 639px) {
+  /* Reduce aggressive border-radius on very small screens */
+  .mobile-radius {
+    border-radius: 1.25rem !important;
+  }
+}
+
+/* ===== Focus Visible for Accessibility ===== */
+:focus-visible {
+  outline: 2px solid var(--accent-orange);
+  outline-offset: 2px;
+}
+
+button:focus:not(:focus-visible) {
+  outline: none;
 }

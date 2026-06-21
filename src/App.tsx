@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { CalendarDays } from 'lucide-react'
 import { Navigate, Route, Routes, useMatch, useNavigate, useParams } from 'react-router-dom'
@@ -41,11 +41,9 @@ const formatCurrency = (value: number) =>
   }).format(value)
 
 const slides = [
-  '#',
-  '#',
-  '#',
-  // 'https://picsum.photos/1920/1080?random=2',
-  // 'https://picsum.photos/1920/1080?random=3',
+  { id: 'slide-1', url: '#' },
+  { id: 'slide-2', url: '#' },
+  { id: 'slide-3', url: '#' },
 ]
 
 const slideTexts = [
@@ -199,8 +197,11 @@ function SeatSelectionRoute({
 }
 
 function App() {
-  const restoredBookingFlow = loadPersistedBookingFlow()
+  // Load persisted booking flow only once (useRef prevents re-parsing on every render)
+  const restoredRef = useRef(loadPersistedBookingFlow())
+  const restoredBookingFlow = restoredRef.current
   const persistedSelectedTrip = restoredBookingFlow?.selectedTrip ?? null
+
   const defaultDateIso = new Date().toISOString().slice(0, 10)
   const navigate = useNavigate()
   const seatRouteMatch = useMatch('/trips/:tripId/seats')
@@ -409,7 +410,7 @@ function App() {
     }
   }
 
-  const fetchSeatMap = async (tripId: number) => {
+  const fetchSeatMap = useCallback(async (tripId: number) => {
     const requestId = seatMapRequestRef.current + 1
     seatMapRequestRef.current = requestId
 
@@ -428,7 +429,7 @@ function App() {
       if (seatMapRequestRef.current !== requestId) return
       setLoadingSeatMap(false)
     }
-  }
+  }, [])
 
   useEffect(() => {
     if (!selectedTrip || !seatRouteMatch) return
@@ -436,7 +437,7 @@ function App() {
     setSeatMap(null)
     setSeatMapError(null)
     fetchSeatMap(selectedTrip.tripId)
-  }, [routeSeatTripId, seatRouteMatch, selectedTrip])
+  }, [routeSeatTripId, seatRouteMatch, selectedTrip, fetchSeatMap])
 
   const handleSelectTrip = (trip: TripSearchResult) => {
     setLoadingSeatMap(true)
@@ -500,260 +501,263 @@ function App() {
   const originGroups = groupLocationsByType(locations)
 
   const searchPage = (
-    <div className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,_#f8fbff_0%,_#eff6ff_45%,_#f8fbff_100%)] text-slate-900">
-      <div className="absolute left-0 right-0 top-0 z-30 flex items-center justify-between px-6 py-4">
-        <div className="rounded-full border border-sky-100 bg-transparent px-4 py-2 text-xl font-bold text-slate-900 shadow-[0_10px_30px_rgba(148,163,184,0.16)]">
-          Saigon<span className="text-orange-500">.ST</span>
-        </div>
-
-        <div className="flex items-center gap-2 rounded-2xl border border-sky-100 bg-white px-4 py-2 text-slate-700 shadow-[0_10px_30px_rgba(148,163,184,0.16)] backdrop-blur transition hover:bg-white">
-          {user ? (
-            <>
-              <span className="text-xl"></span>
-              <span className="hidden md:flex flex-col items-start leading-tight">
-                <span>{user.fullName || user.username || 'User'}</span>
-                <span className="text-xs text-slate-500">
-                  {[user.phone].filter(Boolean).join(' • ')}
-                </span>
-              </span>
-              <button
-                onClick={handleLogout}
-                className="ml-2 rounded-full bg-orange-500 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-orange-600"
-              >
-                Thoát
-              </button>
-            </>
-          ) : (
-            <button className="flex items-center gap-2 font-medium text-slate-700 transition hover:text-orange-600" onClick={handleLoginClick}>
-              <span className="text-xl"></span>
-              <span className="hidden md:block">Đăng nhập</span>
-            </button>
-          )}
-        </div>
-      </div>
-
+    <div className="relative min-h-screen overflow-x-hidden bg-[linear-gradient(180deg,_#f8fbff_0%,_#eff6ff_45%,_#f8fbff_100%)] text-slate-900">
+      {/* Slide backgrounds — keep absolute */}
       {slides.map((slide, index) => (
         <div
-          key={slide}
+          key={slide.id}
           className={`slide-bg ${currentSlide === index ? 'active' : 'inactive'}`}
-          style={{ backgroundImage: `url('${slide}')` }}
+          style={{ backgroundImage: `url('${slide.url}')` }}
         />
       ))}
 
-      <div className="absolute inset-0" />
-
-      <div className="absolute inset-0 flex flex-col items-center justify-start pt-[5%] text-center text-slate-900">
-        <p className="rounded-full border border-sky-100 bg-white/100 px-4 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-sky-700 shadow-sm backdrop-blur">Saigon.ST Busline</p>
-        <h1 id="heading" className="mt-4 max-w-3xl text-5xl font-black tracking-tight text-slate-900">
-          {slideTexts[currentSlide]}
-        </h1>
-        <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600">
-          Trải nghiệm đặt vé đơn giản, thông tin rõ ràng và minh bạch cùng Saigon.ST.
-        </p>
-      </div>
-
-      <div className="absolute bottom-[52%] left-1/2 w-[95%] max-w-5xl -translate-x-1/2 text-slate-900">
-        <form onSubmit={handleSearch} className="rounded-[2rem] border border-sky-100 bg-white p-6 shadow-[0_24px_70px_rgba(148,163,184,0.18)] backdrop-blur">
-          <div className="grid md:grid-cols-4 gap-3 items-end">
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Nơi đi</label>
-              <select
-                id="from"
-                value={from}
-                onChange={(event) => handleFromChange(event.target.value)}
-                className="w-full rounded-2xl border border-sky-100 bg-sky-50/70 p-3 text-slate-700 outline-none transition focus:border-orange-300 focus:bg-white focus:ring-4 focus:ring-orange-100"
-                disabled={loadingLocations}
-              >
-                <option value="">
-                  {loadingLocations ? 'Đang tải...' : 'Chọn điểm đi...'}
-                </option>
-                {originGroups.map(([type, items]) => (
-                  <optgroup key={type} label={locationTypeLabels[type] || type}>
-                    {items.map((location) => (
-                      <option key={location.id} value={String(location.id)}>
-                        {formatLocationLabel(location)}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Nơi đến</label>
-              <select
-                id="to"
-                value={to}
-                onChange={(event) => handleToChange(event.target.value)}
-                className="w-full rounded-2xl border border-sky-100 bg-sky-50/70 p-3 text-slate-700 outline-none transition focus:border-orange-300 focus:bg-white focus:ring-4 focus:ring-orange-100"
-                disabled={loadingLocations}
-              >
-                <option value="">
-                  {loadingLocations ? 'Đang tải...' : from ? 'Chọn điểm đến...' : 'Chọn điểm đi trước'}
-                </option>
-                {destinationGroups.map(([type, items]) => (
-                  <optgroup key={type} label={locationTypeLabels[type] || type}>
-                    {items.map((location) => (
-                      <option key={location.id} value={String(location.id)}>
-                        {formatLocationLabel(location)}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Ngày</label>
-              <div className="relative">
-                <input
-                  id="date"
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="dd/mm/yyyy"
-                  value={displayDate}
-                  onChange={(event) => {
-                    setDisplayDate(event.target.value)
-                    setDateError(null)
-                  }}
-                  onBlur={() => {
-                    const iso = parseDisplayToISO(displayDate)
-                    if (!iso) {
-                      setDateError('Định dạng ngày không hợp lệ (dd/mm/yyyy)')
-                      return
-                    }
-                    if (iso < todayIso) {
-                      setDateError('Không thể chọn ngày đã qua')
-                      return
-                    }
-                    commitSearchDate(iso)
-                  }}
-                  className={`w-full rounded-2xl border bg-sky-50/70 p-3 pr-12 text-slate-700 outline-none transition focus:bg-white focus:ring-4 focus:ring-orange-100 ${dateError ? 'border-red-400' : 'border-sky-100 focus:border-orange-300'}`}
-                />
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (hiddenDateRef.current) {
-                      try {
-                        // @ts-ignore
-                        if (typeof hiddenDateRef.current.showPicker === 'function') hiddenDateRef.current.showPicker()
-                        else hiddenDateRef.current.focus()
-                        hiddenDateRef.current.click()
-                      } catch {
-                        hiddenDateRef.current.focus()
-                      }
-                    }
-                  }}
-                  className="absolute right-2 top-2 rounded-full p-1 text-slate-500 transition hover:bg-white hover:text-orange-500"
-                  aria-label="Open calendar"
-                >
-                  <CalendarDays className="h-5 w-5" />
-                </button>
-
-                <input
-                  ref={hiddenDateRef}
-                  type="date"
-                  value={date}
-                  min={todayIso}
-                  onChange={(e) => {
-                    const iso = e.target.value
-                    if (iso) {
-                      commitSearchDate(iso)
-                    }
-                  }}
-                  className="sr-only"
-                  aria-hidden
-                />
-                {dateError && <div className="text-sm text-red-500 mt-1">{dateError}</div>}
-              </div>
-            </div>
-
-            <div>
-              <button
-                id="btn"
-                type="submit"
-                disabled={loadingTrips}
-                className={`w-full p-3 rounded-xl font-medium transition-all duration-200 ${user
-                  ? 'rounded-2xl bg-orange-500 text-white shadow-[0_14px_30px_rgba(249,115,22,0.28)] hover:-translate-y-0.5 hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-0'
-                  : 'rounded-2xl bg-slate-200 text-slate-400 cursor-not-allowed'
-                  }`}
-              >
-                {loadingTrips ? 'Đang tìm...' : user ? 'Tìm vé' : 'Đăng nhập de tim ve'}
-              </button>
-            </div>
+      {/* Main content wrapper — flexbox, not absolute */}
+      <div className="relative z-10 flex min-h-screen flex-col">
+        {/* ===== HEADER ===== */}
+        <header className="flex items-center justify-between px-4 py-3 sm:px-6 sm:py-4">
+          <div className="rounded-full border border-sky-100 bg-white/90 px-3 py-1.5 text-lg font-bold text-slate-900 shadow-[0_10px_30px_rgba(148,163,184,0.16)] backdrop-blur sm:px-4 sm:py-2 sm:text-xl">
+            Saigon<span className="text-orange-500">.ST</span>
           </div>
-        </form>
-      </div>
 
-      {(hasSearchedTrips || loadingTrips) && (
-        <div className="absolute left-1/2 top-[50%] w-[95%] max-w-5xl -translate-x-1/2 text-slate-900">
-          <div className="rounded-[2rem] border border-sky-100 bg-white/90 p-6 shadow-[0_24px_70px_rgba(148,163,184,0.18)] backdrop-blur">
-            <h3 className="mb-4 text-xl font-bold text-slate-800">
-              Kết quả tìm kiếm chuyến xe
-            </h3>
-
-            {loadingTrips ? (
-              <div className="text-center py-8">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
-                <p className="mt-2 text-slate-600">Đang tìm chuyến xe...</p>
-              </div>
-            ) : trips.length > 0 ? (
-              <div className="space-y-4">
-                {trips.map((trip) => (
-                  <div
-                    key={trip.tripId}
-                    className="rounded-[1.5rem] border border-sky-100 bg-[linear-gradient(135deg,_#ffffff_0%,_#f7fbff_100%)] p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_18px_35px_rgba(148,163,184,0.16)]"
-                  >
-                    <div className="flex justify-between items-center">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-4 mb-2">
-                          <div className="rounded-2xl border border-orange-100 bg-orange-50 px-4 py-3 text-2xl font-bold text-orange-500">
-                            {new Date(trip.departureTime).toLocaleTimeString('vi-VN', {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <span className="font-semibold text-slate-800">{trip.routeOrigin}</span>
-                              <div className="flex items-center gap-2 text-sky-400">
-                                <div className="w-8 h-px bg-sky-200"></div>
-                                <span className="text-xs">→</span>
-                                <div className="w-8 h-px bg-sky-200"></div>
-                              </div>
-                              <span className="font-semibold text-slate-800">{trip.routeDestination}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between text-sm text-slate-600">
-                          <span>Biển số: {trip.licensePlate}</span>
-                          <span>Loại xe: {trip.vehicleType}</span>
-                          <span className="font-semibold text-orange-600">{formatCurrency(trip.price)}</span>
-                        </div>
-                      </div>
-                      <div className="ml-4">
-                        <button
-                          type="button"
-                          onClick={() => handleSelectTrip(trip)}
-                          className="rounded-xl bg-orange-500 px-6 py-2.5 font-semibold text-white shadow-[0_14px_28px_rgba(249,115,22,0.28)] transition hover:-translate-y-0.5 hover:bg-orange-600"
-                        >
-                          Đặt vé
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          <div className="flex items-center gap-2 rounded-2xl border border-sky-100 bg-white/90 px-3 py-1.5 text-slate-700 shadow-[0_10px_30px_rgba(148,163,184,0.16)] backdrop-blur transition hover:bg-white sm:px-4 sm:py-2">
+            {user ? (
+              <>
+                <span className="text-xl"></span>
+                <span className="hidden sm:flex flex-col items-start leading-tight">
+                  <span className="text-sm">{user.fullName || user.username || 'User'}</span>
+                  <span className="text-xs text-slate-500">
+                    {[user.phone].filter(Boolean).join(' • ')}
+                  </span>
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="ml-1 rounded-full bg-orange-500 px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-orange-600 sm:ml-2 sm:px-3 sm:py-1.5"
+                >
+                  Thoát
+                </button>
+              </>
             ) : (
-              <div className="py-8 text-center text-slate-500">
-                <p>Không tìm thấy chuyến xe nào phù hợp.</p>
-                <p className="text-sm mt-1">Hãy thử thay đổi ngày hoặc tuyến đường khác.</p>
-              </div>
+              <button className="flex items-center gap-1.5 font-medium text-slate-700 transition hover:text-orange-600 sm:gap-2" onClick={handleLoginClick}>
+                <span className="text-xl"></span>
+                <span className="hidden sm:block text-sm">Đăng nhập</span>
+              </button>
             )}
           </div>
+        </header>
+
+        {/* ===== HERO SECTION ===== */}
+        <div className="flex flex-col items-center px-4 pt-4 text-center sm:pt-8">
+          <p className="rounded-full border border-sky-100 bg-white/100 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-sky-700 shadow-sm backdrop-blur sm:px-4 sm:text-xs">Saigon.ST Busline</p>
+          <h1 id="heading" className="mt-3 max-w-3xl text-3xl font-black tracking-tight text-slate-900 text-balance sm:mt-4 sm:text-4xl lg:text-5xl">
+            {slideTexts[currentSlide]}
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 sm:mt-4 sm:text-base sm:leading-7">
+            Trải nghiệm đặt vé đơn giản, thông tin rõ ràng và minh bạch cùng Saigon.ST.
+          </p>
         </div>
-      )}
+
+        {/* ===== SEARCH FORM ===== */}
+        <div className="mx-auto mt-6 w-full max-w-5xl px-3 sm:mt-8 sm:px-4">
+          <form onSubmit={handleSearch} className="rounded-2xl border border-sky-100 bg-white p-4 shadow-[0_24px_70px_rgba(148,163,184,0.18)] backdrop-blur sm:rounded-[2rem] sm:p-6">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 items-end">
+              <div>
+                <label htmlFor="from" className="mb-1 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Nơi đi</label>
+                <select
+                  id="from"
+                  value={from}
+                  onChange={(event) => handleFromChange(event.target.value)}
+                  className="w-full rounded-xl border border-sky-100 bg-sky-50/70 p-2.5 text-sm text-slate-700 outline-none transition focus:border-orange-300 focus:bg-white focus:ring-4 focus:ring-orange-100 sm:rounded-2xl sm:p-3"
+                  disabled={loadingLocations}
+                >
+                  <option value="">
+                    {loadingLocations ? 'Đang tải...' : 'Chọn điểm đi...'}
+                  </option>
+                  {originGroups.map(([type, items]) => (
+                    <optgroup key={type} label={locationTypeLabels[type] || type}>
+                      {items.map((location) => (
+                        <option key={location.id} value={String(location.id)}>
+                          {formatLocationLabel(location)}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="to" className="mb-1 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Nơi đến</label>
+                <select
+                  id="to"
+                  value={to}
+                  onChange={(event) => handleToChange(event.target.value)}
+                  className="w-full rounded-xl border border-sky-100 bg-sky-50/70 p-2.5 text-sm text-slate-700 outline-none transition focus:border-orange-300 focus:bg-white focus:ring-4 focus:ring-orange-100 sm:rounded-2xl sm:p-3"
+                  disabled={loadingLocations}
+                >
+                  <option value="">
+                    {loadingLocations ? 'Đang tải...' : from ? 'Chọn điểm đến...' : 'Chọn điểm đi trước'}
+                  </option>
+                  {destinationGroups.map(([type, items]) => (
+                    <optgroup key={type} label={locationTypeLabels[type] || type}>
+                      {items.map((location) => (
+                        <option key={location.id} value={String(location.id)}>
+                          {formatLocationLabel(location)}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="date" className="mb-1 block text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Ngày</label>
+                <div className="relative">
+                  <input
+                    id="date"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder="dd/mm/yyyy"
+                    value={displayDate}
+                    onChange={(event) => {
+                      setDisplayDate(event.target.value)
+                      setDateError(null)
+                    }}
+                    onBlur={() => {
+                      const iso = parseDisplayToISO(displayDate)
+                      if (!iso) {
+                        setDateError('Định dạng ngày không hợp lệ (dd/mm/yyyy)')
+                        return
+                      }
+                      if (iso < todayIso) {
+                        setDateError('Không thể chọn ngày đã qua')
+                        return
+                      }
+                      commitSearchDate(iso)
+                    }}
+                    className={`w-full rounded-xl border bg-sky-50/70 p-2.5 pr-12 text-sm text-slate-700 outline-none transition focus:bg-white focus:ring-4 focus:ring-orange-100 sm:rounded-2xl sm:p-3 ${dateError ? 'border-red-400' : 'border-sky-100 focus:border-orange-300'}`}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (hiddenDateRef.current) {
+                        try {
+                          // @ts-ignore
+                          if (typeof hiddenDateRef.current.showPicker === 'function') hiddenDateRef.current.showPicker()
+                          else hiddenDateRef.current.focus()
+                          hiddenDateRef.current.click()
+                        } catch {
+                          hiddenDateRef.current.focus()
+                        }
+                      }
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-500 transition hover:bg-white hover:text-orange-500"
+                    aria-label="Mở lịch chọn ngày"
+                  >
+                    <CalendarDays className="h-5 w-5" />
+                  </button>
+
+                  <input
+                    ref={hiddenDateRef}
+                    type="date"
+                    value={date}
+                    min={todayIso}
+                    onChange={(e) => {
+                      const iso = e.target.value
+                      if (iso) {
+                        commitSearchDate(iso)
+                      }
+                    }}
+                    className="sr-only"
+                    aria-hidden
+                  />
+                  {dateError && <div className="mt-1 text-xs text-red-500 sm:text-sm">{dateError}</div>}
+                </div>
+              </div>
+
+              <div>
+                <button
+                  id="btn"
+                  type="submit"
+                  disabled={loadingTrips}
+                  className={`w-full rounded-xl p-2.5 text-sm font-medium transition-all duration-200 sm:rounded-2xl sm:p-3 ${user
+                    ? 'bg-orange-500 text-white shadow-[0_14px_30px_rgba(249,115,22,0.28)] hover:-translate-y-0.5 hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60'
+                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                    }`}
+                >
+                  {loadingTrips ? 'Đang tìm...' : user ? 'Tìm vé' : 'Đăng nhập để tìm vé'}
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        {/* ===== SEARCH RESULTS ===== */}
+        {(hasSearchedTrips || loadingTrips) && (
+          <div className="mx-auto mt-6 w-full max-w-5xl px-3 pb-8 sm:mt-8 sm:px-4 sm:pb-12">
+            <div className="rounded-2xl border border-sky-100 bg-white/90 p-4 shadow-[0_24px_70px_rgba(148,163,184,0.18)] backdrop-blur sm:rounded-[2rem] sm:p-6">
+              <h3 className="mb-4 text-lg font-bold text-slate-800 sm:text-xl">
+                Kết quả tìm kiếm chuyến xe
+              </h3>
+
+              {loadingTrips ? (
+                <div className="text-center py-8">
+                  <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                  <p className="mt-2 text-slate-600">Đang tìm chuyến xe...</p>
+                </div>
+              ) : trips.length > 0 ? (
+                <div className="space-y-3 sm:space-y-4">
+                  {trips.map((trip) => (
+                    <div
+                      key={trip.tripId}
+                      className="rounded-xl border border-sky-100 bg-[linear-gradient(135deg,_#ffffff_0%,_#f7fbff_100%)] p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-[0_18px_35px_rgba(148,163,184,0.16)] sm:rounded-[1.5rem] sm:p-5"
+                    >
+                      {/* Mobile: stack vertically. Tablet+: side by side */}
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3 mb-2 sm:gap-4">
+                            <div className="rounded-xl border border-orange-100 bg-orange-50 px-3 py-2 text-xl font-bold text-orange-500 sm:rounded-2xl sm:px-4 sm:py-3 sm:text-2xl">
+                              {new Date(trip.departureTime).toLocaleTimeString('vi-VN', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="font-semibold text-slate-800 text-sm sm:text-base">{trip.routeOrigin}</span>
+                                <span className="text-sky-400 text-xs">→</span>
+                                <span className="font-semibold text-slate-800 text-sm sm:text-base">{trip.routeDestination}</span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 sm:text-sm">
+                            <span>Biển số: {trip.licensePlate}</span>
+                            <span>Loại xe: {trip.vehicleType}</span>
+                            <span className="font-semibold text-orange-600">{formatCurrency(trip.price)}</span>
+                          </div>
+                        </div>
+                        <div className="sm:ml-4 flex-shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleSelectTrip(trip)}
+                            className="w-full rounded-xl bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow-[0_14px_28px_rgba(249,115,22,0.28)] transition hover:-translate-y-0.5 hover:bg-orange-600 sm:w-auto sm:px-6"
+                          >
+                            Đặt vé
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-8 text-center text-slate-500">
+                  <p>Không tìm thấy chuyến xe nào phù hợp.</p>
+                  <p className="text-sm mt-1">Hãy thử thay đổi ngày hoặc tuyến đường khác.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 

@@ -84,49 +84,49 @@ export default function LoginModal({ show, onClose, onLoginSuccess }: LoginModal
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 px-4 backdrop-blur-sm">
-            <div className="relative w-full max-w-[420px] rounded-3xl bg-white shadow-2xl">
+            <div className="relative w-full max-w-[420px] rounded-2xl bg-white shadow-2xl animate-scale-in sm:rounded-3xl">
                 <button
                     type="button"
                     onClick={onClose}
                     disabled={isLoading}
-                    className="absolute right-5 top-5 rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed"
+                    className="absolute right-4 top-4 rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:cursor-not-allowed sm:right-5 sm:top-5"
                 >
                     <X className="h-5 w-5" />
                 </button>
 
-                <div className="px-8 pt-10 text-center">
+                <div className="px-6 pt-8 text-center sm:px-8 sm:pt-10">
                     <div className="mb-3 flex items-center justify-center">
-                        <span className="text-3xl font-extrabold tracking-tight text-slate-900">
-                            VeXe
+                        <span className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+                            Saigon
                         </span>
-                        <span className="text-3xl font-extrabold tracking-tight text-orange-500">
-                            .vn
+                        <span className="text-2xl font-extrabold tracking-tight text-orange-500 sm:text-3xl">
+                            .ST
                         </span>
                     </div>
 
-                    <h2 className="text-xl font-bold text-slate-900">
+                    <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
                         Đăng nhập tài khoản
                     </h2>
 
-                    <p className="mt-2 text-sm leading-6 text-slate-500">
+                    <p className="mt-2 text-xs leading-5 text-slate-500 sm:text-sm sm:leading-6">
                         Đăng nhập để đặt vé, quản lý chuyến đi và theo dõi lịch sử đặt vé của bạn.
                     </p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="px-8 py-8">
+                <form onSubmit={handleSubmit} className="px-6 py-6 sm:px-8 sm:py-8">
                     {error && (
-                        <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                        <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5 text-xs text-red-600 sm:mb-5 sm:px-4 sm:py-3 sm:text-sm">
                             {error}
                         </div>
                     )}
 
-                    <div className="mb-5">
-                        <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <div className="mb-4 sm:mb-5">
+                        <label className="mb-1.5 block text-xs font-semibold text-slate-700 sm:mb-2 sm:text-sm">
                             Email
                         </label>
 
-                        <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50 px-4 transition focus-within:border-orange-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100">
-                            <Mail className="mr-3 h-5 w-5 text-slate-400" />
+                        <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 px-3 transition focus-within:border-orange-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100 sm:rounded-2xl sm:px-4">
+                            <Mail className="mr-2 h-4 w-4 text-slate-400 sm:mr-3 sm:h-5 sm:w-5" />
 
                             <input
                                 type="email"
@@ -136,18 +136,18 @@ export default function LoginModal({ show, onClose, onLoginSuccess }: LoginModal
                                 placeholder="Nhập email của bạn"
                                 required
                                 disabled={isLoading}
-                                className="w-full bg-transparent py-3.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed"
+                                className="w-full bg-transparent py-3 text-sm text-slate-800 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed"
                             />
                         </div>
                     </div>
 
                     <div className="mb-3">
-                        <label className="mb-2 block text-sm font-semibold text-slate-700">
+                        <label className="mb-1.5 block text-xs font-semibold text-slate-700 sm:mb-2 sm:text-sm">
                             Mật khẩu
                         </label>
 
-                        <div className="flex items-center rounded-2xl border border-slate-200 bg-slate-50 px-4 transition focus-within:border-orange-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100">
-                            <Lock className="mr-3 h-5 w-5 text-slate-400" />
+                        <div className="flex items-center rounded-xl border border-slate-200 bg-slate-50 px-3 transition focus-within:border-orange-400 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100 sm:rounded-2xl sm:px-4">
+                            <Lock className="mr-2 h-4 w-4 text-slate-400 sm:mr-3 sm:h-5 sm:w-5" />
 
                             <input
                                 type="password"
@@ -157,24 +157,24 @@ export default function LoginModal({ show, onClose, onLoginSuccess }: LoginModal
                                 placeholder="Nhập mật khẩu"
                                 required
                                 disabled={isLoading}
-                                className="w-full bg-transparent py-3.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed"
+                                className="w-full bg-transparent py-3 text-sm text-slate-800 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed"
                             />
                         </div>
                     </div>
 
-                    <div className="mb-6 flex items-center justify-between">
+                    <div className="mb-5 flex items-center justify-between sm:mb-6">
                         <button
                             type="button"
                             onClick={fillDemoData}
                             disabled={isLoading}
-                            className="text-sm font-medium text-sky-600 transition hover:text-sky-700 disabled:cursor-not-allowed disabled:opacity-60"
+                            className="text-xs font-medium text-sky-600 transition hover:text-sky-700 disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm"
                         >
 
                         </button>
 
                         <a
                             href="#"
-                            className="text-sm font-medium text-orange-500 transition hover:text-orange-600"
+                            className="text-xs font-medium text-orange-500 transition hover:text-orange-600 sm:text-sm"
                         >
                             Quên mật khẩu?
                         </a>
@@ -183,7 +183,7 @@ export default function LoginModal({ show, onClose, onLoginSuccess }: LoginModal
                     <button
                         type="submit"
                         disabled={isLoading}
-                        className="flex w-full items-center justify-center gap-2 rounded-2xl bg-orange-500 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-500/25 transition hover:-translate-y-0.5 hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-500 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-orange-500/25 transition hover:-translate-y-0.5 hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60 sm:rounded-2xl sm:py-3.5"
                     >
                         {isLoading ? (
                             <>
@@ -195,7 +195,7 @@ export default function LoginModal({ show, onClose, onLoginSuccess }: LoginModal
                         )}
                     </button>
 
-                    <p className="mt-6 text-center text-sm text-slate-500">
+                    <p className="mt-5 text-center text-xs text-slate-500 sm:mt-6 sm:text-sm">
                         Chưa có tài khoản?{' '}
                         <a
                             href="#"
@@ -206,8 +206,8 @@ export default function LoginModal({ show, onClose, onLoginSuccess }: LoginModal
                     </p>
                 </form>
 
-                <div className="border-t border-slate-100 px-8 py-5">
-                    <div className="flex items-center justify-center gap-4 text-xs text-slate-400">
+                <div className="border-t border-slate-100 px-6 py-4 sm:px-8 sm:py-5">
+                    <div className="flex items-center justify-center gap-4 text-[10px] text-slate-400 sm:text-xs">
                         <a href="#" className="transition hover:text-orange-500">
                             Điều khoản
                         </a>
