@@ -504,6 +504,15 @@ function App() {
     navigate('/')
   }
 
+  const handlePaymentConfirmed = useCallback((bookingCode: string) => {
+    setShowBookingSuccessModal(false)
+    setBookingResult(null)
+    setBookingConfirmData(null)
+    resetSearchResults()
+    showToast(`Thanh toan thanh cong cho don ${bookingCode}!`, 'success')
+    navigate('/')
+  }, [navigate, showToast])
+
   const destinationGroups = groupLocationsByType(getDestinationLocations())
   const originGroups = groupLocationsByType(locations)
 
@@ -843,6 +852,7 @@ function App() {
         show={showBookingSuccessModal}
         booking={bookingResult}
         onClose={handleCloseBookingSuccess}
+        onPaymentConfirmed={handlePaymentConfirmed}
       />
     </>
   )

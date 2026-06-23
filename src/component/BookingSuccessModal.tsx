@@ -1,14 +1,17 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Clock3, Copy, Download, QrCode, X } from 'lucide-react'
+import { bookingsAPI } from '../api/config'
 import type { BookingResponse } from '../api/config'
 
 interface BookingSuccessModalProps {
     show: boolean
     booking: BookingResponse | null
     onClose: () => void
+    onPaymentConfirmed: (bookingCode: string) => void
 }
 
 const PAYMENT_TIMEOUT_MINUTES = 15
+const PAYMENT_POLL_INTERVAL_MS = 5000
 const BANK_ID = '970432'
 const ACCOUNT_NO = '0352789648'
 const ACCOUNT_NAME = 'TRAN MAU NHAN'
@@ -54,9 +57,12 @@ export default function BookingSuccessModal({
     show,
     booking,
     onClose,
+    onPaymentConfirmed,
 }: BookingSuccessModalProps) {
     const [remainingSeconds, setRemainingSeconds] = useState(0)
     const [copiedField, setCopiedField] = useState<string | null>(null)
+    const [isCheckingPayment, setIsCheckingPayment] = useState(false)
+    const hasConfirmedPaymentRef = useRef(false)
 
     const transferContent = useMemo(() => booking?.bookingCode || '', [booking?.bookingCode])
 
@@ -98,9 +104,53 @@ export default function BookingSuccessModal({
         return () => window.clearTimeout(timer)
     }, [copiedField])
 
-    if (!show || !booking) return null
-
     const isExpired = remainingSeconds <= 0
+
+    useEffect(() => {
+        hasConfirmedPaymentRef.current = false
+        setIsCheckingPayment(false)
+    }, [booking?.bookingCode, show])
+
+    useEffect(() => {
+        if (!show || !booking?.bookingCode || isExpired) return
+
+        let isMounted = true
+
+        const checkPaymentStatus = async () => {
+            if (hasConfirmedPaymentRef.current) return
+
+            try {
+                if (isMounted) {
+                    setIsCheckingPayment(true)
+                }
+
+                const response = await bookingsAPI.getPaymentStatus(booking.bookingCode)
+
+                if (!isMounted || hasConfirmedPaymentRef.current) return
+
+                if (response.success && response.status === 1) {
+                    hasConfirmedPaymentRef.current = true
+                    onPaymentConfirmed(response.bookingCode)
+                }
+            } catch (error) {
+                console.error('Error checking booking payment status:', error)
+            } finally {
+                if (isMounted) {
+                    setIsCheckingPayment(false)
+                }
+            }
+        }
+
+        checkPaymentStatus()
+        const timer = window.setInterval(checkPaymentStatus, PAYMENT_POLL_INTERVAL_MS)
+
+        return () => {
+            isMounted = false
+            window.clearInterval(timer)
+        }
+    }, [booking?.bookingCode, isExpired, onPaymentConfirmed, show])
+
+    if (!show || !booking) return null
 
     const copyField = async (text: string, field: string) => {
         try {
@@ -155,6 +205,10 @@ export default function BookingSuccessModal({
                     <p className="mt-2 hidden text-sm leading-6 text-slate-500 sm:block">
                         Quet ma QR hoac chuyen khoan dung thong tin de he thong xac nhan ve tu dong.
                     </p>
+
+                    <div className="mt-3 text-xs font-medium text-slate-500 sm:text-sm">
+                        {isCheckingPayment ? 'He thong dang kiem tra trang thai thanh toan...' : 'He thong se tu dong cap nhat sau khi nhan duoc thanh toan.'}
+                    </div>
 
                     <div
                         className={`mt-4 grid gap-2 rounded-2xl px-4 py-3 text-left sm:mx-auto sm:mt-5 sm:inline-flex sm:w-fit sm:min-w-[320px] sm:items-center sm:justify-center sm:gap-4 sm:text-center ${

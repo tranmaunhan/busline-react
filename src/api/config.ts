@@ -254,10 +254,27 @@ export interface BookingResponse {
     tickets: TicketResponse[]
 }
 
+export interface BookingPaymentStatusResponse {
+    success: boolean
+    message: string
+    bookingCode: string
+    status: number | null
+}
+
 // Bookings API endpoints
 export const bookingsAPI = {
     createBooking: async (request: CreateBookingRequest): Promise<BookingResponse> => {
         const response = await api.post<BookingResponse>('/bookings', request)
+        return response.data
+    },
+
+    getPaymentStatus: async (bookingCode: string): Promise<BookingPaymentStatusResponse> => {
+        const response = await axios.get<BookingPaymentStatusResponse>(
+            `https://payment.aihost.io.vn/bookings/${encodeURIComponent(bookingCode)}/status`,
+            {
+                timeout: 10000,
+            }
+        )
         return response.data
     },
 }
