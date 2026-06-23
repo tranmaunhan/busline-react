@@ -3,13 +3,16 @@ import type { FormEvent } from 'react'
 import { CalendarDays, ChevronDown, CircleUserRound, LogIn, LogOut, MapPin, Search, Ticket, User } from 'lucide-react'
 import { Navigate, Route, Routes, useLocation, useMatch, useNavigate, useParams } from 'react-router-dom'
 import BookingLookupPage from './component/BookingLookupPage'
+import ChangePasswordModal from './component/ChangePasswordModal'
 import LoginModal from './component/LoginModal'
+import MyBookingsPage from './component/MyBookingsPage'
+import ProfilePage from './component/ProfilePage'
 import RegisterModal from './component/RegisterModal'
 import SeatSelectionPage from './component/SeatSelectionPage'
 import BookingConfirmModal from './component/BookingConfirmModal'
 import BookingSuccessModal from './component/BookingSuccessModal'
 import routePlaceholder from '../public/34p.jpg'
-import { bookingsAPI, locationsAPI, tripsAPI } from './api/config'
+import { authAPI, bookingsAPI, locationsAPI, tripsAPI } from './api/config'
 import type { AuthUser, Location, TripSearchResult, TripSeatMapResponse, TripSeatMapSeat, BookingResponse } from './api/config'
 import { useToast } from './component/Toast'
 import './App.css'
@@ -218,6 +221,9 @@ function App() {
   const [lookupLoading, setLookupLoading] = useState(false)
   const [lookupError, setLookupError] = useState<string | null>(null)
   const [lookupResult, setLookupResult] = useState<BookingResponse | null>(null)
+  const [myBookings, setMyBookings] = useState<BookingResponse[]>([])
+  const [myBookingsLoading, setMyBookingsLoading] = useState(false)
+  const [myBookingsError, setMyBookingsError] = useState<string | null>(null)
   const [user, setUser] = useState<AuthUser | null>(null)
   const [locations, setLocations] = useState<Location[]>([])
   const [loadingLocations, setLoadingLocations] = useState(true)
@@ -231,6 +237,7 @@ function App() {
 
   const [showBookingConfirmModal, setShowBookingConfirmModal] = useState(false)
   const [showBookingSuccessModal, setShowBookingSuccessModal] = useState(false)
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false)
   const [bookingConfirmData, setBookingConfirmData] = useState<{
     seats: TripSeatMapSeat[]
     pickupLocationId: number
@@ -375,7 +382,10 @@ function App() {
 
   const handleLogout = () => {
     setIsUserMenuOpen(false)
+    setShowChangePasswordModal(false)
     setUser(null)
+    setMyBookings([])
+    setMyBookingsError(null)
     localStorage.removeItem('authToken')
     localStorage.removeItem('authTokenType')
     localStorage.removeItem('authExpiresAt')
@@ -410,6 +420,59 @@ function App() {
     setIsUserMenuOpen(false)
     navigate(path)
   }
+
+  const showProfileFeatureToast = useCallback((featureName: string) => {
+    showToast(`${featureName} sẽ sớm được cập nhật.`, 'info')
+  }, [showToast])
+
+  const loadMyBookings = useCallback(async () => {
+    try {
+      setMyBookingsLoading(true)
+      setMyBookingsError(null)
+      const data = await bookingsAPI.getMyBookings()
+      setMyBookings(Array.isArray(data) ? data : [])
+    } catch (error: any) {
+      console.error('Error loading my bookings:', error)
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        'Không thể tải danh sách đơn hàng. Vui lòng thử lại.'
+
+      setMyBookings([])
+      setMyBookingsError(message)
+    } finally {
+      setMyBookingsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!user) {
+      setMyBookings([])
+      setMyBookingsError(null)
+      setMyBookingsLoading(false)
+      return
+    }
+
+    if (location.pathname !== '/my-bookings') {
+      return
+    }
+
+    loadMyBookings()
+  }, [loadMyBookings, location.pathname, user])
+
+  const handleChangePassword = useCallback(async (payload: {
+    currentPassword: string
+    newPassword: string
+    confirmNewPassword: string
+  }) => {
+    await authAPI.changePassword(payload)
+    setShowChangePasswordModal(false)
+    showToast('Đổi mật khẩu thành công.', 'success')
+  }, [showToast])
+
+  const handlePendingProfileFeature = useCallback((featureName: string) => {
+    showToast(`${featureName} sẽ sớm được cập nhật.`, 'info')
+  }, [showToast])
 
   const refreshLookupBooking = useCallback(async (bookingCode: string, phone: string, suppressError = false) => {
     try {
@@ -1104,27 +1167,56 @@ function App() {
     )
     : <Navigate to="/" replace />
   const profilePage = user
-    ? renderUtilityPage(
-      'Profile cá nhân',
-      `Thông tin cơ bản của bạn: ${user.fullName || user.username || 'Người dùng'}${user.email ? `, email ${user.email}` : ''}${user.phone ? `, số điện thoại ${user.phone}` : ''}. Bạn có thể dùng route này để gắn form cập nhật thông tin sau.`,
-      {
-        label: 'Về trang chủ',
-        onClick: () => navigate('/'),
-      },
-      {
-        label: 'Xem đơn đã đặt',
-        onClick: () => navigate('/my-bookings'),
-      },
+    ? (
+      <ProfilePage
+        header={renderHeader()}
+        user={user}
+        onBackHome={() => navigate('/')}
+        onViewBookings={() => navigate('/my-bookings')}
+        onEditProfile={() => handlePendingProfileFeature('Chức năng chỉnh sửa thông tin')}
+        onChangePassword={() => handlePendingProfileFeature('Chức năng thay đổi mật khẩu')}
+      />
     )
     : <Navigate to="/" replace />
+
+  const resolvedMyBookingsPage = user
+    ? (
+      <MyBookingsPage
+        header={renderHeader()}
+        bookings={myBookings}
+        loading={myBookingsLoading}
+        error={myBookingsError}
+        onReload={loadMyBookings}
+        onBackHome={() => navigate('/')}
+      />
+    )
+    : <Navigate to="/" replace />
+
+  const resolvedProfilePage = user
+    ? (
+      <ProfilePage
+        header={renderHeader()}
+        user={user}
+        onBackHome={() => navigate('/')}
+        onViewBookings={() => navigate('/my-bookings')}
+        onEditProfile={() => showProfileFeatureToast('Chức năng chỉnh sửa thông tin')}
+        onChangePassword={() => setShowChangePasswordModal(true)}
+      />
+    )
+    : <Navigate to="/" replace />
+
+  void renderUtilityPage
+  void handlePendingProfileFeature
+  void myBookingsPage
+  void profilePage
 
   return (
     <>
       <Routes>
         <Route path="/" element={searchPage} />
         <Route path="/booking-lookup" element={bookingLookupPage} />
-        <Route path="/my-bookings" element={myBookingsPage} />
-        <Route path="/profile" element={profilePage} />
+        <Route path="/my-bookings" element={resolvedMyBookingsPage} />
+        <Route path="/profile" element={resolvedProfilePage} />
         <Route
           path="/trips/:tripId/seats"
           element={
@@ -1182,6 +1274,12 @@ function App() {
         booking={bookingResult}
         onClose={handleCloseBookingSuccess}
         onPaymentConfirmed={handlePaymentConfirmed}
+      />
+
+      <ChangePasswordModal
+        show={showChangePasswordModal}
+        onClose={() => setShowChangePasswordModal(false)}
+        onSubmit={handleChangePassword}
       />
     </>
   )

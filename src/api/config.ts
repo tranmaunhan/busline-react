@@ -17,6 +17,12 @@ export interface LoginResponse {
     user: AuthUser
 }
 
+export interface ChangePasswordRequest {
+    currentPassword: string
+    newPassword: string
+    confirmNewPassword: string
+}
+
 export interface Location {
     id: number
     name: string
@@ -199,6 +205,11 @@ export const authAPI = {
         const response = await api.post('/auth/register', userData)
         return response.data
     },
+
+    changePassword: async (payload: ChangePasswordRequest) => {
+        const response = await api.post('/auth/change-password', payload)
+        return response.data
+    },
 }
 // Locations API endpoints
 export const locationsAPI = {
@@ -265,6 +276,11 @@ export interface BookingPaymentStatusResponse {
 export const bookingsAPI = {
     createBooking: async (request: CreateBookingRequest): Promise<BookingResponse> => {
         const response = await api.post<BookingResponse>('/bookings', request)
+        return response.data
+    },
+
+    getMyBookings: async (): Promise<BookingResponse[]> => {
+        const response = await api.get<BookingResponse[]>('/bookings/me')
         return response.data
     },
 
