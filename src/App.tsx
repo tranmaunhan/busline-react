@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { CalendarDays, MapPin, User } from 'lucide-react'
-import { Navigate, Route, Routes, useMatch, useNavigate, useParams } from 'react-router-dom'
+import { CalendarDays, ChevronDown, CircleUserRound, LogIn, LogOut, MapPin, Search, Ticket, User } from 'lucide-react'
+import { Navigate, Route, Routes, useLocation, useMatch, useNavigate, useParams } from 'react-router-dom'
+import BookingLookupPage from './component/BookingLookupPage'
 import LoginModal from './component/LoginModal'
 import RegisterModal from './component/RegisterModal'
 import SeatSelectionPage from './component/SeatSelectionPage'
@@ -196,6 +197,7 @@ function App() {
 
   const defaultDateIso = new Date().toISOString().slice(0, 10)
   const navigate = useNavigate()
+  const location = useLocation()
   const seatRouteMatch = useMatch('/trips/:tripId/seats')
   const routeSeatTripId = Number(seatRouteMatch?.params.tripId ?? '')
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -209,6 +211,9 @@ function App() {
   const todayIso = defaultDateIso
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [showRegisterModal, setShowRegisterModal] = useState(false)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [lookupBookingCode, setLookupBookingCode] = useState('')
+  const [lookupPhone, setLookupPhone] = useState('')
   const [user, setUser] = useState<AuthUser | null>(null)
   const [locations, setLocations] = useState<Location[]>([])
   const [loadingLocations, setLoadingLocations] = useState(true)
@@ -230,6 +235,7 @@ function App() {
     dropoffLocationName: string
   } | null>(null)
   const [bookingResult, setBookingResult] = useState<BookingResponse | null>(null)
+  const userMenuRef = useRef<HTMLDivElement | null>(null)
 
   const resetSearchResults = () => {
     setTrips([])
@@ -257,6 +263,38 @@ function App() {
       }
     }
   }, [])
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!userMenuRef.current?.contains(event.target as Node)) {
+        setIsUserMenuOpen(false)
+      }
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsUserMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [])
+
+  useEffect(() => {
+    setIsUserMenuOpen(false)
+  }, [location.pathname])
+
+  useEffect(() => {
+    if (user?.phone && !lookupPhone) {
+      setLookupPhone(user.phone)
+    }
+  }, [lookupPhone, user?.phone])
 
   useEffect(() => {
     const loadLocations = async () => {
@@ -326,20 +364,13 @@ function App() {
     })
   }, [from, to, date, trips, hasSearchedTrips, selectedTrip])
 
-  const handleLoginClick = () => {
-    if (user) {
-      showToast(`Xin chào ${user.fullName || user.email || 'User'}!`, 'info')
-    } else {
-      setShowLoginModal(true)
-    }
-  }
-
   const handleLoginSuccess = (userData: AuthUser) => {
     setUser(userData)
     showToast('Đăng nhập thành công!', 'success')
   }
 
   const handleLogout = () => {
+    setIsUserMenuOpen(false)
     setUser(null)
     localStorage.removeItem('authToken')
     localStorage.removeItem('authTokenType')
@@ -364,6 +395,30 @@ function App() {
   const handleLoginClickFromRegister = () => {
     setShowRegisterModal(false)
     setShowLoginModal(true)
+  }
+
+  const handleOpenLoginFromMenu = () => {
+    setIsUserMenuOpen(false)
+    setShowLoginModal(true)
+  }
+
+  const handleNavigateFromMenu = (path: string) => {
+    setIsUserMenuOpen(false)
+    navigate(path)
+  }
+
+  const handleBookingLookupSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const bookingCode = lookupBookingCode.trim()
+    const phone = lookupPhone.trim()
+
+    if (!bookingCode || !phone) {
+      showToast('Vui long nhap ma dat ve va so dien thoai de tra cuu!', 'warning')
+      return
+    }
+
+    showToast(`Da nhan thong tin tra cuu cho ma ${bookingCode}.`, 'info')
   }
 
   useEffect(() => {
@@ -516,6 +571,154 @@ function App() {
   const destinationGroups = groupLocationsByType(getDestinationLocations())
   const originGroups = groupLocationsByType(locations)
 
+  const renderHeader = () => (
+    <header className="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
+      <button
+        type="button"
+        onClick={() => navigate('/')}
+        className="rounded-full border border-sky-100 bg-white/90 px-3 py-1.5 text-base font-bold text-slate-900 shadow-[0_10px_30px_rgba(148,163,184,0.16)] backdrop-blur transition hover:bg-white sm:px-4 sm:py-2 sm:text-xl"
+      >
+        Saigon<span className="text-orange-500">.ST</span>
+      </button>
+
+      <div ref={userMenuRef} className="relative">
+        <button
+          type="button"
+          onClick={() => setIsUserMenuOpen((current) => !current)}
+          className="flex items-center gap-2 rounded-2xl border border-sky-100 bg-white/90 px-2.5 py-1.5 text-slate-700 shadow-[0_10px_30px_rgba(148,163,184,0.16)] backdrop-blur transition hover:bg-white sm:px-4 sm:py-2"
+          aria-haspopup="menu"
+          aria-expanded={isUserMenuOpen}
+        >
+          <User className="h-5 w-5 shrink-0 text-slate-500" />
+          <span className="hidden min-w-0 text-left sm:flex sm:flex-col sm:items-start sm:leading-tight">
+            <span className="text-sm font-medium text-slate-800">
+              {user ? user.fullName || user.username || 'User' : 'Tai khoan'}
+            </span>
+            <span className="text-xs text-slate-500">
+              {user ? ([user.phone].filter(Boolean).join(' - ') || user.email) : 'Mo menu nhanh'}
+            </span>
+          </span>
+          <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+        </button>
+
+        {isUserMenuOpen ? (
+          <div className="absolute right-0 z-30 mt-2 w-[250px] overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white p-2 shadow-[0_24px_60px_rgba(15,23,42,0.18)]">
+            <div className="rounded-2xl bg-slate-50 px-3 py-2.5">
+              <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                {user ? 'Tai khoan cua ban' : 'Tuy chon nhanh'}
+              </div>
+              <div className="mt-1 text-sm font-bold text-slate-900">
+                {user ? user.fullName || user.username || 'Nguoi dung' : 'Chon thao tac ban muon'}
+              </div>
+            </div>
+
+            <div className="mt-2 space-y-1">
+              <button
+                type="button"
+                onClick={() => handleNavigateFromMenu('/booking-lookup')}
+                className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-sky-50 hover:text-sky-700"
+              >
+                <Search className="h-4 w-4 shrink-0" />
+                <span>Tra cuu ve</span>
+              </button>
+
+              {user ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleNavigateFromMenu('/my-bookings')}
+                    className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-sky-50 hover:text-sky-700"
+                  >
+                    <Ticket className="h-4 w-4 shrink-0" />
+                    <span>Xem don da dat</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleNavigateFromMenu('/profile')}
+                    className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-sky-50 hover:text-sky-700"
+                  >
+                    <CircleUserRound className="h-4 w-4 shrink-0" />
+                    <span>Profile ca nhan</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-rose-600 transition hover:bg-rose-50"
+                  >
+                    <LogOut className="h-4 w-4 shrink-0" />
+                    <span>Dang xuat</span>
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleOpenLoginFromMenu}
+                  className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-orange-600 transition hover:bg-orange-50"
+                >
+                  <LogIn className="h-4 w-4 shrink-0" />
+                  <span>Dang nhap</span>
+                </button>
+              )}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </header>
+  )
+
+  const renderUtilityPage = (
+    title: string,
+    description: string,
+    primaryAction: {
+      label: string
+      onClick: () => void
+    },
+    secondaryAction?: {
+      label: string
+      onClick: () => void
+    },
+  ) => (
+    <div className="min-h-screen bg-[linear-gradient(180deg,_#f8fbff_0%,_#eff6ff_45%,_#f8fbff_100%)] text-slate-900">
+      <div className="relative z-10 flex min-h-screen flex-col">
+        {renderHeader()}
+
+        <main className="mx-auto flex w-full max-w-5xl flex-1 items-center px-4 pb-10 pt-4 sm:px-6 sm:pb-16 sm:pt-8">
+          <section className="w-full rounded-[2rem] border border-sky-100 bg-white/95 p-6 shadow-[0_24px_70px_rgba(148,163,184,0.18)] backdrop-blur sm:p-10">
+            <div className="inline-flex rounded-full border border-orange-100 bg-orange-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-orange-600">
+              Saigon.ST
+            </div>
+            <h1 className="mt-4 text-3xl font-black text-slate-950 sm:text-4xl">{title}</h1>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
+              {description}
+            </p>
+
+            <div className="mt-8 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={primaryAction.onClick}
+                className="rounded-2xl bg-orange-500 px-5 py-3 text-sm font-semibold text-white shadow-[0_14px_30px_rgba(249,115,22,0.28)] transition hover:-translate-y-0.5 hover:bg-orange-600"
+              >
+                {primaryAction.label}
+              </button>
+
+              {secondaryAction ? (
+                <button
+                  type="button"
+                  onClick={secondaryAction.onClick}
+                  className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                >
+                  {secondaryAction.label}
+                </button>
+              ) : null}
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+  )
+
   const searchPage = (
     <div className="relative min-h-screen overflow-x-hidden bg-[linear-gradient(180deg,_#f8fbff_0%,_#eff6ff_45%,_#f8fbff_100%)] text-slate-900">
       {/* Slide backgrounds — keep absolute */}
@@ -529,37 +732,7 @@ function App() {
 
       {/* Main content wrapper — flexbox, not absolute */}
       <div className="relative z-10 flex min-h-screen flex-col">
-        {/* ===== HEADER ===== */}
-        <header className="flex items-center justify-between px-3 py-3 sm:px-6 sm:py-4">
-          <div className="rounded-full border border-sky-100 bg-white/90 px-3 py-1.5 text-base font-bold text-slate-900 shadow-[0_10px_30px_rgba(148,163,184,0.16)] backdrop-blur sm:px-4 sm:py-2 sm:text-xl">
-            Saigon<span className="text-orange-500">.ST</span>
-          </div>
-
-          <div className="flex items-center gap-2 rounded-2xl border border-sky-100 bg-white/90 px-2.5 py-1.5 text-slate-700 shadow-[0_10px_30px_rgba(148,163,184,0.16)] backdrop-blur transition hover:bg-white sm:px-4 sm:py-2">
-            {user ? (
-              <>
-                <User className="h-5 w-5 text-slate-500 shrink-0" />
-                <span className="hidden sm:flex flex-col items-start leading-tight">
-                  <span className="text-sm">{user.fullName || user.username || 'User'}</span>
-                  <span className="text-xs text-slate-500">
-                    {[user.phone].filter(Boolean).join(' • ')}
-                  </span>
-                </span>
-                <button
-                  onClick={handleLogout}
-                  className="ml-1 rounded-full bg-orange-500 px-2.5 py-1 text-xs font-semibold text-white transition hover:bg-orange-600 sm:ml-2 sm:px-3 sm:py-1.5"
-                >
-                  Thoát
-                </button>
-              </>
-            ) : (
-              <button className="flex items-center gap-1.5 font-medium text-slate-700 transition hover:text-orange-600 sm:gap-2" onClick={handleLoginClick}>
-                <User className="h-5 w-5 text-slate-500 shrink-0" />
-                <span className="hidden sm:block text-sm">Đăng nhập</span>
-              </button>
-            )}
-          </div>
-        </header>
+        {renderHeader()}
 
         {/* ===== HERO SECTION ===== */}
         <div className="flex flex-col items-center px-4 pt-3 text-center sm:pt-8">
@@ -791,11 +964,54 @@ function App() {
 
   const pickupLocationName = pickupLoc ? `${pickupLoc.name} - ${pickupLoc.address}` : ''
   const dropoffLocationName = dropoffLoc ? `${dropoffLoc.name} - ${dropoffLoc.address}` : ''
+  const bookingLookupPage = (
+    <BookingLookupPage
+      header={renderHeader()}
+      bookingCode={lookupBookingCode}
+      phone={lookupPhone}
+      suggestedPhone={user?.phone}
+      onBookingCodeChange={(value) => setLookupBookingCode(value.toUpperCase())}
+      onPhoneChange={setLookupPhone}
+      onSubmit={handleBookingLookupSubmit}
+      onBackHome={() => navigate('/')}
+    />
+  )
+  const myBookingsPage = user
+    ? renderUtilityPage(
+      'Don da dat',
+      'Day la trang tong hop de nguoi dung xem lai cac don da dat. Hien tai minh da noi route va menu de ban co san diem dat cho phan danh sach don hang sau nay.',
+      {
+        label: 'Dat ve tiep',
+        onClick: () => navigate('/'),
+      },
+      {
+        label: 'Profile ca nhan',
+        onClick: () => navigate('/profile'),
+      },
+    )
+    : <Navigate to="/" replace />
+  const profilePage = user
+    ? renderUtilityPage(
+      'Profile ca nhan',
+      `Thong tin co ban cua ban: ${user.fullName || user.username || 'Nguoi dung'}${user.email ? `, email ${user.email}` : ''}${user.phone ? `, so dien thoai ${user.phone}` : ''}. Ban co the dung route nay de gan form cap nhat thong tin sau.`,
+      {
+        label: 'Ve trang chu',
+        onClick: () => navigate('/'),
+      },
+      {
+        label: 'Xem don da dat',
+        onClick: () => navigate('/my-bookings'),
+      },
+    )
+    : <Navigate to="/" replace />
 
   return (
     <>
       <Routes>
         <Route path="/" element={searchPage} />
+        <Route path="/booking-lookup" element={bookingLookupPage} />
+        <Route path="/my-bookings" element={myBookingsPage} />
+        <Route path="/profile" element={profilePage} />
         <Route
           path="/trips/:tripId/seats"
           element={
