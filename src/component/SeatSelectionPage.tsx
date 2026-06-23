@@ -596,11 +596,11 @@ export default function SeatSelectionPage({
             <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-[0_-12px_30px_rgba(15,23,42,0.08)] backdrop-blur xl:hidden">
                 <div className="mx-auto flex max-w-7xl items-center gap-3">
                     <div className="min-w-0 flex-1">
-                        <div className="text-xs uppercase tracking-[0.16em] text-slate-400">Da chon</div>
+                        <div className="text-xs uppercase tracking-[0.16em] text-slate-400">Đã chọn</div>
                         <div className="mt-1 text-sm font-semibold text-slate-800">
                             {selectedSeats.length > 0
-                                ? `${selectedSeats.length} ghe - ${formatCurrency(selectedTotalAmount)}`
-                                : 'Chon ghe de tiep tuc'}
+                                ? `${selectedSeats.length} ghế - ${formatCurrency(selectedTotalAmount)}`
+                                : 'Chọn ghế để tiếp tục'}
                         </div>
                     </div>
 
@@ -610,7 +610,7 @@ export default function SeatSelectionPage({
                         onClick={handleProceedSelection}
                         className="rounded-[1rem] bg-orange-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
                     >
-                        Tiep tuc
+                        Tiếp tục
                     </button>
                 </div>
             </div>

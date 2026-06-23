@@ -75,7 +75,7 @@ export default function BookingConfirmModal({
             } else if (err.message) {
                 setError(err.message)
             } else {
-                setError('Dat ve that bai. Vui long thu lai.')
+                setError('Đặt vé thất bại. Vui lòng thử lại.')
             }
         } finally {
             setIsLoading(false)
@@ -99,10 +99,10 @@ export default function BookingConfirmModal({
                 <div className="border-b border-sky-50 bg-[linear-gradient(135deg,_#eff6ff_0%,_#ffffff_100%)] px-4 py-4 sm:px-6 sm:py-5">
                     <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900 sm:text-xl">
                         <Ticket className="h-5 w-5 text-orange-500" />
-                        Xac nhan dat ve
+                        Xác nhận đặt vé
                     </h3>
                     <p className="mt-1 hidden text-xs text-slate-500 sm:block">
-                        Kiem tra thong tin truoc khi xac nhan.
+                        Kiểm tra thông tin trước khi xác nhận.
                     </p>
                 </div>
 
@@ -126,7 +126,7 @@ export default function BookingConfirmModal({
                         <div className="flex items-center justify-between border-t border-sky-100/50 pt-3">
                             <div className="min-w-0">
                                 <div className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                                    Tuyen duong
+                                    Tuyến đường
                                 </div>
                                 <div className="mt-0.5 text-sm font-bold text-slate-800 sm:text-base">
                                     {trip.routeOrigin} - {trip.routeDestination}
@@ -135,7 +135,7 @@ export default function BookingConfirmModal({
 
                             <div className="text-right">
                                 <div className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                                    Khoi hanh
+                                    Khởi hành
                                 </div>
                                 <div className="mt-0.5 flex items-center justify-end gap-1 text-sm font-bold text-slate-800">
                                     <Clock3 className="h-3.5 w-3.5 text-orange-500" />
@@ -146,14 +146,14 @@ export default function BookingConfirmModal({
                     </div>
 
                     <div className="space-y-3">
-                        <h4 className="text-sm font-bold text-slate-800">Diem don va diem tra</h4>
+                        <h4 className="text-sm font-bold text-slate-800">Điểm đón và điểm trả</h4>
                         <div className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4">
                             <div>
-                                <div className="text-xs font-medium uppercase text-slate-400">Diem don</div>
+                                <div className="text-xs font-medium uppercase text-slate-400">Điểm đón</div>
                                 <div className="mt-1 text-sm font-semibold text-slate-800">{pickupLocationName}</div>
                             </div>
                             <div className="border-t border-slate-100 pt-3">
-                                <div className="text-xs font-medium uppercase text-slate-400">Diem tra</div>
+                                <div className="text-xs font-medium uppercase text-slate-400">Điểm trả</div>
                                 <div className="mt-1 text-sm font-semibold text-slate-800">{dropoffLocationName}</div>
                             </div>
                         </div>
@@ -161,9 +161,9 @@ export default function BookingConfirmModal({
 
                     <div className="space-y-3 border-t border-slate-100 pt-4">
                         <div className="flex items-center justify-between">
-                            <h4 className="text-sm font-bold text-slate-800">Ghe da chon</h4>
+                            <h4 className="text-sm font-bold text-slate-800">Ghế đã chọn</h4>
                             <span className="hidden text-xs text-slate-500 sm:inline">
-                                Don gia: {formatCurrency(trip.price)}/ghe
+                                Đơn giá: {formatCurrency(trip.price)}/ghế
                             </span>
                         </div>
 
@@ -177,6 +177,7 @@ export default function BookingConfirmModal({
                                     {seat.seatCode}
                                     <span className="hidden text-xs font-medium text-slate-400 sm:inline">
                                         ({seat.deck === 'UPPER' ? 'Tang tren' : 'Tang duoi'})
+                                        
                                     </span>
                                 </div>
                             ))}
@@ -185,9 +186,9 @@ export default function BookingConfirmModal({
 
                     <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50 p-4">
                         <div>
-                            <div className="text-xs font-medium text-slate-500">Tong tien thanh toan</div>
+                            <div className="text-xs font-medium text-slate-500">Tổng tiền thanh toán</div>
                             <div className="mt-0.5 hidden text-xs text-slate-400 sm:block">
-                                Gia da bao gom VAT va phi dich vu
+                                Giá đã bao gồm VAT và phí dịch vụ
                             </div>
                         </div>
 
@@ -206,7 +207,7 @@ export default function BookingConfirmModal({
                         className="flex-1 rounded-xl border border-slate-200 bg-white py-3 font-semibold text-slate-700 transition active:scale-[0.98] hover:bg-slate-50"
                         disabled={isLoading}
                     >
-                        Huy
+                        Hủy
                     </button>
 
                     <button
@@ -218,10 +219,10 @@ export default function BookingConfirmModal({
                         {isLoading ? (
                             <>
                                 <Loader2 className="h-5 w-5 animate-spin" />
-                                Dang giu cho...
+                                Đang giữ chỗ...
                             </>
                         ) : (
-                            'Xac nhan dat ve'
+                            'Xác nhận đặt vé'
                         )}
                     </button>
                 </div>

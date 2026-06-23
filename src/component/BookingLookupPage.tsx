@@ -1,18 +1,18 @@
 import { useMemo } from 'react'
 import type { FormEventHandler, ReactNode } from 'react'
 import {
+  AlertCircle,
   CalendarDays,
   Copy,
   CreditCard,
   Download,
+  Home,
+  Info,
   MapPin,
   Phone,
   QrCode,
-  Ticket,
   Search,
-  Home,
-  AlertCircle,
-  Info
+  Ticket,
 } from 'lucide-react'
 import type { BookingResponse } from '../api/config'
 import {
@@ -131,8 +131,6 @@ export default function BookingLookupPage({
         <main className="mx-auto flex w-full max-w-[1400px] flex-1 items-start px-4 pb-10 pt-4 sm:px-6 sm:pb-14 sm:pt-8">
           <section className="w-full rounded-[2rem] border border-sky-100 bg-white/95 p-4 shadow-[0_24px_70px_rgba(148,163,184,0.18)] backdrop-blur sm:p-6 lg:p-8">
             <div className="grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
-
-              {/* Cột Form Tra cứu */}
               <div className="h-fit rounded-[1.75rem] border border-sky-100 bg-[linear-gradient(180deg,_#ffffff_0%,_#f7fbff_100%)] p-6 shadow-sm">
                 <div className="inline-flex rounded-full border border-orange-100 bg-orange-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.15em] text-orange-600">
                   Tra cứu vé
@@ -181,7 +179,7 @@ export default function BookingLookupPage({
                     </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row flex-wrap gap-3 pt-2">
+                  <div className="flex flex-col flex-wrap gap-3 pt-2 sm:flex-row">
                     <button
                       type="submit"
                       disabled={isLoading}
@@ -203,10 +201,9 @@ export default function BookingLookupPage({
                 </form>
               </div>
 
-              {/* Cột Hiển thị Kết quả */}
-              <div className="flex flex-col min-h-[320px] rounded-[1.75rem] border border-slate-200 bg-slate-50/80 p-4 sm:p-6">
+              <div className="flex min-h-[320px] flex-col rounded-[1.75rem] border border-slate-200 bg-slate-50/80 p-4 sm:p-6">
                 {errorMessage ? (
-                  <div className="flex items-start gap-3 rounded-[1.25rem] border border-rose-200 bg-rose-50 px-5 py-4 text-sm font-medium text-rose-700 mb-5">
+                  <div className="mb-5 flex items-start gap-3 rounded-[1.25rem] border border-rose-200 bg-rose-50 px-5 py-4 text-sm font-medium text-rose-700">
                     <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-rose-500" />
                     <p>{errorMessage}</p>
                   </div>
@@ -214,7 +211,6 @@ export default function BookingLookupPage({
 
                 {bookingResult ? (
                   <div className="space-y-5">
-                    {/* Header Kết quả */}
                     <div className="flex flex-wrap items-center justify-between gap-4 rounded-[1.25rem] bg-white px-5 py-4 shadow-sm ring-1 ring-slate-200/60">
                       <div className="min-w-0">
                         <div className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400">
@@ -225,26 +221,23 @@ export default function BookingLookupPage({
                         </div>
                       </div>
                       <div className={`rounded-full px-4 py-1.5 text-sm font-bold ring-1 ${isPendingPaymentStatus(bookingResult.status)
-                          ? 'bg-amber-50 text-amber-700 ring-amber-200'
-                          : 'bg-emerald-50 text-emerald-700 ring-emerald-200'
-                        }`}>
+                        ? 'bg-amber-50 text-amber-700 ring-amber-200'
+                        : 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                        }`}
+                      >
                         {getBookingStatusLabel(bookingResult.status)}
                       </div>
                     </div>
 
-                    {/* Chia layout phần QR và Details */}
                     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
-
-                      {/* Lưới Thông tin chi tiết (Đã sửa layout thành 2x2) */}
-                      <div className="grid gap-4 sm:grid-cols-2 h-fit">
-
+                      <div className="grid h-fit gap-4 sm:grid-cols-2">
                         <div className="min-w-0 rounded-[1.25rem] bg-white px-5 py-4 shadow-sm ring-1 ring-slate-200/60">
                           <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.15em] text-slate-400">
                             <MapPin className="h-4 w-4 shrink-0 text-sky-500" />
                             <span className="truncate">Tuyến đường</span>
                           </div>
                           <div className="mt-3 text-sm font-bold text-slate-900">
-                            {bookingResult.routeOrigin} <span className="text-slate-400 font-medium px-1">→</span> {bookingResult.routeDestination}
+                            {bookingResult.routeOrigin} <span className="px-1 font-medium text-slate-400">→</span> {bookingResult.routeDestination}
                           </div>
                           <div className="mt-2 flex flex-col gap-1 text-sm text-slate-600">
                             <p className="truncate"><span className="font-semibold text-slate-400">Đón:</span> {bookingResult.pickupLocationName}</p>
@@ -259,11 +252,11 @@ export default function BookingLookupPage({
                           </div>
                           <div className="mt-3 flex flex-col gap-2">
                             <div className="text-sm">
-                              <span className="block text-xs font-semibold text-slate-400 mb-0.5">Đặt vé lúc:</span>
+                              <span className="mb-0.5 block text-xs font-semibold text-slate-400">Đặt vé lúc:</span>
                               <span className="font-medium text-slate-900">{formatDateTime(bookingResult.bookingTime)}</span>
                             </div>
                             <div className="text-sm">
-                              <span className="block text-xs font-semibold text-slate-400 mb-0.5">Khởi hành:</span>
+                              <span className="mb-0.5 block text-xs font-semibold text-slate-400">Khởi hành:</span>
                               <span className="font-medium text-slate-900">{formatDateTime(bookingResult.tripDepartureTime)}</span>
                             </div>
                           </div>
@@ -274,10 +267,10 @@ export default function BookingLookupPage({
                             <CreditCard className="h-4 w-4 shrink-0 text-emerald-500" />
                             <span className="truncate">Thanh toán</span>
                           </div>
-                          <div className="mt-3 text-xl font-black text-slate-950 truncate">
+                          <div className="mt-3 truncate text-xl font-black text-slate-950">
                             {formatCurrency(bookingResult.totalAmount)}
                           </div>
-                          <div className="mt-2 text-sm text-slate-500 truncate">
+                          <div className="mt-2 truncate text-sm text-slate-500">
                             Mã chuyến: <span className="font-semibold text-slate-700">{bookingResult.tripId}</span>
                           </div>
                         </div>
@@ -297,10 +290,8 @@ export default function BookingLookupPage({
                             ))}
                           </div>
                         </div>
-
                       </div>
 
-                      {/* Khối Thanh Toán (QR) */}
                       {isPendingPaymentStatus(bookingResult.status) ? (
                         <div className="h-fit rounded-[1.5rem] border border-amber-200 bg-white p-5 shadow-sm ring-1 ring-amber-100">
                           <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.15em] text-amber-700 ring-1 ring-amber-200">
@@ -308,7 +299,7 @@ export default function BookingLookupPage({
                             Cần thanh toán
                           </div>
 
-                          <div className="mt-4 mx-auto max-w-[200px] rounded-[1.25rem] border border-slate-200 bg-white p-2.5 shadow-sm">
+                          <div className="mx-auto mt-4 max-w-[200px] rounded-[1.25rem] border border-slate-200 bg-white p-2.5 shadow-sm">
                             <img
                               src={pendingPaymentQrUrl}
                               alt="QR thanh toán đơn đặt vé"
@@ -323,10 +314,10 @@ export default function BookingLookupPage({
                             </div>
                             <hr className="border-slate-200" />
                             <div className="flex items-start justify-between gap-3">
-                              <span className="text-xs font-bold uppercase tracking-[0.1em] text-slate-400 mt-0.5">Tài khoản</span>
+                              <span className="mt-0.5 text-xs font-bold uppercase tracking-[0.1em] text-slate-400">Tài khoản</span>
                               <div className="text-right">
                                 <div className="font-black text-slate-900">{PAYMENT_ACCOUNT_NO}</div>
-                                <div className="text-xs font-medium text-slate-500 mt-0.5">{PAYMENT_ACCOUNT_NAME}</div>
+                                <div className="mt-0.5 text-xs font-medium text-slate-500">{PAYMENT_ACCOUNT_NAME}</div>
                               </div>
                             </div>
                             <hr className="border-slate-200" />
@@ -352,7 +343,7 @@ export default function BookingLookupPage({
                               <button
                                 type="button"
                                 onClick={() => handleCopyText(PAYMENT_ACCOUNT_NO)}
-                                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-3 text-xs font-bold text-slate-700 transition hover:bg-slate-50 hover:border-slate-300"
+                                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-3 text-xs font-bold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
                               >
                                 <Copy className="h-4 w-4 shrink-0 text-slate-400" />
                                 Copy STK
@@ -361,7 +352,7 @@ export default function BookingLookupPage({
                               <button
                                 type="button"
                                 onClick={handleDownloadQr}
-                                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-3 text-xs font-bold text-slate-700 transition hover:bg-slate-50 hover:border-slate-300"
+                                className="inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-3 text-xs font-bold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
                               >
                                 <Download className="h-4 w-4 shrink-0 text-slate-400" />
                                 Tải mã QR
@@ -373,13 +364,12 @@ export default function BookingLookupPage({
                     </div>
                   </div>
                 ) : !errorMessage ? (
-                  // Trạng thái trống (Empty State)
                   <div className="flex h-full flex-1 flex-col items-center justify-center rounded-[1.5rem] border-2 border-dashed border-slate-200 bg-white/50 px-6 py-12 text-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-sky-50 text-sky-500 mb-4">
+                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-sky-50 text-sky-500">
                       <Info className="h-8 w-8" />
                     </div>
                     <h3 className="text-base font-bold text-slate-700">Chưa có thông tin hiển thị</h3>
-                    <p className="mt-2 text-sm text-slate-500 max-w-xs">
+                    <p className="mt-2 max-w-xs text-sm text-slate-500">
                       Vui lòng nhập <strong className="font-semibold text-slate-700">Mã đặt chỗ</strong> và <strong className="font-semibold text-slate-700">Số điện thoại</strong> để kiểm tra thông tin vé của bạn.
                     </p>
                   </div>

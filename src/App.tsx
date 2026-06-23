@@ -433,9 +433,9 @@ function App() {
     const phone = lookupPhone.trim()
 
     if (!bookingCode || !phone) {
-      setLookupError('Vui long nhap ma dat ve va so dien thoai de tra cuu!')
+      setLookupError('Vui lòng nhập mã đặt vé và số điện thoại để tra cứu!')
       setLookupResult(null)
-      showToast('Vui long nhap ma dat ve va so dien thoai de tra cuu!', 'warning')
+      showToast('Vui lòng nhập mã đặt vé và số điện thoại để tra cứu!', 'warning')
       return
     }
 
@@ -448,7 +448,7 @@ function App() {
 
         setLookupResult(data)
         setLookupError(null)
-        showToast(`Tra cuu thanh cong don ${data.bookingCode}!`, 'success')
+        showToast(`Tra cứu thành công đơn ${data.bookingCode}!`, 'success')
       })
       .catch((error: any) => {
         console.error('Error looking up booking:', error)
@@ -456,7 +456,7 @@ function App() {
         const message =
           error?.response?.data?.message ||
           error?.response?.data?.error ||
-          'Khong tim thay don dat ve. Vui long kiem tra lai BookingCode va so dien thoai.'
+          'Không tìm thấy đơn đặt vé. Vui lòng kiểm tra lại BookingCode và số điện thoại.'
 
         setLookupResult(null)
         setLookupError(message)
@@ -499,7 +499,7 @@ function App() {
         }
 
         if (refreshedBooking.status === 1 || refreshedBooking.status === '1') {
-          showToast(`Don ${refreshedBooking.bookingCode} da duoc thanh toan. Da lam moi ket qua tra cuu!`, 'success')
+          showToast(`Đơn ${refreshedBooking.bookingCode} đã được thanh toán. Đã làm mới kết quả tra cứu!`, 'success')
         }
       } catch (error) {
         console.error('Error polling payment status from lookup page:', error)
@@ -661,7 +661,7 @@ function App() {
     setBookingResult(null)
     setBookingConfirmData(null)
     resetSearchResults()
-    showToast(`Thanh toan thanh cong cho don ${bookingCode}!`, 'success')
+    showToast(`Thanh toán thành công cho đơn ${bookingCode}!`, 'success')
     navigate('/')
   }, [navigate, showToast])
 
@@ -682,19 +682,24 @@ function App() {
         <button
           type="button"
           onClick={() => setIsUserMenuOpen((current) => !current)}
-          className="flex items-center gap-2 rounded-2xl border border-sky-100 bg-white/90 px-2.5 py-1.5 text-slate-700 shadow-[0_10px_30px_rgba(148,163,184,0.16)] backdrop-blur transition hover:bg-white sm:px-4 sm:py-2"
+          className={`flex items-center rounded-2xl border border-sky-100 bg-white/90 text-slate-700 shadow-[0_10px_30px_rgba(148,163,184,0.16)] backdrop-blur transition hover:bg-white ${
+            user ? 'gap-2 px-2.5 py-1.5 sm:px-4 sm:py-2' : 'gap-1.5 px-3 py-2'
+          }`}
           aria-haspopup="menu"
           aria-expanded={isUserMenuOpen}
+          aria-label={user ? 'Mo menu tai khoan' : 'Mo menu lua chon'}
         >
           <User className="h-5 w-5 shrink-0 text-slate-500" />
-          <span className="hidden min-w-0 text-left sm:flex sm:flex-col sm:items-start sm:leading-tight">
-            <span className="text-sm font-medium text-slate-800">
-              {user ? user.fullName || user.username || 'User' : 'Tai khoan'}
+          {user ? (
+            <span className="hidden min-w-0 text-left sm:flex sm:flex-col sm:items-start sm:leading-tight">
+              <span className="text-sm font-medium text-slate-800">
+                {user.fullName || user.username || 'User'}
+              </span>
+              <span className="text-xs text-slate-500">
+                {[user.phone].filter(Boolean).join(' - ') || user.email}
+              </span>
             </span>
-            <span className="text-xs text-slate-500">
-              {user ? ([user.phone].filter(Boolean).join(' - ') || user.email) : 'Mo menu nhanh'}
-            </span>
-          </span>
+          ) : null}
           <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition ${isUserMenuOpen ? 'rotate-180' : ''}`} />
         </button>
 
@@ -702,10 +707,10 @@ function App() {
           <div className="absolute right-0 z-30 mt-2 w-[250px] overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white p-2 shadow-[0_24px_60px_rgba(15,23,42,0.18)]">
             <div className="rounded-2xl bg-slate-50 px-3 py-2.5">
               <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
-                {user ? 'Tai khoan cua ban' : 'Tuy chon nhanh'}
+                {user ? 'Tài khoản của bạn' : 'Tùy chọn nhanh'}
               </div>
               <div className="mt-1 text-sm font-bold text-slate-900">
-                {user ? user.fullName || user.username || 'Nguoi dung' : 'Chon thao tac ban muon'}
+                {user ? user.fullName || user.username || 'Người dùng' : 'Chọn thao tác bạn muốn'}
               </div>
             </div>
 
@@ -716,7 +721,7 @@ function App() {
                 className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-sky-50 hover:text-sky-700"
               >
                 <Search className="h-4 w-4 shrink-0" />
-                <span>Tra cuu ve</span>
+                <span>Tra cứu vé</span>
               </button>
 
               {user ? (
@@ -727,7 +732,7 @@ function App() {
                     className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-sky-50 hover:text-sky-700"
                   >
                     <Ticket className="h-4 w-4 shrink-0" />
-                    <span>Xem don da dat</span>
+                    <span>Xem đơn đã đặt</span>
                   </button>
 
                   <button
@@ -736,7 +741,7 @@ function App() {
                     className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-sky-50 hover:text-sky-700"
                   >
                     <CircleUserRound className="h-4 w-4 shrink-0" />
-                    <span>Profile ca nhan</span>
+                    <span>Profile cá nhân</span>
                   </button>
 
                   <button
@@ -745,7 +750,7 @@ function App() {
                     className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-rose-600 transition hover:bg-rose-50"
                   >
                     <LogOut className="h-4 w-4 shrink-0" />
-                    <span>Dang xuat</span>
+                    <span>Đăng xuất</span>
                   </button>
                 </>
               ) : (
@@ -755,7 +760,7 @@ function App() {
                   className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-orange-600 transition hover:bg-orange-50"
                 >
                   <LogIn className="h-4 w-4 shrink-0" />
-                  <span>Dang nhap</span>
+                  <span>Đăng nhập</span>
                 </button>
               )}
             </div>
@@ -1086,28 +1091,28 @@ function App() {
   )
   const myBookingsPage = user
     ? renderUtilityPage(
-      'Don da dat',
-      'Day la trang tong hop de nguoi dung xem lai cac don da dat. Hien tai minh da noi route va menu de ban co san diem dat cho phan danh sach don hang sau nay.',
+      'Đơn đã đặt',
+      'Đây là trang tổng hợp để người dùng xem lại các đơn đã đặt. Hiện tại mình đã nối route và menu để bạn có sẵn điểm đặt cho phần danh sách đơn hàng sau này.',
       {
-        label: 'Dat ve tiep',
+        label: 'Đặt vé tiếp',
         onClick: () => navigate('/'),
       },
       {
-        label: 'Profile ca nhan',
+        label: 'Profile cá nhân',
         onClick: () => navigate('/profile'),
       },
     )
     : <Navigate to="/" replace />
   const profilePage = user
     ? renderUtilityPage(
-      'Profile ca nhan',
-      `Thong tin co ban cua ban: ${user.fullName || user.username || 'Nguoi dung'}${user.email ? `, email ${user.email}` : ''}${user.phone ? `, so dien thoai ${user.phone}` : ''}. Ban co the dung route nay de gan form cap nhat thong tin sau.`,
+      'Profile cá nhân',
+      `Thông tin cơ bản của bạn: ${user.fullName || user.username || 'Người dùng'}${user.email ? `, email ${user.email}` : ''}${user.phone ? `, số điện thoại ${user.phone}` : ''}. Bạn có thể dùng route này để gắn form cập nhật thông tin sau.`,
       {
-        label: 'Ve trang chu',
+        label: 'Về trang chủ',
         onClick: () => navigate('/'),
       },
       {
-        label: 'Xem don da dat',
+        label: 'Xem đơn đã đặt',
         onClick: () => navigate('/my-bookings'),
       },
     )
