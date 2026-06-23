@@ -2,6 +2,11 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Clock3, Copy, Download, QrCode, X } from 'lucide-react'
 import { bookingsAPI } from '../api/config'
 import type { BookingResponse } from '../api/config'
+import {
+    buildVietQrUrl,
+    PAYMENT_ACCOUNT_NAME,
+    PAYMENT_ACCOUNT_NO,
+} from '../paymentQr'
 
 interface BookingSuccessModalProps {
     show: boolean
@@ -12,10 +17,6 @@ interface BookingSuccessModalProps {
 
 const PAYMENT_TIMEOUT_MINUTES = 15
 const PAYMENT_POLL_INTERVAL_MS = 5000
-const BANK_ID = '970432'
-const ACCOUNT_NO = '0352789648'
-const ACCOUNT_NAME = 'TRAN MAU NHAN'
-const QR_TEMPLATE = 'compact2'
 
 const formatCurrency = (value: number) =>
     new Intl.NumberFormat('vi-VN', {
@@ -30,11 +31,6 @@ const formatCountdown = (totalSeconds: number) => {
 
     return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
 }
-
-const buildVietQrUrl = (amount: number, transferContent: string) =>
-    `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-${QR_TEMPLATE}.png?amount=${amount}&addInfo=${encodeURIComponent(
-        transferContent
-    )}&accountName=${encodeURIComponent(ACCOUNT_NAME)}`
 
 const copyTextWithFallback = async (text: string) => {
     if (navigator.clipboard?.writeText) {
@@ -290,15 +286,15 @@ export default function BookingSuccessModal({
                                     <div className="mt-2 flex items-center justify-between gap-3">
                                         <div className="min-w-0">
                                             <div className="text-base font-black tracking-wide text-slate-950 sm:text-lg">
-                                                {ACCOUNT_NO}
+                                                {PAYMENT_ACCOUNT_NO}
                                             </div>
                                             <div className="mt-1 text-sm text-slate-500">
-                                                {ACCOUNT_NAME}
+                                                {PAYMENT_ACCOUNT_NAME}
                                             </div>
                                         </div>
                                         <button
                                             type="button"
-                                            onClick={() => copyField(ACCOUNT_NO, 'accountNo')}
+                                            onClick={() => copyField(PAYMENT_ACCOUNT_NO, 'accountNo')}
                                             className="rounded-full bg-slate-50 p-2 text-slate-500 ring-1 ring-slate-200 transition hover:bg-slate-100 hover:text-slate-900"
                                             aria-label="Sao chep so tai khoan"
                                         >
@@ -354,7 +350,7 @@ export default function BookingSuccessModal({
 
                         <button
                             type="button"
-                            onClick={() => copyField(ACCOUNT_NO, 'accountNo')}
+                            onClick={() => copyField(PAYMENT_ACCOUNT_NO, 'accountNo')}
                             className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50 sm:hidden"
                         >
                             <Copy className="h-4 w-4 shrink-0" strokeWidth={2} />

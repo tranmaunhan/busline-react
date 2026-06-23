@@ -9,7 +9,7 @@ import SeatSelectionPage from './component/SeatSelectionPage'
 import BookingConfirmModal from './component/BookingConfirmModal'
 import BookingSuccessModal from './component/BookingSuccessModal'
 import routePlaceholder from '../public/34p.jpg'
-import { locationsAPI, tripsAPI } from './api/config'
+import { bookingsAPI, locationsAPI, tripsAPI } from './api/config'
 import type { AuthUser, Location, TripSearchResult, TripSeatMapResponse, TripSeatMapSeat, BookingResponse } from './api/config'
 import { useToast } from './component/Toast'
 import './App.css'
@@ -81,6 +81,7 @@ const groupLocationsByType = (items: Location[]) => {
 }
 
 const BOOKING_FLOW_STORAGE_KEY = 'vexe.booking.flow'
+const LOOKUP_PAYMENT_POLL_INTERVAL_MS = 5000
 
 interface PersistedBookingFlow {
   from: string
@@ -214,6 +215,9 @@ function App() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [lookupBookingCode, setLookupBookingCode] = useState('')
   const [lookupPhone, setLookupPhone] = useState('')
+  const [lookupLoading, setLookupLoading] = useState(false)
+  const [lookupError, setLookupError] = useState<string | null>(null)
+  const [lookupResult, setLookupResult] = useState<BookingResponse | null>(null)
   const [user, setUser] = useState<AuthUser | null>(null)
   const [locations, setLocations] = useState<Location[]>([])
   const [loadingLocations, setLoadingLocations] = useState(true)
@@ -407,6 +411,21 @@ function App() {
     navigate(path)
   }
 
+  const refreshLookupBooking = useCallback(async (bookingCode: string, phone: string, suppressError = false) => {
+    try {
+      const data = await bookingsAPI.lookupBooking(bookingCode, phone)
+      setLookupResult(data)
+      setLookupError(null)
+      return data
+    } catch (error) {
+      console.error('Error refreshing booking lookup:', error)
+      if (!suppressError) {
+        throw error
+      }
+      return null
+    }
+  }, [])
+
   const handleBookingLookupSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
 
@@ -414,12 +433,90 @@ function App() {
     const phone = lookupPhone.trim()
 
     if (!bookingCode || !phone) {
+      setLookupError('Vui long nhap ma dat ve va so dien thoai de tra cuu!')
+      setLookupResult(null)
       showToast('Vui long nhap ma dat ve va so dien thoai de tra cuu!', 'warning')
       return
     }
 
-    showToast(`Da nhan thong tin tra cuu cho ma ${bookingCode}.`, 'info')
+    setLookupLoading(true)
+    setLookupError(null)
+
+    refreshLookupBooking(bookingCode, phone)
+      .then((data) => {
+        if (!data) return
+
+        setLookupResult(data)
+        setLookupError(null)
+        showToast(`Tra cuu thanh cong don ${data.bookingCode}!`, 'success')
+      })
+      .catch((error: any) => {
+        console.error('Error looking up booking:', error)
+
+        const message =
+          error?.response?.data?.message ||
+          error?.response?.data?.error ||
+          'Khong tim thay don dat ve. Vui long kiem tra lai BookingCode va so dien thoai.'
+
+        setLookupResult(null)
+        setLookupError(message)
+        showToast(message, 'error')
+      })
+      .finally(() => {
+        setLookupLoading(false)
+      })
   }
+
+  useEffect(() => {
+    const isLookupPage = location.pathname === '/booking-lookup'
+    const isPendingPayment = lookupResult?.status === 0 || lookupResult?.status === '0'
+    const phone = lookupPhone.trim()
+
+    if (!isLookupPage || !lookupResult?.bookingCode || !isPendingPayment || !phone) {
+      return
+    }
+
+    let isMounted = true
+    let isCheckingPayment = false
+    let isRefreshingLookup = false
+
+    const pollPaymentStatus = async () => {
+      if (!isMounted || isCheckingPayment || isRefreshingLookup) return
+
+      try {
+        isCheckingPayment = true
+        const paymentStatus = await bookingsAPI.getPaymentStatus(lookupResult.bookingCode)
+
+        if (!isMounted || !(paymentStatus.success && paymentStatus.status === 1)) {
+          return
+        }
+
+        isRefreshingLookup = true
+        const refreshedBooking = await refreshLookupBooking(lookupResult.bookingCode, phone, true)
+
+        if (!isMounted || !refreshedBooking) {
+          return
+        }
+
+        if (refreshedBooking.status === 1 || refreshedBooking.status === '1') {
+          showToast(`Don ${refreshedBooking.bookingCode} da duoc thanh toan. Da lam moi ket qua tra cuu!`, 'success')
+        }
+      } catch (error) {
+        console.error('Error polling payment status from lookup page:', error)
+      } finally {
+        isCheckingPayment = false
+        isRefreshingLookup = false
+      }
+    }
+
+    pollPaymentStatus()
+    const interval = window.setInterval(pollPaymentStatus, LOOKUP_PAYMENT_POLL_INTERVAL_MS)
+
+    return () => {
+      isMounted = false
+      window.clearInterval(interval)
+    }
+  }, [location.pathname, lookupPhone, lookupResult?.bookingCode, lookupResult?.status, refreshLookupBooking, showToast])
 
   useEffect(() => {
     const interval = window.setInterval(() => {
@@ -970,8 +1067,19 @@ function App() {
       bookingCode={lookupBookingCode}
       phone={lookupPhone}
       suggestedPhone={user?.phone}
-      onBookingCodeChange={(value) => setLookupBookingCode(value.toUpperCase())}
-      onPhoneChange={setLookupPhone}
+      isLoading={lookupLoading}
+      errorMessage={lookupError}
+      bookingResult={lookupResult}
+      onBookingCodeChange={(value) => {
+        setLookupBookingCode(value.toUpperCase())
+        setLookupError(null)
+        setLookupResult(null)
+      }}
+      onPhoneChange={(value) => {
+        setLookupPhone(value)
+        setLookupError(null)
+        setLookupResult(null)
+      }}
       onSubmit={handleBookingLookupSubmit}
       onBackHome={() => navigate('/')}
     />

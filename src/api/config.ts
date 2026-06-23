@@ -243,7 +243,7 @@ export interface BookingResponse {
     bookingId: number
     bookingCode: string
     bookingTime: string
-    status: string
+    status: number | string
     totalAmount: number
     tripId: number
     tripDepartureTime: string
@@ -265,6 +265,16 @@ export interface BookingPaymentStatusResponse {
 export const bookingsAPI = {
     createBooking: async (request: CreateBookingRequest): Promise<BookingResponse> => {
         const response = await api.post<BookingResponse>('/bookings', request)
+        return response.data
+    },
+
+    lookupBooking: async (bookingCode: string, phone: string): Promise<BookingResponse> => {
+        const response = await api.get<BookingResponse>('/bookings/lookup', {
+            params: {
+                bookingCode,
+                phone,
+            },
+        })
         return response.data
     },
 
