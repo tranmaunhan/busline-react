@@ -4,6 +4,7 @@ import type { AuthUser } from '../api/config'
 
 interface ProfilePageProps {
   header: ReactNode
+  footer?: ReactNode
   user: AuthUser
   onBackHome: () => void
   onViewBookings: () => void
@@ -15,6 +16,7 @@ const getDisplayName = (user: AuthUser) => user.fullName || user.username || 'Ch
 
 export default function ProfilePage({
   header,
+  footer,
   user,
   onBackHome,
   onViewBookings,
@@ -33,11 +35,10 @@ export default function ProfilePage({
                 Hồ sơ cá nhân
               </div>
 
-              <h1 className="mt-4 text-3xl font-black text-slate-950 sm:text-4xl">
-                Thông tin cá nhân
-              </h1>
+              <h1 className="mt-4 text-3xl font-black text-slate-950 sm:text-4xl">Thông tin cá nhân</h1>
               <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
-                Kiểm tra nhanh thông tin tài khoản của bạn. Giao diện giữ theo dạng form dọc và chỉ hiển thị tên, email, số điện thoại.
+                Kiểm tra nhanh thông tin tài khoản của bạn. Giao diện giữ theo dạng form dọc và chỉ hiển thị tên, email,
+                số điện thoại.
               </p>
 
               <div className="mt-8 rounded-[1.75rem] border border-sky-100 bg-[linear-gradient(180deg,_#ffffff_0%,_#f7fbff_100%)] p-5 shadow-sm sm:p-6">
@@ -125,6 +126,8 @@ export default function ProfilePage({
             </div>
           </section>
         </main>
+
+        {footer}
       </div>
     </div>
   )

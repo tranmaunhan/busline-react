@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { CalendarDays, ChevronDown, CircleUserRound, LogIn, LogOut, MapPin, Search, Ticket, User } from 'lucide-react'
+import { CalendarDays, ChevronDown, CircleUserRound, Headphones, LogIn, LogOut, Mail, MapPin, Phone, Search, Ticket, User } from 'lucide-react'
 import { Navigate, Route, Routes, useLocation, useMatch, useNavigate, useParams } from 'react-router-dom'
 import BookingLookupPage from './component/BookingLookupPage'
 import ChangePasswordModal from './component/ChangePasswordModal'
+import HomePage, { homeSlides } from './component/home'
 import LoginModal from './component/LoginModal'
 import MyBookingsPage from './component/MyBookingsPage'
 import ProfilePage from './component/ProfilePage'
@@ -11,11 +12,12 @@ import RegisterModal from './component/RegisterModal'
 import SeatSelectionPage from './component/SeatSelectionPage'
 import BookingConfirmModal from './component/BookingConfirmModal'
 import BookingSuccessModal from './component/BookingSuccessModal'
-import routePlaceholder from '../public/34p.jpg'
 import { authAPI, bookingsAPI, locationsAPI, tripsAPI } from './api/config'
 import type { AuthUser, Location, TripSearchResult, TripSeatMapResponse, TripSeatMapSeat, BookingResponse } from './api/config'
 import { useToast } from './component/Toast'
 import './App.css'
+
+const routePlaceholder = '/anh_000.webp'
 
 const formatDateDisplay = (iso: string) => {
   if (!iso) return ''
@@ -46,11 +48,7 @@ const formatCurrency = (value: number) =>
     maximumFractionDigits: 0,
   }).format(value)
 
-const slides = [
-  { id: 'slide-1', url: '#' },
-  { id: 'slide-2', url: '#' },
-  { id: 'slide-3', url: '#' },
-]
+const slides = homeSlides
 
 const slideTexts = [
   'Không ngừng hoàn thiện để thành công',
@@ -211,6 +209,7 @@ function App() {
   const [displayDate, setDisplayDate] = useState(() => formatDateDisplay(restoredBookingFlow?.date ?? defaultDateIso))
   const [dateError, setDateError] = useState<string | null>(null)
   const hiddenDateRef = useRef<HTMLInputElement | null>(null)
+  const resultsRef = useRef<HTMLElement | null>(null)
   const seatMapRequestRef = useRef(0)
   const todayIso = defaultDateIso
   const [showLoginModal, setShowLoginModal] = useState(false)
@@ -302,6 +301,23 @@ function App() {
   useEffect(() => {
     setIsUserMenuOpen(false)
   }, [location.pathname])
+
+  useEffect(() => {
+    if (location.pathname !== '/' || !location.hash) return
+
+    const targetId = decodeURIComponent(location.hash.slice(1))
+    const timer = window.setTimeout(() => {
+      if (targetId === 'top') {
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        return
+      }
+
+      const element = document.getElementById(targetId)
+      element?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 80)
+
+    return () => window.clearTimeout(timer)
+  }, [location.hash, location.pathname])
 
   useEffect(() => {
     if (user?.phone && !lookupPhone) {
@@ -471,7 +487,7 @@ function App() {
     const booking = myBookings.find((item) => item.bookingId === bookingId)
 
     if (!booking) {
-      showToast('Khong tim thay booking de huy.', 'error')
+      showToast('Không tìm thấy booking để hủy.', 'error')
       return
     }
 
@@ -494,7 +510,7 @@ function App() {
       const message =
         error?.response?.data?.message ||
         error?.response?.data?.error ||
-        'Khong the huy booking nay. Vui long thu lai.'
+        'Không thể hủy booking này. Vui lòng thử lại.'
 
       showToast(message, 'error')
     } finally {
@@ -506,7 +522,7 @@ function App() {
     const booking = myBookings.find((item) => item.bookingId === bookingId)
 
     if (!booking) {
-      showToast('Khong tim thay booking de thanh toan.', 'error')
+      showToast('Không tìm thấy booking để thanh toán.', 'error')
       return
     }
 
@@ -643,10 +659,20 @@ function App() {
 
   useEffect(() => {
     const interval = window.setInterval(() => {
-      setCurrentSlide((current) => (current + 1) % slides.length)
+      setCurrentSlide((current) => (current + 1) % homeSlides.length)
     }, 4000)
     return () => window.clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    if (!(hasSearchedTrips || loadingTrips) || location.pathname !== '/') return
+
+    const timer = window.setTimeout(() => {
+      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }, 120)
+
+    return () => window.clearTimeout(timer)
+  }, [hasSearchedTrips, loadingTrips, location.pathname])
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -792,7 +818,7 @@ function App() {
     const currentSource = paymentModalSource
     setPaymentModalSource(null)
     if (currentSource === 'my-bookings') {
-      showToast(`Thanh toÃ¡n thÃ nh cÃ´ng cho Ä‘Æ¡n ${bookingCode}!`, 'success')
+      showToast(`Thanh toán thành công cho đơn ${bookingCode}!`, 'success')
       void loadMyBookings()
       return
     }
@@ -958,7 +984,7 @@ function App() {
     </div>
   )
 
-  const searchPage = (
+  const searchPage = location.pathname === '/__legacy__' ? (
     <div className="relative min-h-screen overflow-x-hidden bg-[linear-gradient(180deg,_#f8fbff_0%,_#eff6ff_45%,_#f8fbff_100%)] text-slate-900">
       {/* Slide backgrounds — keep absolute */}
       {slides.map((slide, index) => (
@@ -1193,6 +1219,324 @@ function App() {
         )}
       </div>
     </div>
+  ) : null
+
+  const isHomePage = location.pathname === '/'
+
+  const handleNavigateHomeSection = (sectionId: string) => {
+    setIsUserMenuOpen(false)
+
+    if (!isHomePage) {
+      navigate({ pathname: '/', hash: `#${sectionId}` })
+      return
+    }
+
+    if (sectionId === 'top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      if (window.location.hash) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search)
+      }
+      return
+    }
+
+    const element = document.getElementById(sectionId)
+    element?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    window.history.replaceState(null, '', `#${sectionId}`)
+  }
+
+  const siteHeader = () => {
+    const navItems = [
+      { label: 'Trang chủ', onClick: () => handleNavigateHomeSection('top') },
+      { label: 'Lịch trình', onClick: () => handleNavigateHomeSection('lich-trinh') },
+      { label: 'Tuyến phổ biến', onClick: () => handleNavigateHomeSection('tuyen-pho-bien') },
+      { label: 'Liên hệ', onClick: () => handleNavigateHomeSection('lien-he') },
+    ]
+
+    return (
+      <header className="sticky top-0 z-40 border-b border-white/70 bg-white/82 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => handleNavigateHomeSection('top')}
+                className="rounded-full border border-sky-100 bg-white px-4 py-2 text-base font-black text-slate-900 shadow-sm transition hover:bg-slate-50 sm:text-xl"
+              >
+                Saigon<span className="text-orange-500">.ST</span>
+              </button>
+
+              <nav className="hidden items-center gap-1 lg:flex">
+                {navItems.map((item) => (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={item.onClick}
+                    className="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-sky-50 hover:text-sky-700"
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </nav>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <a
+                href="tel:19001010"
+                className="hidden items-center gap-2 rounded-full border border-orange-100 bg-orange-50 px-4 py-2 text-sm font-semibold text-orange-600 transition hover:bg-orange-100 md:inline-flex"
+              >
+                <Phone className="h-4 w-4" />
+                1900 1010
+              </a>
+
+              <button
+                type="button"
+                onClick={() => navigate('/booking-lookup')}
+                className="hidden rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 md:inline-flex"
+              >
+                Tra cứu vé
+              </button>
+
+              <div ref={userMenuRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsUserMenuOpen((current) => !current)}
+                  className={`flex items-center rounded-2xl border border-sky-100 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 ${
+                    user ? 'gap-2 px-2.5 py-1.5 sm:px-4 sm:py-2' : 'gap-1.5 px-3 py-2'
+                  }`}
+                  aria-haspopup="menu"
+                  aria-expanded={isUserMenuOpen}
+                  aria-label={user ? 'Mo menu tai khoan' : 'Mo menu lua chon'}
+                >
+                  <User className="h-5 w-5 shrink-0 text-slate-500" />
+                  {user ? (
+                    <span className="hidden min-w-0 text-left sm:flex sm:flex-col sm:items-start sm:leading-tight">
+                      <span className="text-sm font-medium text-slate-800">
+                        {user.fullName || user.username || 'User'}
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        {[user.phone].filter(Boolean).join(' - ') || user.email}
+                      </span>
+                    </span>
+                  ) : null}
+                  <ChevronDown className={`h-4 w-4 shrink-0 text-slate-400 transition ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {isUserMenuOpen ? (
+                  <div className="absolute right-0 z-30 mt-2 w-[260px] overflow-hidden rounded-[1.25rem] border border-slate-200 bg-white p-2 shadow-[0_24px_60px_rgba(15,23,42,0.18)]">
+                    <div className="rounded-2xl bg-slate-50 px-3 py-2.5">
+                      <div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">
+                        {user ? 'Tài khoản của bạn' : 'Tùy chọn nhanh'}
+                      </div>
+                      <div className="mt-1 text-sm font-bold text-slate-900">
+                        {user ? user.fullName || user.username || 'Người dùng' : 'Chọn thao tác bạn muốn'}
+                      </div>
+                    </div>
+
+                    <div className="mt-2 space-y-1">
+                      <button
+                        type="button"
+                        onClick={() => handleNavigateFromMenu('/booking-lookup')}
+                        className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-sky-50 hover:text-sky-700"
+                      >
+                        <Search className="h-4 w-4 shrink-0" />
+                        <span>Tra cứu vé</span>
+                      </button>
+
+                      {user ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleNavigateFromMenu('/my-bookings')}
+                            className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-sky-50 hover:text-sky-700"
+                          >
+                            <Ticket className="h-4 w-4 shrink-0" />
+                            <span>Xem đơn đã đặt</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleNavigateFromMenu('/profile')}
+                            className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-sky-50 hover:text-sky-700"
+                          >
+                            <CircleUserRound className="h-4 w-4 shrink-0" />
+                            <span>Profile cá nhân</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={handleLogout}
+                            className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-rose-600 transition hover:bg-rose-50"
+                          >
+                            <LogOut className="h-4 w-4 shrink-0" />
+                            <span>Đăng xuất</span>
+                          </button>
+                        </>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleOpenLoginFromMenu}
+                          className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-orange-600 transition hover:bg-orange-50"
+                        >
+                          <LogIn className="h-4 w-4 shrink-0" />
+                          <span>Đăng nhập</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1 lg:hidden">
+            {navItems.map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                onClick={item.onClick}
+                className="shrink-0 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </header>
+    )
+  }
+
+  const siteFooter = () => (
+    <footer className="border-t border-slate-800 bg-slate-950 text-white">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 lg:grid-cols-[1.1fr_0.9fr_0.9fr] lg:px-8">
+        <div>
+          <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-base font-black">
+            Saigon<span className="text-orange-400">.ST</span> Busline
+          </div>
+          <p className="mt-4 max-w-md text-sm leading-7 text-slate-300">
+            Giao diện trang chủ mới tập trung vào nhận diện doanh nghiệp, thông tin liên hệ rõ ràng và trải nghiệm đặt vé
+            gọn gàng hơn cho khách hàng.
+          </p>
+          <div className="mt-5 space-y-3 text-sm text-slate-300">
+            <div className="flex items-start gap-3">
+              <Phone className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" />
+              <span>Hotline đặt vé: 1900 1010</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <Headphones className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" />
+              <span>Zalo hỗ trợ: 0352789648 | Hỗ trợ 24/24</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <Mail className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" />
+              <span>Email: hotro@SaigonST.vn</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" />
+              <span>Địa chỉ: Bến xe Miền Tây, TP.HCM</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">Điều hướng nhanh</h3>
+          <div className="mt-4 flex flex-col gap-2">
+            <button type="button" onClick={() => handleNavigateHomeSection('top')} className="text-left text-sm text-slate-300 transition hover:text-white">
+              Trang chủ
+            </button>
+            <button type="button" onClick={() => handleNavigateHomeSection('lich-trinh')} className="text-left text-sm text-slate-300 transition hover:text-white">
+              Lịch trình
+            </button>
+            <button type="button" onClick={() => handleNavigateHomeSection('tuyen-pho-bien')} className="text-left text-sm text-slate-300 transition hover:text-white">
+              Tuyến phổ biến
+            </button>
+            <button type="button" onClick={() => navigate('/booking-lookup')} className="text-left text-sm text-slate-300 transition hover:text-white">
+              Tra cứu vé
+            </button>
+            <button type="button" onClick={() => handleNavigateHomeSection('lien-he')} className="text-left text-sm text-slate-300 transition hover:text-white">
+              Liên hệ
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-bold uppercase tracking-[0.18em] text-slate-400">Chính sách tạm thời</h3>
+          <div className="mt-4 grid gap-2">
+            {['Chính sách đặt vé', 'Điều khoản sử dụng', 'Chính sách hoàn hủy', 'Bảo mật thông tin'].map((item) => (
+              <div key={item} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-300">
+                {item}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-white/10 px-4 py-4 text-center text-xs text-slate-400 sm:px-6 lg:px-8">
+        Saigon.ST Busline - đã bổ sung header, footer và các khối nhận diện doanh nghiệp cho trang chủ.
+      </div>
+    </footer>
+  )
+
+  const landingPage = (
+    <HomePage
+      header={siteHeader()}
+      footer={siteFooter()}
+      currentSlide={currentSlide}
+      user={user}
+      from={from}
+      to={to}
+      date={date}
+      displayDate={displayDate}
+      dateError={dateError}
+      todayIso={todayIso}
+      loadingLocations={loadingLocations}
+      loadingTrips={loadingTrips}
+      hasSearchedTrips={hasSearchedTrips}
+      trips={trips}
+      originGroups={originGroups}
+      destinationGroups={destinationGroups}
+      locationTypeLabels={locationTypeLabels}
+      hiddenDateRef={hiddenDateRef}
+      resultsRef={resultsRef}
+      onSearch={handleSearch}
+      onFromChange={handleFromChange}
+      onToChange={handleToChange}
+      onDisplayDateChange={(value) => {
+        setDisplayDate(value)
+        setDateError(null)
+      }}
+      onDateBlur={() => {
+        const iso = parseDisplayToISO(displayDate)
+        if (!iso) {
+          setDateError('Định dạng ngày không hợp lệ (dd/mm/yyyy)')
+          return
+        }
+        if (iso < todayIso) {
+          setDateError('Không thể chọn ngày đã qua')
+          return
+        }
+        commitSearchDate(iso)
+      }}
+      onDatePickerOpen={() => {
+        if (hiddenDateRef.current) {
+          try {
+            // @ts-ignore
+            if (typeof hiddenDateRef.current.showPicker === 'function') hiddenDateRef.current.showPicker()
+            else hiddenDateRef.current.focus()
+            hiddenDateRef.current.click()
+          } catch {
+            hiddenDateRef.current.focus()
+          }
+        }
+      }}
+      onDateSelect={(value) => {
+        if (value) {
+          commitSearchDate(value)
+        }
+      }}
+      onSelectTrip={handleSelectTrip}
+      onNavigateHome={() => handleNavigateHomeSection('top')}
+      onNavigateSection={handleNavigateHomeSection}
+      onOpenLookup={() => navigate('/booking-lookup')}
+    />
   )
 
   const pickupLocationId = Number(from)
@@ -1205,7 +1549,8 @@ function App() {
   const dropoffLocationName = dropoffLoc ? `${dropoffLoc.name} - ${dropoffLoc.address}` : ''
   const bookingLookupPage = (
     <BookingLookupPage
-      header={renderHeader()}
+      header={siteHeader()}
+      footer={siteFooter()}
       bookingCode={lookupBookingCode}
       phone={lookupPhone}
       suggestedPhone={user?.phone}
@@ -1243,7 +1588,8 @@ function App() {
   const profilePage = user
     ? (
       <ProfilePage
-        header={renderHeader()}
+        header={siteHeader()}
+        footer={siteFooter()}
         user={user}
         onBackHome={() => navigate('/')}
         onViewBookings={() => navigate('/my-bookings')}
@@ -1256,7 +1602,8 @@ function App() {
   const resolvedMyBookingsPage = user
     ? (
       <MyBookingsPage
-        header={renderHeader()}
+        header={siteHeader()}
+        footer={siteFooter()}
         bookings={myBookings}
         loading={myBookingsLoading}
         error={myBookingsError}
@@ -1272,7 +1619,8 @@ function App() {
   const resolvedProfilePage = user
     ? (
       <ProfilePage
-        header={renderHeader()}
+        header={siteHeader()}
+        footer={siteFooter()}
         user={user}
         onBackHome={() => navigate('/')}
         onViewBookings={() => navigate('/my-bookings')}
@@ -1286,11 +1634,12 @@ function App() {
   void handlePendingProfileFeature
   void myBookingsPage
   void profilePage
+  void searchPage
 
   return (
     <>
       <Routes>
-        <Route path="/" element={searchPage} />
+        <Route path="/" element={landingPage} />
         <Route path="/booking-lookup" element={bookingLookupPage} />
         <Route path="/my-bookings" element={resolvedMyBookingsPage} />
         <Route path="/profile" element={resolvedProfilePage} />

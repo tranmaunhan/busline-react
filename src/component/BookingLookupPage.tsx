@@ -51,6 +51,7 @@ const isPendingPaymentStatus = (status: number | string) => status === 0 || stat
 
 interface BookingLookupPageProps {
   header: ReactNode
+  footer?: ReactNode
   bookingCode: string
   phone: string
   suggestedPhone?: string | null
@@ -65,6 +66,7 @@ interface BookingLookupPageProps {
 
 export default function BookingLookupPage({
   header,
+  footer,
   bookingCode,
   phone,
   suggestedPhone,
@@ -135,9 +137,7 @@ export default function BookingLookupPage({
                 <div className="inline-flex rounded-full border border-orange-100 bg-orange-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.15em] text-orange-600">
                   Tra cứu vé
                 </div>
-                <h1 className="mt-4 text-2xl font-black text-slate-950">
-                  Kiểm tra đơn hàng
-                </h1>
+                <h1 className="mt-4 text-2xl font-black text-slate-950">Kiểm tra đơn hàng</h1>
                 <p className="mt-2 text-sm leading-relaxed text-slate-500">
                   Nhập thông tin bên dưới để xem chi tiết vé của bạn và tiếp tục thanh toán nếu đơn hàng đang chờ xử lý.
                 </p>
@@ -220,9 +220,11 @@ export default function BookingLookupPage({
                           {bookingResult.bookingCode}
                         </div>
                       </div>
-                      <div className={`rounded-full px-4 py-1.5 text-sm font-bold ring-1 ${isPendingPaymentStatus(bookingResult.status)
-                        ? 'bg-amber-50 text-amber-700 ring-amber-200'
-                        : 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                      <div
+                        className={`rounded-full px-4 py-1.5 text-sm font-bold ring-1 ${
+                          isPendingPaymentStatus(bookingResult.status)
+                            ? 'bg-amber-50 text-amber-700 ring-amber-200'
+                            : 'bg-emerald-50 text-emerald-700 ring-emerald-200'
                         }`}
                       >
                         {getBookingStatusLabel(bookingResult.status)}
@@ -370,7 +372,8 @@ export default function BookingLookupPage({
                     </div>
                     <h3 className="text-base font-bold text-slate-700">Chưa có thông tin hiển thị</h3>
                     <p className="mt-2 max-w-xs text-sm text-slate-500">
-                      Vui lòng nhập <strong className="font-semibold text-slate-700">Mã đặt chỗ</strong> và <strong className="font-semibold text-slate-700">Số điện thoại</strong> để kiểm tra thông tin vé của bạn.
+                      Vui lòng nhập <strong className="font-semibold text-slate-700">Mã đặt chỗ</strong> và{' '}
+                      <strong className="font-semibold text-slate-700">Số điện thoại</strong> để kiểm tra thông tin vé của bạn.
                     </p>
                   </div>
                 ) : null}
@@ -378,6 +381,8 @@ export default function BookingLookupPage({
             </div>
           </section>
         </main>
+
+        {footer}
       </div>
     </div>
   )
