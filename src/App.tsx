@@ -224,6 +224,7 @@ function App() {
   const [myBookings, setMyBookings] = useState<BookingResponse[]>([])
   const [myBookingsLoading, setMyBookingsLoading] = useState(false)
   const [myBookingsError, setMyBookingsError] = useState<string | null>(null)
+  const [cancellingBookingId, setCancellingBookingId] = useState<number | null>(null)
   const [user, setUser] = useState<AuthUser | null>(null)
   const [locations, setLocations] = useState<Location[]>([])
   const [loadingLocations, setLoadingLocations] = useState(true)
@@ -386,6 +387,7 @@ function App() {
     setUser(null)
     setMyBookings([])
     setMyBookingsError(null)
+    setCancellingBookingId(null)
     localStorage.removeItem('authToken')
     localStorage.removeItem('authTokenType')
     localStorage.removeItem('authExpiresAt')
@@ -450,6 +452,7 @@ function App() {
       setMyBookings([])
       setMyBookingsError(null)
       setMyBookingsLoading(false)
+      setCancellingBookingId(null)
       return
     }
 
@@ -459,6 +462,41 @@ function App() {
 
     loadMyBookings()
   }, [loadMyBookings, location.pathname, user])
+
+  const handleCancelPendingBooking = useCallback(async (bookingId: number) => {
+    const booking = myBookings.find((item) => item.bookingId === bookingId)
+
+    if (!booking) {
+      showToast('Khong tim thay booking de huy.', 'error')
+      return
+    }
+
+    if (!(booking.status === 0 || booking.status === '0')) {
+      showToast('Chi booking cho thanh toan moi duoc huy.', 'warning')
+      return
+    }
+
+    if (!window.confirm(`Ban co chac chan muon huy don ${booking.bookingCode}?`)) {
+      return
+    }
+
+    try {
+      setCancellingBookingId(bookingId)
+      const response = await bookingsAPI.cancelPendingBooking(bookingId)
+      showToast(response.message || `Da huy don ${booking.bookingCode}.`, 'success')
+      await loadMyBookings()
+    } catch (error: any) {
+      console.error('Error cancelling pending booking:', error)
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.error ||
+        'Khong the huy booking nay. Vui long thu lai.'
+
+      showToast(message, 'error')
+    } finally {
+      setCancellingBookingId(null)
+    }
+  }, [loadMyBookings, myBookings, showToast])
 
   const handleChangePassword = useCallback(async (payload: {
     currentPassword: string
@@ -1186,8 +1224,10 @@ function App() {
         bookings={myBookings}
         loading={myBookingsLoading}
         error={myBookingsError}
+        cancellingBookingId={cancellingBookingId}
         onReload={loadMyBookings}
         onBackHome={() => navigate('/')}
+        onCancelBooking={handleCancelPendingBooking}
       />
     )
     : <Navigate to="/" replace />

@@ -289,6 +289,10 @@ export interface BookingPaymentStatusResponse {
     status: number | null
 }
 
+export interface MessageResponse {
+    message: string
+}
+
 // Bookings API endpoints
 export const bookingsAPI = {
     createBooking: async (request: CreateBookingRequest): Promise<BookingResponse> => {
@@ -315,6 +319,11 @@ export const bookingsAPI = {
         const response = await api.get<BookingPaymentStatusResponse>(
             `/bookings/${encodeURIComponent(bookingCode)}/status`
         )
+        return response.data
+    },
+
+    cancelPendingBooking: async (bookingId: number): Promise<MessageResponse> => {
+        const response = await api.delete<MessageResponse>(`/bookings/${bookingId}`)
         return response.data
     },
 }

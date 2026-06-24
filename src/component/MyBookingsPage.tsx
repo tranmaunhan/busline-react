@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { CalendarDays, CreditCard, Home, MapPin, RefreshCw, Ticket } from 'lucide-react'
+import { CalendarDays, CreditCard, Home, MapPin, RefreshCw, Ticket, XCircle } from 'lucide-react'
 import type { BookingResponse } from '../api/config'
 
 interface MyBookingsPageProps {
@@ -7,8 +7,10 @@ interface MyBookingsPageProps {
   bookings: BookingResponse[]
   loading: boolean
   error: string | null
+  cancellingBookingId: number | null
   onReload: () => void
   onBackHome: () => void
+  onCancelBooking: (bookingId: number) => void
 }
 
 const formatCurrency = (value: number) =>
@@ -37,6 +39,8 @@ const getStatusLabel = (status: number | string) => {
   return `Trạng thái ${status}`
 }
 
+const isPendingStatus = (status: number | string) => status === 0 || status === '0'
+
 const getStatusClassName = (status: number | string) => {
   if (status === 1 || status === '1') {
     return 'bg-emerald-50 text-emerald-700 ring-emerald-200'
@@ -54,8 +58,10 @@ export default function MyBookingsPage({
   bookings,
   loading,
   error,
+  cancellingBookingId,
   onReload,
   onBackHome,
+  onCancelBooking,
 }: MyBookingsPageProps) {
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,_#f8fbff_0%,_#eff6ff_45%,_#f8fbff_100%)] text-slate-900">
@@ -197,6 +203,19 @@ export default function MyBookingsPage({
                           </div>
                         </div>
                       </div>
+                      {isPendingStatus(booking.status) ? (
+                        <div className="mt-5 flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => onCancelBooking(booking.bookingId)}
+                            disabled={cancellingBookingId !== null}
+                            className="inline-flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-700 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <XCircle className="h-4 w-4 shrink-0" />
+                            {cancellingBookingId === booking.bookingId ? 'Äang há»§y...' : 'Há»§y vÃ©'}
+                          </button>
+                        </div>
+                      ) : null}
                     </article>
                   ))}
                 </div>
