@@ -238,6 +238,7 @@ function App() {
 
   const [showBookingConfirmModal, setShowBookingConfirmModal] = useState(false)
   const [showBookingSuccessModal, setShowBookingSuccessModal] = useState(false)
+  const [paymentModalSource, setPaymentModalSource] = useState<'checkout' | 'my-bookings' | null>(null)
   const [showChangePasswordModal, setShowChangePasswordModal] = useState(false)
   const [bookingConfirmData, setBookingConfirmData] = useState<{
     seats: TripSeatMapSeat[]
@@ -384,6 +385,9 @@ function App() {
   const handleLogout = () => {
     setIsUserMenuOpen(false)
     setShowChangePasswordModal(false)
+    setShowBookingSuccessModal(false)
+    setPaymentModalSource(null)
+    setBookingResult(null)
     setUser(null)
     setMyBookings([])
     setMyBookingsError(null)
@@ -497,6 +501,24 @@ function App() {
       setCancellingBookingId(null)
     }
   }, [loadMyBookings, myBookings, showToast])
+
+  const handlePayPendingBooking = useCallback((bookingId: number) => {
+    const booking = myBookings.find((item) => item.bookingId === bookingId)
+
+    if (!booking) {
+      showToast('Khong tim thay booking de thanh toan.', 'error')
+      return
+    }
+
+    if (!(booking.status === 0 || booking.status === '0')) {
+      showToast('Booking nay khong con o trang thai cho thanh toan.', 'warning')
+      return
+    }
+
+    setBookingResult(booking)
+    setPaymentModalSource('my-bookings')
+    setShowBookingSuccessModal(true)
+  }, [myBookings, showToast])
 
   const handleChangePassword = useCallback(async (payload: {
     currentPassword: string
@@ -746,12 +768,19 @@ function App() {
 
   const handleBookingSuccess = (booking: BookingResponse) => {
     setBookingResult(booking)
+    setPaymentModalSource('checkout')
     setShowBookingSuccessModal(true)
   }
 
   const handleCloseBookingSuccess = () => {
     setShowBookingSuccessModal(false)
     setBookingResult(null)
+    setPaymentModalSource(null)
+
+    if (paymentModalSource === 'my-bookings') {
+      return
+    }
+
     setBookingConfirmData(null)
     resetSearchResults()
     navigate('/')
@@ -760,11 +789,18 @@ function App() {
   const handlePaymentConfirmed = useCallback((bookingCode: string) => {
     setShowBookingSuccessModal(false)
     setBookingResult(null)
+    const currentSource = paymentModalSource
+    setPaymentModalSource(null)
+    if (currentSource === 'my-bookings') {
+      showToast(`Thanh toÃ¡n thÃ nh cÃ´ng cho Ä‘Æ¡n ${bookingCode}!`, 'success')
+      void loadMyBookings()
+      return
+    }
     setBookingConfirmData(null)
     resetSearchResults()
     showToast(`Thanh toán thành công cho đơn ${bookingCode}!`, 'success')
     navigate('/')
-  }, [navigate, showToast])
+  }, [loadMyBookings, navigate, paymentModalSource, showToast])
 
   const destinationGroups = groupLocationsByType(getDestinationLocations())
   const originGroups = groupLocationsByType(locations)
@@ -1227,6 +1263,7 @@ function App() {
         cancellingBookingId={cancellingBookingId}
         onReload={loadMyBookings}
         onBackHome={() => navigate('/')}
+        onPayBooking={handlePayPendingBooking}
         onCancelBooking={handleCancelPendingBooking}
       />
     )

@@ -10,6 +10,7 @@ interface MyBookingsPageProps {
   cancellingBookingId: number | null
   onReload: () => void
   onBackHome: () => void
+  onPayBooking: (bookingId: number) => void
   onCancelBooking: (bookingId: number) => void
 }
 
@@ -61,6 +62,7 @@ export default function MyBookingsPage({
   cancellingBookingId,
   onReload,
   onBackHome,
+  onPayBooking,
   onCancelBooking,
 }: MyBookingsPageProps) {
   return (
@@ -204,7 +206,16 @@ export default function MyBookingsPage({
                         </div>
                       </div>
                       {isPendingStatus(booking.status) ? (
-                        <div className="mt-5 flex justify-end">
+                        <div className="mt-5 flex flex-wrap justify-end gap-3">
+                          <button
+                            type="button"
+                            onClick={() => onPayBooking(booking.bookingId)}
+                            disabled={cancellingBookingId !== null}
+                            className="inline-flex items-center gap-2 rounded-2xl bg-slate-950 px-4 py-3 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <CreditCard className="h-4 w-4 shrink-0" />
+                            Thanh toán ngay
+                          </button>
                           <button
                             type="button"
                             onClick={() => onCancelBooking(booking.bookingId)}
