@@ -17,6 +17,12 @@ export interface LoginResponse {
     user: AuthUser
 }
 
+export interface GoogleAuthConfigResponse {
+    enabled: boolean
+    clientId: string | null
+    redirectUri: string | null
+}
+
 export interface ChangePasswordRequest {
     currentPassword: string
     newPassword: string
@@ -149,6 +155,7 @@ const normalizeTripSeatMap = (data: TripSeatMapApiResponse): TripSeatMapResponse
 // Base API configuration
 const api = axios.create({
     baseURL: 'https://api.aihost.io.vn/api',
+    // baseURL: 'http://localhost:8080/api',
     timeout: 10000,
     headers: {
         'Content-Type': 'application/json',
@@ -193,6 +200,16 @@ api.interceptors.response.use(
 export const authAPI = {
     login: async (credentials: { email: string; password: string }): Promise<LoginResponse> => {
         const response = await api.post('/auth/login', credentials)
+        return response.data
+    },
+
+    getGoogleConfig: async (): Promise<GoogleAuthConfigResponse> => {
+        const response = await api.get('/auth/google/config')
+        return response.data
+    },
+
+    loginWithGoogle: async (payload: { code: string }): Promise<LoginResponse> => {
+        const response = await api.post('/auth/google', payload)
         return response.data
     },
 
