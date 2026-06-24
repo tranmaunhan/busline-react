@@ -11,7 +11,7 @@ import {
   ShieldCheck,
   Sparkles,
 } from 'lucide-react'
-import heroBusImage from '../../assets/hero.png'
+
 
 export interface SupportHighlight {
   label: string

@@ -1,4 +1,4 @@
-import { ArrowRight, ChevronRight } from 'lucide-react'
+
 import { homeSlides } from './data'
 
 interface HomeHeroSectionProps {
