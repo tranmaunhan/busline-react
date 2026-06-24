@@ -156,7 +156,7 @@ const normalizeTripSeatMap = (data: TripSeatMapApiResponse): TripSeatMapResponse
 const api = axios.create({
     baseURL: 'https://api.aihost.io.vn/api',
     // baseURL: 'http://localhost:8080/api',
-    timeout: 10000,
+    timeout: 100000,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -312,11 +312,8 @@ export const bookingsAPI = {
     },
 
     getPaymentStatus: async (bookingCode: string): Promise<BookingPaymentStatusResponse> => {
-        const response = await axios.get<BookingPaymentStatusResponse>(
-            `https://payment.aihost.io.vn/bookings/${encodeURIComponent(bookingCode)}/status`,
-            {
-                timeout: 10000,
-            }
+        const response = await api.get<BookingPaymentStatusResponse>(
+            `/bookings/${encodeURIComponent(bookingCode)}/status`
         )
         return response.data
     },
