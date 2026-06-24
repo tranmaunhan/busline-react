@@ -13,9 +13,7 @@ export default function PopularRoutesSection({ onNavigateSection }: PopularRoute
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-600">Tuyến phổ biến</p>
           <h2 className="mt-2 text-3xl font-black text-slate-950">Những hành trình được quan tâm nhiều</h2>
         </div>
-        <div className="text-sm leading-7 text-slate-500">
-          Các tuyến được gắn tạm để hoàn thiện giao diện nhận diện doanh nghiệp.
-        </div>
+       
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">

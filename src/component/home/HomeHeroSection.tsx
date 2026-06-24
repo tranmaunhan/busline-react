@@ -9,8 +9,7 @@ interface HomeHeroSectionProps {
 
 export default function HomeHeroSection({
   currentSlide,
-  onNavigateSection,
-  onOpenLookup,
+
 }: HomeHeroSectionProps) {
   return (
     <section id="top" className="group relative w-full overflow-hidden">
@@ -34,32 +33,13 @@ export default function HomeHeroSection({
                 {homeSlides.map((slide, index) => (
                   <span
                     key={slide.id}
-                    className={`h-2.5 rounded-full transition-all ${
-                      currentSlide === index ? 'w-10 bg-white shadow-sm' : 'w-2.5 bg-white/60'
-                    }`}
+                    className={`h-2.5 rounded-full transition-all ${currentSlide === index ? 'w-10 bg-white shadow-sm' : 'w-2.5 bg-white/60'
+                      }`}
                   />
                 ))}
               </div>
 
-              <div className="flex translate-y-0 flex-wrap gap-3 opacity-100 transition duration-300 sm:translate-y-3 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 sm:group-focus-within:translate-y-0 sm:group-focus-within:opacity-100">
-                <button
-                  type="button"
-                  onClick={() => onNavigateSection('lich-trinh')}
-                  className="inline-flex items-center gap-2 rounded-2xl bg-orange-500 px-5 py-3 text-sm font-bold text-white shadow-[0_14px_30px_rgba(249,115,22,0.24)] transition hover:-translate-y-0.5 hover:bg-orange-600"
-                >
-                  Đặt vé ngay
-                  <ArrowRight className="h-4 w-4" />
-                </button>
 
-                <button
-                  type="button"
-                  onClick={onOpenLookup}
-                  className="inline-flex items-center gap-2 rounded-2xl border border-white/70 bg-white/20 px-5 py-3 text-sm font-bold text-white backdrop-blur-sm transition hover:bg-white/30"
-                >
-                  Tra cứu vé
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
             </div>
           </div>
         </div>

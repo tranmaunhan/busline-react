@@ -6,11 +6,9 @@ export default function GallerySection() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-600">Hình ảnh xe</p>
-          <h2 className="mt-2 text-3xl font-black text-slate-950">Không gian và hình ảnh thương hiệu</h2>
+          <h2 className="mt-2 text-3xl font-black text-slate-950">Xe đời mới và tiện nghi</h2>
         </div>
-        <p className="max-w-2xl text-sm leading-7 text-slate-500">
-          Khu vực này có thể thay bằng bộ ảnh chính thức của doanh nghiệp ở các phiên bản tiếp theo.
-        </p>
+
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">

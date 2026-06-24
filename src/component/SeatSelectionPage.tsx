@@ -18,6 +18,7 @@ interface SeatSelectionPageProps {
     seatMap: TripSeatMapResponse | null
     loading: boolean
     error: string | null
+    isAuthenticated?: boolean
     routeImageUrl?: string | null
     pickupLocationId: number
     dropoffLocationId: number
@@ -76,6 +77,7 @@ export default function SeatSelectionPage({
     seatMap,
     loading,
     error,
+    isAuthenticated = false,
     routeImageUrl,
     pickupLocationId,
     dropoffLocationId,
@@ -479,6 +481,12 @@ export default function SeatSelectionPage({
                     <aside className="rounded-[2rem] border border-sky-100 bg-white p-4 text-slate-900 shadow-[0_22px_70px_rgba(148,163,184,0.12)] sm:p-6">
                         <div className="text-xs uppercase tracking-[0.28em] text-slate-400">Thông tin đặt chỗ</div>
                         <h2 className="mt-3 text-2xl font-black">Tóm tắt lựa chọn</h2>
+
+                        {!isAuthenticated ? (
+                            <div className="mt-3 rounded-[1.25rem] border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-900">
+                                Bạn đang xem ghế với tư cách khách. Hệ thống sẽ yêu cầu đăng nhập khi bạn bấm giữ chỗ.
+                            </div>
+                        ) : null}
 
                         <div className="mt-6 space-y-3">
 

@@ -1,10 +1,9 @@
-import { CalendarCheck2, CalendarDays, MapPin, Search, Ticket } from 'lucide-react'
+import { CalendarCheck2, CalendarDays, MapPin, Search } from 'lucide-react'
 import { supportHighlights } from './data'
 import type { HomePageProps } from './types'
 
 type TripSearchSectionProps = Pick<
   HomePageProps,
-  | 'user'
   | 'from'
   | 'to'
   | 'date'
@@ -28,7 +27,6 @@ type TripSearchSectionProps = Pick<
 >
 
 export default function TripSearchSection({
-  user,
   from,
   to,
   date,
@@ -55,14 +53,8 @@ export default function TripSearchSection({
       <div className="rounded-[2rem] border border-sky-100 bg-white/95 p-4 shadow-[0_30px_80px_rgba(148,163,184,0.18)] backdrop-blur sm:p-6 lg:p-8">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-orange-100 bg-orange-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.16em] text-orange-600">
-              <Ticket className="h-4 w-4" />
-              Thanh tìm vé
-            </div>
             <h2 className="mt-3 text-2xl font-black text-slate-950 sm:text-3xl">Điểm đi - Điểm đến - Ngày đi</h2>
-            <p className="mt-2 max-w-2xl text-sm leading-7 text-slate-500">
-              Chọn hành trình phù hợp, sau đó tiếp tục đến phần chọn ghế và thanh toán.
-            </p>
+
           </div>
 
           <button
@@ -146,9 +138,8 @@ export default function TripSearchSection({
                   value={displayDate}
                   onChange={(event) => onDisplayDateChange(event.target.value)}
                   onBlur={onDateBlur}
-                  className={`w-full rounded-[1.35rem] border bg-sky-50/70 p-3.5 pr-12 text-sm font-medium text-slate-700 outline-none transition focus:bg-white focus:ring-4 focus:ring-orange-100 ${
-                    dateError ? 'border-red-300' : 'border-sky-100 focus:border-orange-300'
-                  }`}
+                  className={`w-full rounded-[1.35rem] border bg-sky-50/70 p-3.5 pr-12 text-sm font-medium text-slate-700 outline-none transition focus:bg-white focus:ring-4 focus:ring-orange-100 ${dateError ? 'border-red-300' : 'border-sky-100 focus:border-orange-300'
+                    }`}
                 />
 
                 <button
@@ -176,14 +167,10 @@ export default function TripSearchSection({
             <button
               type="submit"
               disabled={loadingTrips}
-              className={`inline-flex min-h-[54px] items-center justify-center gap-2 rounded-[1.35rem] px-5 py-3.5 text-sm font-bold transition ${
-                user
-                  ? 'bg-orange-500 text-white shadow-[0_14px_30px_rgba(249,115,22,0.28)] hover:-translate-y-0.5 hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-70'
-                  : 'bg-slate-900 text-white hover:bg-slate-800'
-              }`}
+              className="inline-flex min-h-[54px] items-center justify-center gap-2 rounded-[1.35rem] bg-orange-500 px-5 py-3.5 text-sm font-bold text-white shadow-[0_14px_30px_rgba(249,115,22,0.28)] transition hover:-translate-y-0.5 hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-70"
             >
               <Search className="h-4 w-4" />
-              {loadingTrips ? 'Đang tìm chuyến...' : user ? 'Tìm vé ngay' : 'Đăng nhập để tìm vé'}
+              {loadingTrips ? 'Đang tìm chuyến...' : 'Tìm chuyến'}
             </button>
           </div>
         </form>

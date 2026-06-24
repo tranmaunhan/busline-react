@@ -109,6 +109,7 @@ interface SeatSelectionRouteProps {
   seatMap: TripSeatMapResponse | null
   loading: boolean
   error: string | null
+  isAuthenticated: boolean
   routeImageUrl?: string | null
   pickupLocationId: number
   dropoffLocationId: number
@@ -137,6 +138,7 @@ function SeatSelectionRoute({
   seatMap,
   loading,
   error,
+  isAuthenticated,
   routeImageUrl,
   pickupLocationId,
   dropoffLocationId,
@@ -178,6 +180,7 @@ function SeatSelectionRoute({
       seatMap={isTripResolved ? seatMap : null}
       loading={routeLoading}
       error={isTripResolved ? error : null}
+      isAuthenticated={isAuthenticated}
       routeImageUrl={routeImageUrl}
       pickupLocationId={pickupLocationId}
       dropoffLocationId={dropoffLocationId}
@@ -699,6 +702,25 @@ function App() {
     searchTrips(originId, destinationId, date)
   }
 
+  const handleGuestFriendlySearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    if (!from || !to || !date) {
+      showToast('Vui lòng nhập đầy đủ thông tin!', 'warning')
+      return
+    }
+
+    const originId = Number(from)
+    const destinationId = Number(to)
+
+    if (!originId || !destinationId) {
+      showToast('Không tìm thấy thông tin điểm đi hoặc điểm đến!', 'error')
+      return
+    }
+
+    searchTrips(originId, destinationId, date)
+  }
+
   const searchTrips = async (originId: number, destinationId: number, searchDate: string) => {
     try {
       setLoadingTrips(true)
@@ -792,6 +814,26 @@ function App() {
     setShowBookingConfirmModal(true)
   }
 
+  const handleProceedWithAuthCheck = (
+    selectedSeats: TripSeatMapSeat[],
+    bookingDetails: {
+      useShuttleService: boolean
+      shuttleNote: string
+      pickupLocationId: number
+      dropoffLocationId: number
+      pickupLocationName: string
+      dropoffLocationName: string
+    },
+  ) => {
+    if (!user) {
+      showToast('Bạn có thể xem ghế trống tự do. Vui lòng đăng nhập khi muốn giữ chỗ.', 'info')
+      setShowLoginModal(true)
+      return
+    }
+
+    handleProceedWithSeats(selectedSeats, bookingDetails)
+  }
+
   const handleBookingSuccess = (booking: BookingResponse) => {
     setBookingResult(booking)
     setPaymentModalSource('checkout')
@@ -845,9 +887,8 @@ function App() {
         <button
           type="button"
           onClick={() => setIsUserMenuOpen((current) => !current)}
-          className={`flex items-center rounded-2xl border border-sky-100 bg-white/90 text-slate-700 shadow-[0_10px_30px_rgba(148,163,184,0.16)] backdrop-blur transition hover:bg-white ${
-            user ? 'gap-2 px-2.5 py-1.5 sm:px-4 sm:py-2' : 'gap-1.5 px-3 py-2'
-          }`}
+          className={`flex items-center rounded-2xl border border-sky-100 bg-white/90 text-slate-700 shadow-[0_10px_30px_rgba(148,163,184,0.16)] backdrop-blur transition hover:bg-white ${user ? 'gap-2 px-2.5 py-1.5 sm:px-4 sm:py-2' : 'gap-1.5 px-3 py-2'
+            }`}
           aria-haspopup="menu"
           aria-expanded={isUserMenuOpen}
           aria-label={user ? 'Mo menu tai khoan' : 'Mo menu lua chon'}
@@ -1238,6 +1279,20 @@ function App() {
       }
       return
     }
+    if (sectionId === 'lich-trinh') {
+      window.scrollTo({ top: 450, behavior: 'smooth' })
+      if (window.location.hash) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search)
+      }
+      return
+    }
+    if (sectionId === 'tuyen-pho-bien') {
+      window.scrollTo({ top: 950, behavior: 'smooth' })
+      if (window.location.hash) {
+        window.history.replaceState(null, '', window.location.pathname + window.location.search)
+      }
+      return
+    }
 
     const element = document.getElementById(sectionId)
     element?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -1300,9 +1355,8 @@ function App() {
                 <button
                   type="button"
                   onClick={() => setIsUserMenuOpen((current) => !current)}
-                  className={`flex items-center rounded-2xl border border-sky-100 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 ${
-                    user ? 'gap-2 px-2.5 py-1.5 sm:px-4 sm:py-2' : 'gap-1.5 px-3 py-2'
-                  }`}
+                  className={`flex items-center rounded-2xl border border-sky-100 bg-white text-slate-700 shadow-sm transition hover:bg-slate-50 ${user ? 'gap-2 px-2.5 py-1.5 sm:px-4 sm:py-2' : 'gap-1.5 px-3 py-2'
+                    }`}
                   aria-haspopup="menu"
                   aria-expanded={isUserMenuOpen}
                   aria-label={user ? 'Mo menu tai khoan' : 'Mo menu lua chon'}
@@ -1496,7 +1550,7 @@ function App() {
       locationTypeLabels={locationTypeLabels}
       hiddenDateRef={hiddenDateRef}
       resultsRef={resultsRef}
-      onSearch={handleSearch}
+      onSearch={handleGuestFriendlySearch}
       onFromChange={handleFromChange}
       onToChange={handleToChange}
       onDisplayDateChange={(value) => {
@@ -1653,6 +1707,7 @@ function App() {
               seatMap={seatMap}
               loading={loadingSeatMap}
               error={seatMapError}
+              isAuthenticated={Boolean(user)}
               routeImageUrl={routePlaceholder}
               pickupLocationId={pickupLocationId}
               dropoffLocationId={dropoffLocationId}
@@ -1661,7 +1716,7 @@ function App() {
               onResolveTrip={handleResolveSeatRouteTrip}
               onBack={handleBackFromSeatMap}
               onRetry={fetchSeatMap}
-              onProceed={handleProceedWithSeats}
+              onProceed={handleProceedWithAuthCheck}
             />
           }
         />

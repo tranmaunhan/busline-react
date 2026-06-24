@@ -72,7 +72,7 @@ export default function TripResultsSection({
                     onClick={() => onSelectTrip(trip)}
                     className="inline-flex min-h-[52px] items-center justify-center rounded-[1.25rem] bg-orange-500 px-5 py-3 text-sm font-bold text-white shadow-[0_14px_28px_rgba(249,115,22,0.28)] transition hover:-translate-y-0.5 hover:bg-orange-600"
                   >
-                    Chọn ghế
+                    Xem ghế trống
                   </button>
                 </div>
               </article>
