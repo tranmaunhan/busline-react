@@ -18,6 +18,14 @@ import { useToast } from './component/Toast'
 import './App.css'
 
 const routePlaceholder = '/anh_000.webp'
+const MIN_TRIP_SEARCH_LEAD_TIME_MINUTES = 45
+
+const toLocalDateISO = (date: Date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 const formatDateDisplay = (iso: string) => {
   if (!iso) return ''
@@ -38,7 +46,7 @@ const parseDisplayToISO = (s: string) => {
   const yyyy = Number(m[3])
   const d = new Date(yyyy, mm - 1, dd)
   if (d.getFullYear() !== yyyy || d.getMonth() !== mm - 1 || d.getDate() !== dd) return null
-  return d.toISOString().slice(0, 10)
+  return toLocalDateISO(d)
 }
 
 const formatCurrency = (value: number) =>
@@ -66,6 +74,31 @@ const locationTypeLabels: Record<string, string> = {
 const formatLocationLabel = (location: Location) => {
   const typeLabel = locationTypeLabels[location.type] || location.type
   return `${location.name} - ${location.address} (${typeLabel})`
+}
+
+const resolveTripSearchStartTime = (trip: TripSearchResult) => trip.pickupTime || trip.departureTime
+
+const isTripVisibleForSearch = (
+  trip: TripSearchResult,
+  searchDate: string,
+  now = new Date(),
+) => {
+  if (searchDate !== toLocalDateISO(now)) {
+    return true
+  }
+
+  const tripStartTimeValue = resolveTripSearchStartTime(trip)
+  if (!tripStartTimeValue) {
+    return true
+  }
+
+  const tripStartTime = new Date(tripStartTimeValue)
+  if (Number.isNaN(tripStartTime.getTime())) {
+    return true
+  }
+
+  const cutoffTime = now.getTime() + MIN_TRIP_SEARCH_LEAD_TIME_MINUTES * 60 * 1000
+  return tripStartTime.getTime() >= cutoffTime
 }
 
 const groupLocationsByType = (items: Location[]) => {
@@ -200,7 +233,7 @@ function App() {
   const restoredBookingFlow = restoredRef.current
   const persistedSelectedTrip = restoredBookingFlow?.selectedTrip ?? null
 
-  const defaultDateIso = new Date().toISOString().slice(0, 10)
+  const defaultDateIso = toLocalDateISO(new Date())
   const navigate = useNavigate()
   const location = useLocation()
   const seatRouteMatch = useMatch('/trips/:tripId/seats')
@@ -730,7 +763,17 @@ function App() {
         dropoffLocationId: destinationId,
         departureDate: searchDate,
       })
-      setTrips(data)
+      const visibleTrips = data.filter((trip) => isTripVisibleForSearch(trip, searchDate))
+      const hiddenTripCount = data.length - visibleTrips.length
+
+      setTrips(visibleTrips)
+
+      if (hiddenTripCount > 0) {
+        showToast(
+          `Da an ${hiddenTripCount} chuyen con duoi ${MIN_TRIP_SEARCH_LEAD_TIME_MINUTES} phut nua khoi hanh.`,
+          'info',
+        )
+      }
     } catch (error) {
       console.error('Error searching trips:', error)
       showToast('Có lỗi xảy ra khi tìm chuyến xe. Vui lòng thử lại!', 'error')
