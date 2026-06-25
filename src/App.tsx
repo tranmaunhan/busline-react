@@ -1466,10 +1466,10 @@ function App() {
           <div className="inline-flex rounded-full border border-white/10 bg-white/5 px-4 py-2 text-base font-black">
             Saigon<span className="text-orange-400">.ST</span> Busline
           </div>
-          <p className="mt-4 max-w-md text-sm leading-7 text-slate-300">
+          {/* <p className="mt-4 max-w-md text-sm leading-7 text-slate-300">
             Giao diện trang chủ mới tập trung vào nhận diện doanh nghiệp, thông tin liên hệ rõ ràng và trải nghiệm đặt vé
             gọn gàng hơn cho khách hàng.
-          </p>
+          </p> */}
           <div className="mt-5 space-y-3 text-sm text-slate-300">
             <div className="flex items-start gap-3">
               <Phone className="mt-0.5 h-4 w-4 shrink-0 text-orange-400" />
@@ -1524,7 +1524,7 @@ function App() {
       </div>
 
       <div className="border-t border-white/10 px-4 py-4 text-center text-xs text-slate-400 sm:px-6 lg:px-8">
-        Saigon.ST Busline - đã bổ sung header, footer và các khối nhận diện doanh nghiệp cho trang chủ.
+        Saigon.ST Busline
       </div>
     </footer>
   )
