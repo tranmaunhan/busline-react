@@ -45,10 +45,18 @@ export interface TripSearchParams {
 export interface TripSearchResult {
     tripId: number
     departureTime: string
+    pickupTime: string
+    dropoffTime: string
     routeOrigin: string
     routeDestination: string
+    pickupLocationId: number
+    pickupLocationName: string
+    dropoffLocationId: number
+    dropoffLocationName: string
     licensePlate: string
     vehicleType: string
+    availableSeats: number
+    segmentDurationMinutes: number
     price: number
 }
 
@@ -154,8 +162,8 @@ const normalizeTripSeatMap = (data: TripSeatMapApiResponse): TripSeatMapResponse
 
 // Base API configuration
 const api = axios.create({
-    baseURL: 'https://api.aihost.io.vn/api',
-    // baseURL: 'http://localhost:8080/api',
+    // baseURL: 'https://api.aihost.io.vn/api',
+    baseURL: 'http://localhost:8080/api',
     timeout: 100000,
     headers: {
         'Content-Type': 'application/json',

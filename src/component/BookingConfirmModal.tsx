@@ -35,6 +35,8 @@ const formatDateTime = (iso: string) => {
     })
 }
 
+const resolveSearchTripStartTime = (trip: TripSearchResult) => trip.pickupTime || trip.departureTime
+
 export default function BookingConfirmModal({
     show,
     onClose,
@@ -139,7 +141,7 @@ export default function BookingConfirmModal({
                                 </div>
                                 <div className="mt-0.5 flex items-center justify-end gap-1 text-sm font-bold text-slate-800">
                                     <Clock3 className="h-3.5 w-3.5 text-orange-500" />
-                                    {formatDateTime(trip.departureTime)}
+                                    {formatDateTime(resolveSearchTripStartTime(trip))}
                                 </div>
                             </div>
                         </div>

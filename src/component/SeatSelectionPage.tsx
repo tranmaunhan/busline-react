@@ -59,6 +59,8 @@ const formatDateTime = (iso: string) => {
     })
 }
 
+const resolveSearchTripStartTime = (trip: TripSearchResult) => trip.pickupTime || trip.departureTime
+
 const formatDuration = (minutes: number) => {
     if (!minutes) return '--'
 
@@ -234,7 +236,7 @@ export default function SeatSelectionPage({
                                 <div className="mt-5 flex flex-wrap gap-2 text-sm text-slate-700 sm:gap-3">
                                     <div className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2 ring-1 ring-sky-100 shadow-sm">
                                         <Clock3 className="h-4 w-4 text-orange-500" />
-                                        {formatDateTime(seatMap?.departureTime || trip.departureTime)}
+                                        {formatDateTime(seatMap?.departureTime || resolveSearchTripStartTime(trip))}
                                     </div>
 
                                     <div className="hidden items-center gap-2 rounded-2xl bg-white px-4 py-2 ring-1 ring-sky-100 shadow-sm sm:inline-flex">

@@ -1,4 +1,13 @@
-import { ArrowRight, BusFront } from 'lucide-react'
+import {
+  ArrowRight,
+  BusFront,
+  Clock,
+  Loader2,
+  MapPin,
+  SearchX,
+  Ticket,
+  Users,
+} from 'lucide-react'
 import type { HomePageProps } from './types'
 import { formatCurrency } from './data'
 
@@ -6,6 +15,171 @@ type TripResultsSectionProps = Pick<
   HomePageProps,
   'loadingTrips' | 'hasSearchedTrips' | 'trips' | 'resultsRef' | 'onSelectTrip'
 >
+
+type TripItem = HomePageProps['trips'][number]
+
+const formatTime = (iso?: string | null) => {
+  if (!iso) return '--:--'
+
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return '--:--'
+
+  return date.toLocaleTimeString('vi-VN', {
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
+
+const formatDuration = (minutes?: number | null) => {
+  if (!minutes || minutes <= 0) return 'Chưa rõ'
+
+  const hours = Math.floor(minutes / 60)
+  const remainingMinutes = minutes % 60
+
+  if (!hours) return `${remainingMinutes} phút`
+  if (!remainingMinutes) return `${hours} giờ`
+  return `${hours} giờ ${remainingMinutes} phút`
+}
+
+function TripInfoChip({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode
+  label: string
+  value: React.ReactNode
+}) {
+  return (
+    <div className="flex items-center gap-2 rounded-2xl bg-slate-50 px-3 py-2 text-sm">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white text-orange-500 shadow-sm">
+        {icon}
+      </span>
+      <div className="min-w-0">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+          {label}
+        </p>
+        <div className="truncate font-bold text-slate-700">{value}</div>
+      </div>
+    </div>
+  )
+}
+
+function TripCard({
+  trip,
+  onSelectTrip,
+}: {
+  trip: TripItem
+  onSelectTrip: (trip: TripItem) => void
+}) {
+  const pickupName = trip.pickupLocationName || trip.routeOrigin
+  const dropoffName = trip.dropoffLocationName || trip.routeDestination
+  const pickupTime = formatTime(trip.pickupTime || trip.departureTime)
+  const dropoffTime = formatTime(trip.dropoffTime || trip.departureTime)
+  const availableSeats = trip.availableSeats ?? 0
+  const canSelect = availableSeats > 0
+
+  return (
+    <article className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-orange-200 hover:shadow-xl">
+      <div className="grid gap-0 lg:grid-cols-[1fr_240px]">
+        <div className="p-4 sm:p-5">
+          <div className="flex flex-col gap-4 md:flex-row md:items-start">
+            <div className="flex shrink-0 items-center gap-3 rounded-3xl bg-orange-50 p-3 md:flex-col md:px-4">
+              <div className="text-center">
+                <p className="text-xs font-bold uppercase tracking-wider text-orange-500">
+                  Đi
+                </p>
+                <p className="text-2xl font-black text-orange-600">
+                  {pickupTime}
+                </p>
+              </div>
+
+              <div className="hidden h-8 w-px bg-orange-200 md:block" />
+
+              <div className="text-center">
+                <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                  Đến
+                </p>
+                <p className="text-xl font-black text-slate-800">
+                  {dropoffTime}
+                </p>
+              </div>
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700">
+                  <Users className="h-3.5 w-3.5" />
+                  Còn {availableSeats} ghế
+                </span>
+
+                <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700">
+                  <BusFront className="h-3.5 w-3.5" />
+                  {trip.vehicleType}
+                </span>
+              </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-2 text-xl font-black text-slate-950">
+                <span className="max-w-full truncate">{pickupName}</span>
+                <ArrowRight className="h-5 w-5 shrink-0 text-orange-400" />
+                <span className="max-w-full truncate">{dropoffName}</span>
+              </div>
+
+              <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+                <TripInfoChip
+                  icon={<Clock className="h-4 w-4" />}
+                  label="Thời gian"
+                  value={formatDuration(trip.segmentDurationMinutes)}
+                />
+
+                <TripInfoChip
+                  icon={<Ticket className="h-4 w-4" />}
+                  label="Giá vé"
+                  value={
+                    <span className="text-orange-600">
+                      {formatCurrency(trip.price)}
+                    </span>
+                  }
+                />
+
+                <TripInfoChip
+                  icon={<BusFront className="h-4 w-4" />}
+                  label="Biển số"
+                  value={trip.licensePlate || 'Đang cập nhật'}
+                />
+
+                <TripInfoChip
+                  icon={<MapPin className="h-4 w-4" />}
+                  label="Tuyến gốc"
+                  value={`${trip.routeOrigin} - ${trip.routeDestination}`}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col justify-between border-t border-slate-100 bg-slate-50 p-4 sm:p-5 lg:border-l lg:border-t-0">
+          <div>
+            <p className="text-sm font-semibold text-slate-500">Giá từ</p>
+            <p className="mt-1 text-2xl font-black text-orange-600">
+              {formatCurrency(trip.price)}
+            </p>
+            <p className="mt-1 text-xs text-slate-400">/ hành khách</p>
+          </div>
+
+          <button
+            type="button"
+            disabled={!canSelect}
+            onClick={() => onSelectTrip(trip)}
+            className="mt-4 inline-flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-orange-500 px-5 py-3 text-sm font-black text-white shadow-[0_14px_28px_rgba(249,115,22,0.28)] transition hover:-translate-y-0.5 hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none disabled:hover:translate-y-0"
+          >
+            {canSelect ? 'Xem ghế trống' : 'Hết ghế'}
+          </button>
+        </div>
+      </div>
+    </article>
+  )
+}
 
 export default function TripResultsSection({
   loadingTrips,
@@ -19,76 +193,83 @@ export default function TripResultsSection({
   }
 
   return (
-    <section ref={resultsRef} className="mx-auto w-full max-w-7xl px-4 pb-4 pt-6 sm:px-6 lg:px-8">
-      <div className="rounded-[2rem] border border-sky-100 bg-white p-4 shadow-[0_24px_70px_rgba(148,163,184,0.12)] sm:p-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-orange-600">Lịch trình tìm thấy</p>
-            <h3 className="mt-2 text-2xl font-black text-slate-950">Kết quả tìm kiếm chuyến xe</h3>
-          </div>
-          <div className="rounded-2xl bg-sky-50 px-4 py-2 text-sm font-semibold text-sky-800">
-            {loadingTrips ? 'Hệ thống đang tải lịch trình...' : `${trips.length} chuyến phù hợp`}
+    <section
+      ref={resultsRef}
+      className="mx-auto w-full max-w-7xl px-4 pb-6 pt-6 sm:px-6 lg:px-8"
+    >
+      <div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-[0_24px_70px_rgba(148,163,184,0.14)]">
+        <div className="border-b border-slate-100 bg-[linear-gradient(135deg,_#fff7ed_0%,_#ffffff_55%,_#f0f9ff_100%)] p-5 sm:p-6">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-orange-600">
+                Lịch trình tìm thấy
+              </p>
+
+              <h3 className="mt-2 text-2xl font-black tracking-tight text-slate-950 sm:text-3xl">
+                Kết quả tìm kiếm chuyến xe
+              </h3>
+
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                Chọn chuyến phù hợp với thời gian, điểm đón, điểm trả và số ghế
+                còn trống để tiếp tục đặt vé.
+              </p>
+            </div>
+
+            <div className="inline-flex w-fit items-center gap-2 rounded-2xl bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-slate-100">
+              {loadingTrips ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
+                  Đang tải lịch trình
+                </>
+              ) : (
+                <>
+                  <Ticket className="h-4 w-4 text-orange-500" />
+                  {trips.length} chuyến phù hợp
+                </>
+              )}
+            </div>
           </div>
         </div>
 
-        {loadingTrips ? (
-          <div className="py-12 text-center">
-            <div className="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-orange-100 border-b-orange-500" />
-            <p className="mt-4 text-sm text-slate-500">Đang tìm chuyến xe cho hành trình của bạn...</p>
-          </div>
-        ) : trips.length > 0 ? (
-          <div className="mt-6 grid gap-4">
-            {trips.map((trip) => (
-              <article
-                key={trip.tripId}
-                className="rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(135deg,_#ffffff_0%,_#f7fbff_100%)] p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg"
-              >
-                <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px] lg:items-center">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <div className="rounded-2xl bg-orange-50 px-4 py-3 text-xl font-black text-orange-600">
-                        {new Date(trip.departureTime).toLocaleTimeString('vi-VN', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </div>
-                      <div>
-                        <div className="flex flex-wrap items-center gap-2 text-lg font-black text-slate-950">
-                          <span>{trip.routeOrigin}</span>
-                          <ArrowRight className="h-4 w-4 text-orange-400" />
-                          <span>{trip.routeDestination}</span>
-                        </div>
-                        <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-500">
-                          <span>Biển số: {trip.licensePlate}</span>
-                          <span>Loại xe: {trip.vehicleType}</span>
-                          <span className="font-bold text-orange-600">{formatCurrency(trip.price)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => onSelectTrip(trip)}
-                    className="inline-flex min-h-[52px] items-center justify-center rounded-[1.25rem] bg-orange-500 px-5 py-3 text-sm font-bold text-white shadow-[0_14px_28px_rgba(249,115,22,0.28)] transition hover:-translate-y-0.5 hover:bg-orange-600"
-                  >
-                    Xem ghế trống
-                  </button>
-                </div>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <div className="mt-6 rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-12 text-center">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-3xl bg-orange-50 text-orange-500">
-              <BusFront className="h-7 w-7" />
+        <div className="p-4 sm:p-6">
+          {loadingTrips ? (
+            <div className="flex flex-col items-center justify-center rounded-[1.75rem] border border-dashed border-orange-200 bg-orange-50/50 px-6 py-14 text-center">
+              <Loader2 className="h-10 w-10 animate-spin text-orange-500" />
+              <h4 className="mt-4 text-lg font-black text-slate-900">
+                Đang tìm chuyến xe phù hợp
+              </h4>
+              <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
+                Hệ thống đang kiểm tra lịch trình, số ghế trống và giá vé cho
+                hành trình của bạn.
+              </p>
             </div>
-            <h4 className="mt-4 text-xl font-black text-slate-900">Chưa tìm thấy chuyến phù hợp</h4>
-            <p className="mx-auto mt-2 max-w-xl text-sm leading-7 text-slate-500">
-              Hãy thử đổi ngày đi, điểm đến hoặc kiểm tra lại lịch trình để xem thêm các tùy chọn khác.
-            </p>
-          </div>
-        )}
+          ) : trips.length > 0 ? (
+            <div className="grid gap-4">
+              {trips.map((trip) => (
+                <TripCard
+                  key={trip.tripId}
+                  trip={trip}
+                  onSelectTrip={onSelectTrip}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-3xl bg-white text-orange-500 shadow-sm">
+                <SearchX className="h-8 w-8" />
+              </div>
+
+              <h4 className="mt-5 text-xl font-black text-slate-900">
+                Chưa tìm thấy chuyến phù hợp
+              </h4>
+
+              <p className="mx-auto mt-2 max-w-xl text-sm leading-7 text-slate-500">
+                Hãy thử đổi ngày đi, điểm đón, điểm trả hoặc kiểm tra lại lịch
+                trình để xem thêm các lựa chọn khác.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </section>
   )
