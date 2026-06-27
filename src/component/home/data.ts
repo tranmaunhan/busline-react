@@ -20,14 +20,6 @@ export interface SupportHighlight {
   icon: LucideIcon
 }
 
-export interface PopularRoute {
-  from: string
-  to: string
-  duration: string
-  price: string
-  frequency: string
-}
-
 export interface ServiceReason {
   title: string
   description: string
@@ -69,13 +61,6 @@ export const supportHighlights: SupportHighlight[] = [
   { label: 'Zalo hỗ trợ', value: '0352789648', href: 'https://zalo.me/0352789648', icon: MessageCircleHeart },
   { label: 'Email', value: 'hotro@SaigonST.vn', href: 'mailto:hotro@SaigonST.vn', icon: Mail },
   { label: 'Hỗ trợ', value: '24/24', href: '#lien-he', icon: Headphones },
-]
-
-export const popularRoutes: PopularRoute[] = [
-  { from: 'TP.HCM', to: 'Cần Thơ', duration: '3 giờ 30 phút', price: 'Từ 165.000đ', frequency: '12 chuyến/ngày' },
-  { from: 'TP.HCM', to: 'Long Xuyên', duration: '4 giờ', price: 'Từ 180.000đ', frequency: '10 chuyến/ngày' },
-  { from: 'TP.HCM', to: 'Châu Đốc', duration: '5 giờ 30 phút', price: 'Từ 220.000đ', frequency: '8 chuyến/ngày' },
-  { from: 'TP.HCM', to: 'Rạch Giá', duration: '6 giờ', price: 'Từ 240.000đ', frequency: '6 chuyến/ngày' },
 ]
 
 export const serviceReasons: ServiceReason[] = [

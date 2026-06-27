@@ -117,32 +117,32 @@ export default function BookingConfirmModal({
     const paymentExpiryDate = parseDateTimeLocalValue(paymentExpiryInput)
 
     if (!trimmedContactName) {
-      setError('Vui long nhap ten lien he.')
+      setError('Vui lòng nhập tên liên hệ.')
       return
     }
 
     if (!trimmedContactPhone) {
-      setError('Vui long nhap so dien thoai lien he.')
+      setError('Vui lòng nhập số điện thoại liên hệ.')
       return
     }
 
     if (!trimmedContactEmail) {
-      setError('Vui long nhap email de nhan ve dien tu.')
+      setError('Vui lòng nhập email để nhận vé điện tử.')
       return
     }
 
     if (!isValidEmail(trimmedContactEmail)) {
-      setError('Email lien he khong hop le.')
+      setError('Email liên hệ không hợp lệ.')
       return
     }
 
     if (!paymentExpiryDate) {
-      setError('Vui long chon thoi gian giu cho hop le.')
+      setError('Vui lòng chọn thời gian giữ chỗ hợp lệ.')
       return
     }
 
     if (paymentExpiryDate.getTime() <= Date.now()) {
-      setError('Thoi gian giu cho phai lon hon thoi diem hien tai.')
+      setError('Thời gian giữ chỗ phải lớn hơn thời điểm hiện tại.')
       return
     }
 
@@ -150,7 +150,7 @@ export default function BookingConfirmModal({
       !Number.isNaN(tripStartDate.getTime()) &&
       paymentExpiryDate.getTime() > tripStartDate.getTime()
     ) {
-      setError('Thoi gian giu cho khong the sau gio khoi hanh cua chuyen xe.')
+      setError('Thời gian giữ chỗ không thể sau giờ khởi hành của chuyến xe.')
       return
     }
 
@@ -181,7 +181,7 @@ export default function BookingConfirmModal({
       } else if (err.message) {
         setError(err.message)
       } else {
-        setError('Dat ve that bai. Vui long thu lai.')
+        setError('Đặt vé thất bại. Vui lòng thử lại.')
       }
     } finally {
       setIsLoading(false)
@@ -203,10 +203,10 @@ export default function BookingConfirmModal({
         <div className="border-b border-sky-50 bg-[linear-gradient(135deg,_#eff6ff_0%,_#ffffff_100%)] px-4 py-4 sm:px-6 sm:py-5">
           <h3 className="flex items-center gap-2 text-lg font-bold text-slate-900 sm:text-xl">
             <Ticket className="h-5 w-5 text-orange-500" />
-            Xac nhan dat ve
+            Xác nhận đặt vé
           </h3>
           <p className="mt-1 hidden text-xs text-slate-500 sm:block">
-            Kiem tra thong tin chuyen di, lien he va thoi gian giu cho truoc khi tao booking.
+            Kiểm tra thông tin chuyến đi, liên hệ và thời gian giữ chỗ trước khi tạo booking.
           </p>
         </div>
 
@@ -232,7 +232,7 @@ export default function BookingConfirmModal({
                 <div className="flex items-center justify-between border-t border-sky-100/50 pt-3">
                   <div className="min-w-0">
                     <div className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                      Tuyen duong
+                      Tuyến đường
                     </div>
                     <div className="mt-0.5 text-sm font-bold text-slate-800 sm:text-base">
                       {trip.routeOrigin} - {trip.routeDestination}
@@ -241,7 +241,7 @@ export default function BookingConfirmModal({
 
                   <div className="text-right">
                     <div className="text-xs font-medium uppercase tracking-wider text-slate-400">
-                      Khoi hanh
+                      Khởi hành
                     </div>
                     <div className="mt-0.5 flex items-center justify-end gap-1 text-sm font-bold text-slate-800">
                       <Clock3 className="h-3.5 w-3.5 text-orange-500" />
@@ -252,14 +252,14 @@ export default function BookingConfirmModal({
               </div>
 
               <div className="space-y-3">
-                <h4 className="text-sm font-bold text-slate-800">Diem don va diem tra</h4>
+                <h4 className="text-sm font-bold text-slate-800">Điểm đón và điểm trả</h4>
                 <div className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4">
                   <div>
-                    <div className="text-xs font-medium uppercase text-slate-400">Diem don</div>
+                    <div className="text-xs font-medium uppercase text-slate-400">Điểm đón</div>
                     <div className="mt-1 text-sm font-semibold text-slate-800">{pickupLocationName}</div>
                   </div>
                   <div className="border-t border-slate-100 pt-3">
-                    <div className="text-xs font-medium uppercase text-slate-400">Diem tra</div>
+                    <div className="text-xs font-medium uppercase text-slate-400">Điểm trả</div>
                     <div className="mt-1 text-sm font-semibold text-slate-800">{dropoffLocationName}</div>
                   </div>
                 </div>
@@ -268,16 +268,16 @@ export default function BookingConfirmModal({
               <div className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4">
                 <div className="flex items-center gap-2">
                   <UserRound className="h-4 w-4 text-orange-500" />
-                  <h4 className="text-sm font-bold text-slate-800">Thong tin lien he</h4>
+                  <h4 className="text-sm font-bold text-slate-800">Thông tin liên hệ</h4>
                 </div>
 
                 {currentUser ? (
                   <p className="text-xs text-slate-500">
-                    Form da nap san tu tai khoan dang nhap. Ban co the chinh sua truoc khi dat ve.
+                    Form đã nạp sẵn từ tài khoản đăng nhập. Bạn có thể chỉnh sửa trước khi đặt vé.
                   </p>
                 ) : (
                   <p className="text-xs text-slate-500">
-                    Khach vang lai van co the dat ve. Vui long nhap thong tin lien he de tao booking.
+                    Khách vãng lai vẫn có thể đặt vé. Vui lòng nhập thông tin liên hệ để tạo booking.
                   </p>
                 )}
 
@@ -290,21 +290,21 @@ export default function BookingConfirmModal({
                       id="contact-name"
                       value={contactName}
                       onChange={(event) => setContactName(event.target.value)}
-                      placeholder="Nhap ho ten"
+                      placeholder="Nhập họ tên"
                       className="w-full rounded-[1.25rem] border border-sky-100 bg-sky-50/70 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-orange-300 focus:bg-white focus:ring-4 focus:ring-orange-100"
                     />
                   </div>
 
                   <div>
                     <label htmlFor="contact-phone" className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
-                      So dien thoai
+                      Số điện thoại
                     </label>
                     <input
                       id="contact-phone"
                       type="tel"
                       value={contactPhone}
                       onChange={(event) => setContactPhone(event.target.value)}
-                      placeholder="Nhap so dien thoai"
+                      placeholder="Nhập số điện thoại"
                       className="w-full rounded-[1.25rem] border border-sky-100 bg-sky-50/70 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-orange-300 focus:bg-white focus:ring-4 focus:ring-orange-100"
                     />
                   </div>
@@ -318,14 +318,14 @@ export default function BookingConfirmModal({
                       type="email"
                       value={contactEmail}
                       onChange={(event) => setContactEmail(event.target.value)}
-                      placeholder="Nhap email de nhan ve dien tu"
+                      placeholder="Nhập email để nhận vé điện tử"
                       className="w-full rounded-[1.25rem] border border-sky-100 bg-sky-50/70 px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-orange-300 focus:bg-white focus:ring-4 focus:ring-orange-100"
                     />
                   </div>
 
                   <div className="sm:col-span-2">
                     <label htmlFor="booking-note" className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
-                      Ghi chu booking
+                      Ghi chú booking
                     </label>
                     <textarea
                       id="booking-note"
@@ -340,9 +340,9 @@ export default function BookingConfirmModal({
               </div>
 
               <div className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4">
-                <h4 className="text-sm font-bold text-slate-800">Thoi gian giu cho</h4>
+                <h4 className="text-sm font-bold text-slate-800">Thời gian giữ chỗ</h4>
                 <p className="text-xs text-slate-500">
-                  Mac dinh la {DEFAULT_PAYMENT_HOLD_HOURS} gio ke tu luc dat. Ban co the dieu chinh, nhung khong vuot qua gio khoi hanh.
+                  Mặc định là {DEFAULT_PAYMENT_HOLD_HOURS} giờ kể từ lúc đặt. Bạn có thể điều chỉnh, nhưng không vượt quá giờ khởi hành.
                 </p>
                 <div>
                   <label htmlFor="payment-expiry" className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-slate-500">
@@ -424,7 +424,7 @@ export default function BookingConfirmModal({
                 Dang tao booking...
               </>
             ) : (
-              'Xac nhan dat ve'
+              'Xác nhận đặt vé'
             )}
           </button>
         </div>

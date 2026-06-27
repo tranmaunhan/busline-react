@@ -60,6 +60,15 @@ export interface TripSearchResult {
     price: number
 }
 
+export interface PopularRouteSummary {
+    routeId: number
+    originName: string
+    destinationName: string
+    estimatedDurationMinutes: number | null
+    startingPrice: number | null
+    dailyTripCount: number
+}
+
 export interface TripSeatMapSeat {
     tripSeatId: number
     seatCode: string
@@ -252,6 +261,23 @@ export const tripsAPI = {
         return response.data
     },
 
+    getPopularRoutes: async (limit = 4): Promise<PopularRouteSummary[]> => {
+        const response = await api.get('/trips/popular-routes', {
+            params: { limit },
+        })
+
+        return Array.isArray(response.data)
+            ? response.data.map((item) => ({
+                routeId: toNumberValue(item?.routeId),
+                originName: String(item?.originName ?? ''),
+                destinationName: String(item?.destinationName ?? ''),
+                estimatedDurationMinutes: toNullableNumber(item?.estimatedDurationMinutes),
+                startingPrice: toNullableNumber(item?.startingPrice),
+                dailyTripCount: toNumberValue(item?.dailyTripCount),
+            }))
+            : []
+    },
+
     getSeatMap: async (tripId: number): Promise<TripSeatMapResponse> => {
         const response = await api.get<TripSeatMapApiResponse>(`/trips/${tripId}/details`)
         console.log('Dữ liệu trả sơ đồ trả về', response)
@@ -367,6 +393,12 @@ const toNumberValue = (value: unknown, fallback = 0) => {
         if (Number.isFinite(parsed)) return parsed
     }
     return fallback
+}
+
+const toNullableNumber = (value: unknown) => {
+    if (value === null || value === undefined || value === '') return null
+    const parsed = toNumberValue(value, Number.NaN)
+    return Number.isFinite(parsed) ? parsed : null
 }
 
 const normalizeBookingTicket = (ticket: BookingTicketApiResponse): BookingTicketEntity => ({

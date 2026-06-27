@@ -37,7 +37,11 @@ export default function HomePage(props: HomePageProps) {
           />
           <TripSearchSection {...props} />
           <TripResultsSection {...props} />
-          <PopularRoutesSection onNavigateSection={onNavigateSection} />
+          <PopularRoutesSection
+            popularRoutes={props.popularRoutes}
+            loading={props.loadingPopularRoutes}
+            onNavigateSection={onNavigateSection}
+          />
           <ServiceReasonsSection />
           <BookingStepsSection />
           <GallerySection />

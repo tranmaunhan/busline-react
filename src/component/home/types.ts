@@ -1,5 +1,5 @@
 import type { FormEventHandler, ReactNode, RefObject } from 'react'
-import type { AuthUser, Location, TripSearchResult } from '../../api/config'
+import type { AuthUser, Location, PopularRouteSummary, TripSearchResult } from '../../api/config'
 
 export interface HomePageProps {
   header: ReactNode
@@ -14,8 +14,10 @@ export interface HomePageProps {
   todayIso: string
   loadingLocations: boolean
   loadingTrips: boolean
+  loadingPopularRoutes: boolean
   hasSearchedTrips: boolean
   trips: TripSearchResult[]
+  popularRoutes: PopularRouteSummary[]
   originGroups: [string, Location[]][]
   destinationGroups: [string, Location[]][]
   locationTypeLabels: Record<string, string>

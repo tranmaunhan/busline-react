@@ -13,12 +13,11 @@ import SeatSelectionPage from './component/SeatSelectionPage'
 import BookingConfirmModal from './component/BookingConfirmModal'
 import BookingSuccessModal from './component/BookingSuccessModal'
 import { authAPI, bookingsAPI, locationsAPI, tripsAPI } from './api/config'
-import type { AuthUser, Location, TripSearchResult, TripSeatMapResponse, TripSeatMapSeat, BookingResponse } from './api/config'
+import type { AuthUser, BookingResponse, Location, PopularRouteSummary, TripSearchResult, TripSeatMapResponse, TripSeatMapSeat } from './api/config'
 import { useToast } from './component/Toast'
 import './App.css'
 
 const routePlaceholder = '/anh_000.webp'
-const MIN_TRIP_SEARCH_LEAD_TIME_MINUTES = 45
 
 const toLocalDateISO = (date: Date) => {
   const year = date.getFullYear()
@@ -74,31 +73,6 @@ const locationTypeLabels: Record<string, string> = {
 const formatLocationLabel = (location: Location) => {
   const typeLabel = locationTypeLabels[location.type] || location.type
   return `${location.name} - ${location.address} (${typeLabel})`
-}
-
-const resolveTripSearchStartTime = (trip: TripSearchResult) => trip.pickupTime || trip.departureTime
-
-const isTripVisibleForSearch = (
-  trip: TripSearchResult,
-  searchDate: string,
-  now = new Date(),
-) => {
-  if (searchDate !== toLocalDateISO(now)) {
-    return true
-  }
-
-  const tripStartTimeValue = resolveTripSearchStartTime(trip)
-  if (!tripStartTimeValue) {
-    return true
-  }
-
-  const tripStartTime = new Date(tripStartTimeValue)
-  if (Number.isNaN(tripStartTime.getTime())) {
-    return true
-  }
-
-  const cutoffTime = now.getTime() + MIN_TRIP_SEARCH_LEAD_TIME_MINUTES * 60 * 1000
-  return tripStartTime.getTime() >= cutoffTime
 }
 
 const groupLocationsByType = (items: Location[]) => {
@@ -265,6 +239,8 @@ function App() {
   const [loadingLocations, setLoadingLocations] = useState(true)
   const [trips, setTrips] = useState<TripSearchResult[]>(() => restoredBookingFlow?.trips ?? [])
   const [loadingTrips, setLoadingTrips] = useState(false)
+  const [popularRoutes, setPopularRoutes] = useState<PopularRouteSummary[]>([])
+  const [loadingPopularRoutes, setLoadingPopularRoutes] = useState(false)
   const [hasSearchedTrips, setHasSearchedTrips] = useState(() => restoredBookingFlow?.hasSearchedTrips ?? false)
   const [selectedTrip, setSelectedTrip] = useState<TripSearchResult | null>(() => restoredBookingFlow?.selectedTrip ?? null)
   const [seatMap, setSeatMap] = useState<TripSeatMapResponse | null>(null)
@@ -378,6 +354,23 @@ function App() {
     }
 
     loadLocations()
+  }, [])
+
+  useEffect(() => {
+    const loadPopularRoutes = async () => {
+      try {
+        setLoadingPopularRoutes(true)
+        const data = await tripsAPI.getPopularRoutes()
+        setPopularRoutes(Array.isArray(data) ? data : [])
+      } catch (error) {
+        console.error('Error loading popular routes:', error)
+        setPopularRoutes([])
+      } finally {
+        setLoadingPopularRoutes(false)
+      }
+    }
+
+    loadPopularRoutes()
   }, [])
 
   const getDestinationLocations = () => {
@@ -529,18 +522,18 @@ function App() {
     }
 
     if (!(booking.status === 0 || booking.status === '0')) {
-      showToast('Chi booking cho thanh toan moi duoc huy.', 'warning')
+      showToast('Chỉ booking chờ thanh toán mới được hủy.', 'warning')
       return
     }
 
-    if (!window.confirm(`Ban co chac chan muon huy don ${booking.bookingCode}?`)) {
+    if (!window.confirm(`Bạn có chắc chắn muốn hủy đơn ${booking.bookingCode}?`)) {
       return
     }
 
     try {
       setCancellingBookingId(bookingId)
       const response = await bookingsAPI.cancelPendingBooking(bookingId)
-      showToast(response.message || `Da huy don ${booking.bookingCode}.`, 'success')
+      showToast(response.message || `Đã hủy đơn ${booking.bookingCode}.`, 'success')
       await loadMyBookings()
     } catch (error: any) {
       console.error('Error cancelling pending booking:', error)
@@ -564,7 +557,7 @@ function App() {
     }
 
     if (!(booking.status === 0 || booking.status === '0')) {
-      showToast('Booking nay khong con o trang thai cho thanh toan.', 'warning')
+      showToast('Booking này không còn ở trạng thái chờ thanh toán.', 'warning')
       return
     }
 
@@ -758,17 +751,7 @@ function App() {
         dropoffLocationId: destinationId,
         departureDate: searchDate,
       })
-      const visibleTrips = data.filter((trip) => isTripVisibleForSearch(trip, searchDate))
-      const hiddenTripCount = data.length - visibleTrips.length
-
-      setTrips(visibleTrips)
-
-      if (hiddenTripCount > 0) {
-        showToast(
-          `Da an ${hiddenTripCount} chuyen con duoi ${MIN_TRIP_SEARCH_LEAD_TIME_MINUTES} phut nua khoi hanh.`,
-          'info',
-        )
-      }
+      setTrips(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Error searching trips:', error)
       showToast('Có lỗi xảy ra khi tìm chuyến xe. Vui lòng thử lại!', 'error')
@@ -932,7 +915,7 @@ function App() {
             }`}
           aria-haspopup="menu"
           aria-expanded={isUserMenuOpen}
-          aria-label={user ? 'Mo menu tai khoan' : 'Mo menu lua chon'}
+          aria-label={user ? 'Mở menu tài khoản' : 'Mở menu lựa chọn'}
         >
           <User className="h-5 w-5 shrink-0 text-slate-500" />
           {user ? (
@@ -986,7 +969,7 @@ function App() {
                     className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-sky-50 hover:text-sky-700"
                   >
                     <CircleUserRound className="h-4 w-4 shrink-0" />
-                    <span>Profile cá nhân</span>
+                    <span>Hồ sơ cá nhân</span>
                   </button>
 
                   <button
@@ -1397,7 +1380,7 @@ function App() {
                     }`}
                   aria-haspopup="menu"
                   aria-expanded={isUserMenuOpen}
-                  aria-label={user ? 'Mo menu tai khoan' : 'Mo menu lua chon'}
+                  aria-label={user ? 'Mở menu tài khoản' : 'Mở menu lựa chọn'}
                 >
                   <User className="h-5 w-5 shrink-0 text-slate-500" />
                   {user ? (
@@ -1451,7 +1434,7 @@ function App() {
                             className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-sky-50 hover:text-sky-700"
                           >
                             <CircleUserRound className="h-4 w-4 shrink-0" />
-                            <span>Profile cá nhân</span>
+                            <span>Hồ sơ cá nhân</span>
                           </button>
 
                           <button
@@ -1581,8 +1564,10 @@ function App() {
       todayIso={todayIso}
       loadingLocations={loadingLocations}
       loadingTrips={loadingTrips}
+      loadingPopularRoutes={loadingPopularRoutes}
       hasSearchedTrips={hasSearchedTrips}
       trips={trips}
+      popularRoutes={popularRoutes}
       originGroups={originGroups}
       destinationGroups={destinationGroups}
       locationTypeLabels={locationTypeLabels}
@@ -1672,7 +1657,7 @@ function App() {
         onClick: () => navigate('/'),
       },
       {
-        label: 'Profile cá nhân',
+        label: 'Hồ sơ cá nhân',
         onClick: () => navigate('/profile'),
       },
     )

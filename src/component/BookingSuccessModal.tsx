@@ -268,7 +268,7 @@ export default function BookingSuccessModal({
             <section className="order-2 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 sm:p-5 lg:order-1">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-sm font-bold text-slate-900">Thong tin thanh toan</div>
+                  <div className="text-sm font-bold text-slate-900">Thông tin thanh toán</div>
                   <div className="mt-1 hidden text-xs text-slate-500 sm:block">
                     Ma dat ve: {booking.bookingCode}
                   </div>
@@ -303,14 +303,14 @@ export default function BookingSuccessModal({
                       type="button"
                       onClick={() => handleCopy(transferContent, 'transferContent')}
                       className="rounded-full bg-slate-50 p-2 text-slate-500 ring-1 ring-slate-200 transition hover:bg-slate-100 hover:text-slate-900"
-                      aria-label="Sao chep noi dung chuyen khoan"
+                      aria-label="Sao chép nội dung chuyển khoản"
                     >
                       <Copy className="h-4 w-4 shrink-0" strokeWidth={2} />
                     </button>
                   </div>
                   {copiedField === 'transferContent' ? (
                     <div className="mt-2 text-xs font-semibold text-emerald-600">
-                      Da sao chep noi dung chuyen khoan
+                      Đã sao chép nội dung chuyển khoản
                     </div>
                   ) : null}
                 </div>
@@ -332,33 +332,33 @@ export default function BookingSuccessModal({
                       type="button"
                       onClick={() => handleCopy(PAYMENT_ACCOUNT_NO, 'accountNo')}
                       className="rounded-full bg-slate-50 p-2 text-slate-500 ring-1 ring-slate-200 transition hover:bg-slate-100 hover:text-slate-900"
-                      aria-label="Sao chep so tai khoan"
+                      aria-label="Sao chép số tài khoản"
                     >
                       <Copy className="h-4 w-4 shrink-0" strokeWidth={2} />
                     </button>
                   </div>
                   {copiedField === 'accountNo' ? (
                     <div className="mt-2 text-xs font-semibold text-emerald-600">
-                      Da sao chep so tai khoan
+                      Đã sao chép số tài khoản
                     </div>
                   ) : null}
                 </div>
 
                 <div className="rounded-[1.25rem] bg-white p-4 text-sm text-slate-600 ring-1 ring-slate-200">
-                  Chuyen khoan dung so tien va dung noi dung de he thong doi soat tu dong.
+                  Chuyển khoản đúng số tiền và đúng nội dung để hệ thống đối soát tự động.
                 </div>
 
                 <div className="rounded-[1.25rem] bg-white p-4 text-sm text-slate-600 ring-1 ring-slate-200">
                   <div className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
-                    Thong tin lien he
+                    Thông tin liên hệ
                   </div>
                   <div className="mt-2 space-y-1">
                     <div>
-                      Nguoi lien he:{' '}
+                      Người liên hệ:{' '}
                       <span className="font-semibold text-slate-900">{booking.contactName || '--'}</span>
                     </div>
                     <div>
-                      So dien thoai:{' '}
+                      Số điện thoại:{' '}
                       <span className="font-semibold text-slate-900">{booking.contactPhone || '--'}</span>
                     </div>
                     <div>
@@ -398,7 +398,7 @@ export default function BookingSuccessModal({
               className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] bg-slate-950 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800"
             >
               <Copy className="h-4 w-4 shrink-0" strokeWidth={2} />
-              Sao chep noi dung CK
+              Sao chép nội dung CK
             </button>
 
             <button
