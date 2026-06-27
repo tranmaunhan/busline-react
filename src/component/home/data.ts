@@ -161,7 +161,7 @@ export const testimonials: Testimonial[] = [
 export const faqs: FaqItem[] = [
   {
     question: 'Tôi có cần đăng nhập trước khi đặt vé không?',
-    answer: 'Có. Hệ thống hiện tại yêu cầu đăng nhập trước khi tìm và đặt vé để quản lý booking tốt hơn.',
+    answer: 'Không bắt buộc. Khách vãng lai vẫn có thể tìm chuyến, chọn ghế và nhập thông tin liên hệ để tạo booking; nếu đã đăng nhập thì form sẽ được nạp sẵn nhanh hơn.',
   },
   {
     question: 'Tôi có thể tra cứu vé ở đâu?',

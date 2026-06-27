@@ -162,8 +162,8 @@ const normalizeTripSeatMap = (data: TripSeatMapApiResponse): TripSeatMapResponse
 
 // Base API configuration
 const api = axios.create({
-    baseURL: 'https://api.aihost.io.vn/api',
-    // baseURL: 'http://localhost:8080/api',
+    // baseURL: 'https://api.aihost.io.vn/api',
+    baseURL: 'http://localhost:8080/api',
     timeout: 100000,
     headers: {
         'Content-Type': 'application/json',
@@ -264,9 +264,14 @@ export interface CreateBookingRequest {
     tripSeatIds: number[]
     pickupLocationId: number
     dropoffLocationId: number
+    contactName: string
+    contactPhone: string
+    contactEmail: string
+    note?: string | null
+    paymentExpiry: string
 }
 
-export interface TicketResponse {
+export interface BookingTicketEntity {
     ticketId: number
     tripSeatId: number
     seatCode: string
@@ -275,20 +280,125 @@ export interface TicketResponse {
     price: number
 }
 
-export interface BookingResponse {
+export interface BookingEntity {
+    id: number
     bookingId: number
+    userId: number | null
     bookingCode: string
     bookingTime: string
     status: number | string
     totalAmount: number
+    contactName: string | null
+    contactPhone: string | null
+    contactEmail: string | null
+    note: string | null
+    paymentExpiry: string | null
     tripId: number
     tripDepartureTime: string
     routeOrigin: string
     routeDestination: string
     pickupLocationName: string
     dropoffLocationName: string
-    tickets: TicketResponse[]
+    tickets: BookingTicketEntity[]
 }
+
+export type TicketResponse = BookingTicketEntity
+export type BookingResponse = BookingEntity
+
+interface BookingTicketApiResponse {
+    ticketId?: number
+    id?: number
+    tripSeatId?: number
+    trip_seat_id?: number
+    seatCode?: string
+    seat_code?: string
+    deck?: string
+    seatType?: string
+    seat_type?: string
+    price?: number | string | null
+}
+
+interface BookingApiResponse {
+    id?: number
+    bookingId?: number
+    userId?: number | null
+    user_id?: number | null
+    bookingCode?: string
+    booking_code?: string
+    bookingTime?: string
+    booking_time?: string
+    status?: number | string
+    totalAmount?: number | string | null
+    total_amount?: number | string | null
+    contactName?: string | null
+    contact_name?: string | null
+    contactPhone?: string | null
+    contact_phone?: string | null
+    contactEmail?: string | null
+    contact_email?: string | null
+    note?: string | null
+    paymentExpiry?: string | null
+    payment_expiry?: string | null
+    tripId?: number
+    trip_id?: number
+    tripDepartureTime?: string
+    trip_departure_time?: string
+    routeOrigin?: string
+    route_origin?: string
+    routeDestination?: string
+    route_destination?: string
+    pickupLocationName?: string
+    pickup_location_name?: string
+    dropoffLocationName?: string
+    dropoff_location_name?: string
+    tickets?: BookingTicketApiResponse[] | null
+}
+
+const toNullableString = (value: unknown) => {
+    if (value === null || value === undefined) return null
+    const normalized = String(value).trim()
+    return normalized ? normalized : null
+}
+
+const toNumberValue = (value: unknown, fallback = 0) => {
+    if (typeof value === 'number' && Number.isFinite(value)) return value
+    if (typeof value === 'string' && value.trim()) {
+        const parsed = Number(value)
+        if (Number.isFinite(parsed)) return parsed
+    }
+    return fallback
+}
+
+const normalizeBookingTicket = (ticket: BookingTicketApiResponse): BookingTicketEntity => ({
+    ticketId: toNumberValue(ticket.ticketId ?? ticket.id),
+    tripSeatId: toNumberValue(ticket.tripSeatId ?? ticket.trip_seat_id),
+    seatCode: String(ticket.seatCode ?? ticket.seat_code ?? ''),
+    deck: String(ticket.deck ?? ''),
+    seatType: String(ticket.seatType ?? ticket.seat_type ?? ''),
+    price: toNumberValue(ticket.price),
+})
+
+const normalizeBooking = (booking: BookingApiResponse): BookingEntity => ({
+    id: toNumberValue(booking.id ?? booking.bookingId),
+    bookingId: toNumberValue(booking.id ?? booking.bookingId),
+    userId: booking.userId ?? booking.user_id ?? null,
+    bookingCode: String(booking.bookingCode ?? booking.booking_code ?? ''),
+    bookingTime: String(booking.bookingTime ?? booking.booking_time ?? ''),
+    status: booking.status ?? 0,
+    totalAmount: toNumberValue(booking.totalAmount ?? booking.total_amount),
+    contactName: toNullableString(booking.contactName ?? booking.contact_name),
+    contactPhone: toNullableString(booking.contactPhone ?? booking.contact_phone),
+    contactEmail: toNullableString(booking.contactEmail ?? booking.contact_email),
+    note: toNullableString(booking.note),
+    paymentExpiry: toNullableString(booking.paymentExpiry ?? booking.payment_expiry),
+    tripId: toNumberValue(booking.tripId ?? booking.trip_id),
+    tripDepartureTime: String(booking.tripDepartureTime ?? booking.trip_departure_time ?? ''),
+    routeOrigin: String(booking.routeOrigin ?? booking.route_origin ?? ''),
+    routeDestination: String(booking.routeDestination ?? booking.route_destination ?? ''),
+    pickupLocationName: String(booking.pickupLocationName ?? booking.pickup_location_name ?? ''),
+    dropoffLocationName: String(booking.dropoffLocationName ?? booking.dropoff_location_name ?? ''),
+    tickets: Array.isArray(booking.tickets) ? booking.tickets.map(normalizeBookingTicket) : [],
+})
 
 export interface BookingPaymentStatusResponse {
     success: boolean
@@ -304,23 +414,23 @@ export interface MessageResponse {
 // Bookings API endpoints
 export const bookingsAPI = {
     createBooking: async (request: CreateBookingRequest): Promise<BookingResponse> => {
-        const response = await api.post<BookingResponse>('/bookings', request)
-        return response.data
+        const response = await api.post<BookingApiResponse>('/bookings', request)
+        return normalizeBooking(response.data)
     },
 
     getMyBookings: async (): Promise<BookingResponse[]> => {
-        const response = await api.get<BookingResponse[]>('/bookings/me')
-        return response.data
+        const response = await api.get<BookingApiResponse[]>('/bookings/me')
+        return Array.isArray(response.data) ? response.data.map(normalizeBooking) : []
     },
 
     lookupBooking: async (bookingCode: string, phone: string): Promise<BookingResponse> => {
-        const response = await api.get<BookingResponse>('/bookings/lookup', {
+        const response = await api.get<BookingApiResponse>('/bookings/lookup', {
             params: {
                 bookingCode,
                 phone,
             },
         })
-        return response.data
+        return normalizeBooking(response.data)
     },
 
     getPaymentStatus: async (bookingCode: string): Promise<BookingPaymentStatusResponse> => {

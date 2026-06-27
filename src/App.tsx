@@ -281,6 +281,7 @@ function App() {
     dropoffLocationId: number
     pickupLocationName: string
     dropoffLocationName: string
+    note: string
   } | null>(null)
   const [bookingResult, setBookingResult] = useState<BookingResponse | null>(null)
   const userMenuRef = useRef<HTMLDivElement | null>(null)
@@ -520,7 +521,7 @@ function App() {
   }, [loadMyBookings, location.pathname, user])
 
   const handleCancelPendingBooking = useCallback(async (bookingId: number) => {
-    const booking = myBookings.find((item) => item.bookingId === bookingId)
+    const booking = myBookings.find((item) => item.id === bookingId)
 
     if (!booking) {
       showToast('Không tìm thấy booking để hủy.', 'error')
@@ -555,7 +556,7 @@ function App() {
   }, [loadMyBookings, myBookings, showToast])
 
   const handlePayPendingBooking = useCallback((bookingId: number) => {
-    const booking = myBookings.find((item) => item.bookingId === bookingId)
+    const booking = myBookings.find((item) => item.id === bookingId)
 
     if (!booking) {
       showToast('Không tìm thấy booking để thanh toán.', 'error')
@@ -713,12 +714,6 @@ function App() {
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (!user) {
-      showToast('Vui lòng đăng nhập trước khi tìm vé!', 'warning')
-      setShowLoginModal(true)
-      return
-    }
-
     if (!from || !to || !date) {
       showToast('Vui lòng nhập đầy đủ thông tin!', 'warning')
       return
@@ -847,12 +842,19 @@ function App() {
       dropoffLocationName: string
     },
   ) => {
+    const bookingNote = bookingDetails.useShuttleService
+      ? bookingDetails.shuttleNote
+        ? `Yeu cau trung chuyen: ${bookingDetails.shuttleNote}`
+        : 'Yeu cau trung chuyen'
+      : ''
+
     setBookingConfirmData({
       seats: selectedSeats,
       pickupLocationId: bookingDetails.pickupLocationId,
       dropoffLocationId: bookingDetails.dropoffLocationId,
       pickupLocationName: bookingDetails.pickupLocationName,
       dropoffLocationName: bookingDetails.dropoffLocationName,
+      note: bookingNote,
     })
     setShowBookingConfirmModal(true)
   }
@@ -868,16 +870,12 @@ function App() {
       dropoffLocationName: string
     },
   ) => {
-    if (!user) {
-      showToast('Bạn có thể xem ghế trống tự do. Vui lòng đăng nhập khi muốn giữ chỗ.', 'info')
-      setShowLoginModal(true)
-      return
-    }
-
     handleProceedWithSeats(selectedSeats, bookingDetails)
   }
 
   const handleBookingSuccess = (booking: BookingResponse) => {
+    setLookupBookingCode(booking.bookingCode)
+    setLookupPhone(booking.contactPhone || '')
     setBookingResult(booking)
     setPaymentModalSource('checkout')
     setShowBookingSuccessModal(true)
@@ -1223,12 +1221,9 @@ function App() {
                   id="btn"
                   type="submit"
                   disabled={loadingTrips}
-                  className={`w-full rounded-xl p-2.5 text-sm font-medium transition-all duration-200 sm:rounded-2xl sm:p-3 ${user
-                    ? 'bg-orange-500 text-white shadow-[0_14px_30px_rgba(249,115,22,0.28)] hover:-translate-y-0.5 hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60'
-                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
-                    }`}
+                  className="w-full rounded-xl bg-orange-500 p-2.5 text-sm font-medium text-white shadow-[0_14px_30px_rgba(249,115,22,0.28)] transition-all duration-200 hover:-translate-y-0.5 hover:bg-orange-600 disabled:cursor-not-allowed disabled:opacity-60 sm:rounded-2xl sm:p-3"
                 >
-                  {loadingTrips ? 'Đang tìm...' : user ? 'Tìm vé' : 'Đăng nhập để tìm vé'}
+                  {loadingTrips ? 'Đang tìm...' : 'Tìm vé'}
                 </button>
               </div>
             </div>
@@ -1789,6 +1784,8 @@ function App() {
           dropoffLocationId={bookingConfirmData.dropoffLocationId}
           pickupLocationName={bookingConfirmData.pickupLocationName}
           dropoffLocationName={bookingConfirmData.dropoffLocationName}
+          currentUser={user}
+          initialNote={bookingConfirmData.note}
           onBookingSuccess={handleBookingSuccess}
         />
       )}

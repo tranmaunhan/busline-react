@@ -261,6 +261,12 @@ export default function BookingLookupPage({
                               <span className="mb-0.5 block text-xs font-semibold text-slate-400">Khởi hành:</span>
                               <span className="font-medium text-slate-900">{formatDateTime(bookingResult.tripDepartureTime)}</span>
                             </div>
+                            {bookingResult.paymentExpiry ? (
+                              <div className="text-sm">
+                                <span className="mb-0.5 block text-xs font-semibold text-slate-400">Giữ chỗ đến:</span>
+                                <span className="font-medium text-slate-900">{formatDateTime(bookingResult.paymentExpiry)}</span>
+                              </div>
+                            ) : null}
                           </div>
                         </div>
 

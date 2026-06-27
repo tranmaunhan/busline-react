@@ -486,7 +486,7 @@ export default function SeatSelectionPage({
 
                         {!isAuthenticated ? (
                             <div className="mt-3 rounded-[1.25rem] border border-orange-200 bg-orange-50 px-4 py-3 text-sm text-orange-900">
-                                Bạn đang xem ghế với tư cách khách. Hệ thống sẽ yêu cầu đăng nhập khi bạn bấm giữ chỗ.
+                                Ban dang dat ve voi tu cach khach. O buoc tiep theo, he thong se mo form de ban nhap thong tin lien he va thoi gian giu cho.
                             </div>
                         ) : null}
 

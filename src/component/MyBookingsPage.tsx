@@ -365,6 +365,15 @@ export default function MyBookingsPage({
                                   {formatDateTime(booking.tripDepartureTime)}
                                 </span>
                               </p>
+
+                              {booking.paymentExpiry ? (
+                                <p className="mt-2 text-sm leading-6 text-slate-500">
+                                  Giữ chỗ đến
+                                  <span className="mt-0.5 block font-black text-slate-950">
+                                    {formatDateTime(booking.paymentExpiry)}
+                                  </span>
+                                </p>
+                              ) : null}
                             </div>
 
                             <div className="rounded-[1.25rem] bg-slate-50 p-4">
