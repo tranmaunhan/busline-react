@@ -29,6 +29,12 @@ export interface ChangePasswordRequest {
     confirmNewPassword: string
 }
 
+export interface UpdateProfileRequest {
+    fullName: string
+    email: string
+    phone: string
+}
+
 export interface Location {
     id: number
     name: string
@@ -242,6 +248,11 @@ export const authAPI = {
 
     changePassword: async (payload: ChangePasswordRequest) => {
         const response = await api.post('/auth/change-password', payload)
+        return response.data
+    },
+
+    updateProfile: async (payload: UpdateProfileRequest): Promise<LoginResponse> => {
+        const response = await api.put('/auth/profile', payload)
         return response.data
     },
 }

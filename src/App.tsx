@@ -13,7 +13,7 @@ import SeatSelectionPage from './component/SeatSelectionPage'
 import BookingConfirmModal from './component/BookingConfirmModal'
 import BookingSuccessModal from './component/BookingSuccessModal'
 import { authAPI, bookingsAPI, locationsAPI, tripsAPI } from './api/config'
-import type { AuthUser, BookingResponse, Location, PopularRouteSummary, TripSearchResult, TripSeatMapResponse, TripSeatMapSeat } from './api/config'
+import type { AuthUser, BookingResponse, Location, LoginResponse, PopularRouteSummary, TripSearchResult, TripSeatMapResponse, TripSeatMapSeat, UpdateProfileRequest } from './api/config'
 import { useToast } from './component/Toast'
 import './App.css'
 
@@ -107,6 +107,13 @@ const loadPersistedBookingFlow = (): PersistedBookingFlow | null => {
 const persistBookingFlow = (state: PersistedBookingFlow) => {
   if (typeof window === 'undefined') return
   window.sessionStorage.setItem(BOOKING_FLOW_STORAGE_KEY, JSON.stringify(state))
+}
+
+const persistAuthSession = (response: LoginResponse) => {
+  localStorage.setItem('authToken', response.accessToken)
+  localStorage.setItem('authTokenType', response.tokenType)
+  localStorage.setItem('authExpiresAt', String(Date.now() + response.expiresInMs))
+  localStorage.setItem('userData', JSON.stringify(response.user))
 }
 
 interface SeatSelectionRouteProps {
@@ -427,6 +434,13 @@ function App() {
     setUser(userData)
     showToast('Đăng nhập thành công!', 'success')
   }
+
+  const handleUpdateProfile = useCallback(async (payload: UpdateProfileRequest) => {
+    const response = await authAPI.updateProfile(payload)
+    persistAuthSession(response)
+    setUser(response.user)
+    showToast('Cập nhật thông tin cá nhân thành công.', 'success')
+  }, [showToast])
 
   const handleLogout = () => {
     setIsUserMenuOpen(false)
@@ -1670,7 +1684,7 @@ function App() {
         user={user}
         onBackHome={() => navigate('/')}
         onViewBookings={() => navigate('/my-bookings')}
-        onEditProfile={() => handlePendingProfileFeature('Chức năng chỉnh sửa thông tin')}
+        onUpdateProfile={handleUpdateProfile}
         onChangePassword={() => handlePendingProfileFeature('Chức năng thay đổi mật khẩu')}
       />
     )
@@ -1701,13 +1715,14 @@ function App() {
         user={user}
         onBackHome={() => navigate('/')}
         onViewBookings={() => navigate('/my-bookings')}
-        onEditProfile={() => showProfileFeatureToast('Chức năng chỉnh sửa thông tin')}
+        onUpdateProfile={handleUpdateProfile}
         onChangePassword={() => setShowChangePasswordModal(true)}
       />
     )
     : <Navigate to="/" replace />
 
   void renderUtilityPage
+  void showProfileFeatureToast
   void handlePendingProfileFeature
   void myBookingsPage
   void profilePage
