@@ -1408,14 +1408,14 @@ function App() {
                     </div>
 
                     <div className="mt-2 space-y-1">
-                      <button
+                      {/* <button
                         type="button"
                         onClick={() => handleNavigateFromMenu('/booking-lookup')}
                         className="flex w-full items-center gap-3 rounded-2xl px-3 py-2.5 text-left text-sm text-slate-700 transition hover:bg-sky-50 hover:text-sky-700"
                       >
                         <Search className="h-4 w-4 shrink-0" />
                         <span>Tra cứu vé</span>
-                      </button>
+                      </button> */}
 
                       {user ? (
                         <>

@@ -182,7 +182,7 @@ function TripCard({
                 <span className="max-w-full truncate">{dropoffName}</span>
               </div>
 
-              <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+              <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-2">
                 <TripInfoChip
                   icon={<Clock className="h-4 w-4" />}
                   label="Thời gian"
