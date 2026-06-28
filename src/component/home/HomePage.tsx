@@ -1,11 +1,11 @@
 import ContactSection from './ContactSection'
 import BookingStepsSection from './BookingStepsSection'
-import FaqSection from './FaqSection'
+
 import GallerySection from './GallerySection'
 import HomeHeroSection from './HomeHeroSection'
 import PopularRoutesSection from './PopularRoutesSection'
 import ServiceReasonsSection from './ServiceReasonsSection'
-import TestimonialsSection from './TestimonialsSection'
+
 import TripResultsSection from './TripResultsSection'
 import TripSearchSection from './TripSearchSection'
 import type { HomePageProps } from './types'
@@ -45,8 +45,6 @@ export default function HomePage(props: HomePageProps) {
           <ServiceReasonsSection />
           <BookingStepsSection />
           <GallerySection />
-          <TestimonialsSection />
-          <FaqSection />
           <ContactSection />
         </main>
 

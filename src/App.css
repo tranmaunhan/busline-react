@@ -17,7 +17,8 @@ body {
     radial-gradient(circle at top right, rgba(219, 234, 254, 0.62), transparent 24%),
     linear-gradient(180deg, #f8fbff 0%, #f3f8ff 48%, #eef5ff 100%);
   color: var(--text-primary);
-  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  /* font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif; */
+  font-family: "Inter", sans-serif;
 }
 
 /* ===== Slide Backgrounds ===== */
@@ -43,6 +44,7 @@ body {
     opacity: 0;
     transform: translateY(1rem);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -50,8 +52,13 @@ body {
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes scale-in {
@@ -59,6 +66,7 @@ body {
     opacity: 0;
     transform: scale(0.95);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -79,10 +87,25 @@ body {
 
 /* ===== Hero Heading Transition ===== */
 @keyframes heading-fade {
-  0% { opacity: 0; transform: translateY(8px); }
-  15% { opacity: 1; transform: translateY(0); }
-  85% { opacity: 1; transform: translateY(0); }
-  100% { opacity: 0; transform: translateY(-8px); }
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  15% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  85% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
 }
 
 /* ===== Responsive Utilities ===== */
@@ -101,6 +124,7 @@ body {
 
 /* ===== Mobile-specific adjustments ===== */
 @media (max-width: 639px) {
+
   /* Reduce aggressive border-radius on very small screens */
   .mobile-radius {
     border-radius: 1.25rem !important;
@@ -123,6 +147,7 @@ button:focus:not(:focus-visible) {
     opacity: 0;
     transform: translateX(1.5rem);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
