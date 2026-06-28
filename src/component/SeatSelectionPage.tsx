@@ -104,8 +104,6 @@ export default function SeatSelectionPage({
 }: SeatSelectionPageProps) {
     const [activeDeck, setActiveDeck] = useState('LOWER')
     const [selectedSeatIds, setSelectedSeatIds] = useState<number[]>([])
-    const [useShuttleService, setUseShuttleService] = useState(false)
-    const [shuttleNote, setShuttleNote] = useState('')
     const [showFullRoute, setShowFullRoute] = useState(false)
 
     useEffect(() => {
@@ -188,18 +186,10 @@ export default function SeatSelectionPage({
         })
     }
 
-    const handleSelectShuttleService = (nextValue: boolean) => {
-        setUseShuttleService(nextValue)
-
-        if (!nextValue) {
-            setShuttleNote('')
-        }
-    }
-
     const handleProceedSelection = () => {
         onProceed?.(selectedSeats, {
-            useShuttleService,
-            shuttleNote: shuttleNote.trim(),
+            useShuttleService: false,
+            shuttleNote: '',
             pickupLocationId,
             dropoffLocationId,
             pickupLocationName,
