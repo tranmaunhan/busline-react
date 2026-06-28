@@ -38,7 +38,7 @@ export default function PopularRoutesSection({
   onNavigateSection,
 }: PopularRoutesSectionProps) {
   return (
-    <section id="tuyen-pho-bien" className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <section id="tuyen-pho-bien" className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 py-6 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-600">Tuyến phổ biến</p>

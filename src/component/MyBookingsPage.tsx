@@ -190,7 +190,7 @@ export default function MyBookingsPage({
                 </button>
 
                 <div className="col-span-2 rounded-2xl border border-sky-100 bg-sky-50 px-4 py-3 text-sm leading-6 text-sky-800 sm:col-span-1 lg:col-span-1">
-                  Vé chờ thanh toán nên được xử lý sớm để tránh hết thời gian giữ ghế.
+                  Vé chờ thanh toán nên được xử lý sớm để tránh hết thời gian giữ ghế nhé.
                 </div>
               </div>
             </div>

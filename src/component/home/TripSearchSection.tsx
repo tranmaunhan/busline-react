@@ -48,22 +48,6 @@ export default function TripSearchSection({
   return (
     <section id="lich-trinh" className="relative z-20 w-full scroll-mt-24">
       <div className="mx-auto w-full max-w-6xl rounded-[2rem] border border-slate-200/80 bg-white p-4 shadow-[0_28px_72px_rgba(15,23,42,0.16),0_10px_24px_rgba(249,115,22,0.08)] sm:p-6 lg:p-8">
-        {/* <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <h2 className="mt-3 text-2xl font-black text-slate-950 sm:text-3xl">Điểm đi - Điểm đến - Ngày đi</h2>
-
-          </div>
-
-          <button
-            type="button"
-            onClick={onNavigateHome}
-            className="inline-flex items-center gap-2 self-start rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-white"
-          >
-            <CalendarCheck2 className="h-4 w-4 text-orange-500" />
-            Lịch trình hôm nay
-          </button>
-        </div> */}
-
         <form onSubmit={onSearch} className="mt-1">
           <div className="grid gap-4 lg:grid-cols-[1fr_1fr_0.8fr_0.9fr] lg:items-end">
             <div>
@@ -172,29 +156,7 @@ export default function TripSearchSection({
           </div>
         </form>
 
-        {/* <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {supportHighlights.map((item) => {
-            const Icon = item.icon
 
-            return (
-              <a
-                key={item.label}
-                href={item.href}
-                className="rounded-[1.25rem] border border-slate-200 bg-slate-50/80 p-4 transition hover:-translate-y-0.5 hover:bg-white"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-orange-500 ring-1 ring-slate-200">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <div className="text-xs uppercase tracking-[0.14em] text-slate-400">{item.label}</div>
-                    <div className="text-sm font-bold text-slate-900">{item.value}</div>
-                  </div>
-                </div>
-              </a>
-            )
-          })}
-        </div> */}
       </div>
     </section>
   )

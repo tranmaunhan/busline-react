@@ -2,7 +2,7 @@ import { Mail, MapPin, MessageCircleHeart, Phone } from 'lucide-react'
 
 export default function ContactSection() {
   return (
-    <section id="lien-he" className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <section id="lien-he" className="mx-auto w-full max-w-7xl scroll-mt-24 px-4 py-6 sm:px-6 lg:px-8">
       <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="rounded-[2rem] border border-slate-200 bg-slate-950 p-6 text-white shadow-sm sm:p-8">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-orange-300">Liên hệ và bản đồ</p>

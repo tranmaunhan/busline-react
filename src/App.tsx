@@ -318,6 +318,28 @@ function App() {
     }
   }, [])
 
+  const scrollToElement = useCallback((element: HTMLElement | null) => {
+    if (!element) return
+
+    const header = document.getElementById('site-header')
+    const headerOffset = header ? header.getBoundingClientRect().height + 16 : 96
+    const nextTop = element.getBoundingClientRect().top + window.scrollY - headerOffset
+
+    window.scrollTo({
+      top: Math.max(nextTop, 0),
+      behavior: 'smooth',
+    })
+  }, [])
+
+  const scrollToHomeSection = useCallback((sectionId: string) => {
+    if (sectionId === 'top') {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+
+    scrollToElement(document.getElementById(sectionId))
+  }, [scrollToElement])
+
   useEffect(() => {
     setIsUserMenuOpen(false)
   }, [location.pathname])
@@ -327,17 +349,11 @@ function App() {
 
     const targetId = decodeURIComponent(location.hash.slice(1))
     const timer = window.setTimeout(() => {
-      if (targetId === 'top') {
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-        return
-      }
-
-      const element = document.getElementById(targetId)
-      element?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      scrollToHomeSection(targetId)
     }, 80)
 
     return () => window.clearTimeout(timer)
-  }, [location.hash, location.pathname])
+  }, [location.hash, location.pathname, scrollToHomeSection])
 
   useEffect(() => {
     if (user?.phone && !lookupPhone) {
@@ -712,11 +728,11 @@ function App() {
     if (!(hasSearchedTrips || loadingTrips) || location.pathname !== '/') return
 
     const timer = window.setTimeout(() => {
-      resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      scrollToElement(resultsRef.current)
     }, 120)
 
     return () => window.clearTimeout(timer)
-  }, [hasSearchedTrips, loadingTrips, location.pathname])
+  }, [hasSearchedTrips, loadingTrips, location.pathname, scrollToElement])
 
   function handleSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -1307,31 +1323,20 @@ function App() {
       return
     }
 
+    scrollToHomeSection(sectionId)
+
     if (sectionId === 'top') {
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-      if (window.location.hash) {
-        window.history.replaceState(null, '', window.location.pathname + window.location.search)
-      }
-      return
-    }
-    if (sectionId === 'lich-trinh') {
-      window.scrollTo({ top: 450, behavior: 'smooth' })
-      if (window.location.hash) {
-        window.history.replaceState(null, '', window.location.pathname + window.location.search)
-      }
-      return
-    }
-    if (sectionId === 'tuyen-pho-bien') {
-      window.scrollTo({ top: 950, behavior: 'smooth' })
       if (window.location.hash) {
         window.history.replaceState(null, '', window.location.pathname + window.location.search)
       }
       return
     }
 
-    const element = document.getElementById(sectionId)
-    element?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    window.history.replaceState(null, '', `#${sectionId}`)
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}${window.location.search}#${sectionId}`,
+    )
   }
 
   const siteHeader = () => {
@@ -1343,7 +1348,7 @@ function App() {
     ]
 
     return (
-      <header className="sticky top-0 z-40 border-b border-white/70 bg-white/82 backdrop-blur-xl">
+        <header id="site-header" className="sticky top-0 z-40 border-b border-white/70 bg-white/82 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
