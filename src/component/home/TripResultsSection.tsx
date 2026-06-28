@@ -189,25 +189,10 @@ function TripCard({
                   value={formatDuration(trip.segmentDurationMinutes)}
                 />
 
-                <TripInfoChip
-                  icon={<Ticket className="h-4 w-4" />}
-                  label="Giá vé"
-                  value={
-                    <span className="text-orange-600">
-                      {formatCurrency(trip.price)}
-                    </span>
-                  }
-                />
-
-                <TripInfoChip
-                  icon={<BusFront className="h-4 w-4" />}
-                  label="Biển số"
-                  value={trip.licensePlate || 'Đang cập nhật'}
-                />
 
                 <TripInfoChip
                   icon={<MapPin className="h-4 w-4" />}
-                  label="Tuyến gốc"
+                  label="Thuộc lộ trình"
                   value={`${trip.routeOrigin} - ${trip.routeDestination}`}
                 />
               </div>
@@ -271,7 +256,7 @@ export default function TripResultsSection({
 
   const activeSlot =
     slotItems.find((slot) => slot.key === selectedSlotKey) || slotItems[0] || null
-  const hasExpiredTripsHidden = trips.length > 0 && visibleTrips.length < trips.length
+
 
   if (!hasSearchedTrips && !loadingTrips) {
     return null
@@ -294,9 +279,7 @@ export default function TripResultsSection({
                 Kết quả tìm kiếm chuyến xe
               </h3>
 
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                Chọn khung giờ phù hợp để xem các chuyến còn nhận khách và tiếp tục đặt vé.
-              </p>
+
             </div>
 
             <div className="inline-flex w-fit items-center gap-2 rounded-2xl bg-white px-4 py-2 text-sm font-bold text-slate-700 shadow-sm ring-1 ring-slate-100">
@@ -337,11 +320,10 @@ export default function TripResultsSection({
                       key={slot.key}
                       type="button"
                       onClick={() => setSelectedSlotKey(slot.key)}
-                      className={`shrink-0 rounded-2xl border px-4 py-3 text-left transition ${
-                        isActive
-                          ? 'border-orange-500 bg-orange-500 text-white shadow-[0_14px_28px_rgba(249,115,22,0.2)]'
-                          : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-orange-200 hover:bg-orange-50'
-                      }`}
+                      className={`shrink-0 rounded-2xl border px-4 py-3 text-left transition ${isActive
+                        ? 'border-orange-500 bg-orange-500 text-white shadow-[0_14px_28px_rgba(249,115,22,0.2)]'
+                        : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-orange-200 hover:bg-orange-50'
+                        }`}
                     >
                       <div className="text-sm font-black">{slot.label}</div>
                       <div className={`mt-1 text-xs font-semibold ${isActive ? 'text-orange-100' : 'text-slate-500'}`}>
@@ -352,11 +334,7 @@ export default function TripResultsSection({
                 })}
               </div>
 
-              {hasExpiredTripsHidden ? (
-                <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-                  Một số chuyến đã qua giờ chạy nên được ẩn khỏi kết quả hiện tại.
-                </div>
-              ) : null}
+
 
               <div className="grid gap-4">
                 {activeSlot.trips.map((trip) => (
