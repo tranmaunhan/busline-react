@@ -1,5 +1,4 @@
-import { CalendarCheck2, CalendarDays, MapPin, Search } from 'lucide-react'
-import { supportHighlights } from './data'
+import { CalendarDays, MapPin, Search } from 'lucide-react'
 import type { HomePageProps } from './types'
 
 type TripSearchSectionProps = Pick<
@@ -23,7 +22,6 @@ type TripSearchSectionProps = Pick<
   | 'onDateBlur'
   | 'onDatePickerOpen'
   | 'onDateSelect'
-  | 'onNavigateHome'
 >
 
 export default function TripSearchSection({
@@ -46,12 +44,11 @@ export default function TripSearchSection({
   onDateBlur,
   onDatePickerOpen,
   onDateSelect,
-  onNavigateHome,
 }: TripSearchSectionProps) {
   return (
-    <section id="lich-trinh" className="relative z-20 mx-auto -mt-8 w-full max-w-6xl px-4 sm:-mt-12 sm:px-6 lg:px-8">
-      <div className="rounded-[2rem] border border-sky-100 bg-white/95 p-4 shadow-[0_30px_80px_rgba(148,163,184,0.18)] backdrop-blur sm:p-6 lg:p-8">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+    <section id="lich-trinh" className="relative z-20 w-full scroll-mt-24">
+      <div className="mx-auto w-full max-w-6xl rounded-[2rem] border border-slate-200/80 bg-white p-4 shadow-[0_28px_72px_rgba(15,23,42,0.16),0_10px_24px_rgba(249,115,22,0.08)] sm:p-6 lg:p-8">
+        {/* <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h2 className="mt-3 text-2xl font-black text-slate-950 sm:text-3xl">Điểm đi - Điểm đến - Ngày đi</h2>
 
@@ -65,15 +62,15 @@ export default function TripSearchSection({
             <CalendarCheck2 className="h-4 w-4 text-orange-500" />
             Lịch trình hôm nay
           </button>
-        </div>
+        </div> */}
 
-        <form onSubmit={onSearch} className="mt-6">
+        <form onSubmit={onSearch} className="mt-1">
           <div className="grid gap-4 lg:grid-cols-[1fr_1fr_0.8fr_0.9fr] lg:items-end">
             <div>
               <label htmlFor="from" className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
                 Điểm đi
               </label>
-              <div className="flex items-center rounded-[1.35rem] border border-sky-100 bg-sky-50/70 px-4 transition focus-within:border-orange-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100">
+              <div className="flex items-center rounded-[1.35rem] border border-slate-200 bg-white px-4 shadow-[0_8px_24px_rgba(15,23,42,0.04)] transition focus-within:border-orange-300 focus-within:ring-4 focus-within:ring-orange-100">
                 <MapPin className="mr-3 h-5 w-5 shrink-0 text-slate-400" />
                 <select
                   id="from"
@@ -100,7 +97,7 @@ export default function TripSearchSection({
               <label htmlFor="to" className="mb-2 block text-xs font-bold uppercase tracking-[0.16em] text-slate-500">
                 Điểm đến
               </label>
-              <div className="flex items-center rounded-[1.35rem] border border-sky-100 bg-sky-50/70 px-4 transition focus-within:border-orange-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100">
+              <div className="flex items-center rounded-[1.35rem] border border-slate-200 bg-white px-4 shadow-[0_8px_24px_rgba(15,23,42,0.04)] transition focus-within:border-orange-300 focus-within:ring-4 focus-within:ring-orange-100">
                 <MapPin className="mr-3 h-5 w-5 shrink-0 text-slate-400" />
                 <select
                   id="to"
@@ -138,14 +135,14 @@ export default function TripSearchSection({
                   value={displayDate}
                   onChange={(event) => onDisplayDateChange(event.target.value)}
                   onBlur={onDateBlur}
-                  className={`w-full rounded-[1.35rem] border bg-sky-50/70 p-3.5 pr-12 text-sm font-medium text-slate-700 outline-none transition focus:bg-white focus:ring-4 focus:ring-orange-100 ${dateError ? 'border-red-300' : 'border-sky-100 focus:border-orange-300'
+                  className={`w-full rounded-[1.35rem] border bg-white p-3.5 pr-12 text-sm font-medium text-slate-700 shadow-[0_8px_24px_rgba(15,23,42,0.04)] outline-none transition focus:ring-4 focus:ring-orange-100 ${dateError ? 'border-red-300' : 'border-slate-200 focus:border-orange-300'
                     }`}
                 />
 
                 <button
                   type="button"
                   onClick={onDatePickerOpen}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-white hover:text-orange-500"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-2 text-slate-500 transition hover:bg-slate-50 hover:text-orange-500"
                   aria-label="Mở lịch chọn ngày"
                 >
                   <CalendarDays className="h-5 w-5" />
@@ -175,7 +172,7 @@ export default function TripSearchSection({
           </div>
         </form>
 
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {/* <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           {supportHighlights.map((item) => {
             const Icon = item.icon
 
@@ -197,7 +194,7 @@ export default function TripSearchSection({
               </a>
             )
           })}
-        </div>
+        </div> */}
       </div>
     </section>
   )

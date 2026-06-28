@@ -133,8 +133,8 @@ export default function BookingLookupPage({
         <main className="mx-auto flex w-full max-w-[1400px] flex-1 items-start px-4 pb-10 pt-4 sm:px-6 sm:pb-14 sm:pt-8">
           <section className="w-full rounded-[2rem] border border-sky-100 bg-white/95 p-4 shadow-[0_24px_70px_rgba(148,163,184,0.18)] backdrop-blur sm:p-6 lg:p-8">
             <div className="grid gap-6 xl:grid-cols-[380px_minmax(0,1fr)]">
-              <div className="h-fit rounded-[1.75rem] border border-sky-100 bg-[linear-gradient(180deg,_#ffffff_0%,_#f7fbff_100%)] p-6 shadow-sm">
-                <div className="inline-flex rounded-full border border-orange-100 bg-orange-50 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.15em] text-orange-600">
+              <div className="h-fit rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(180deg,_#ffffff_0%,_#f8fbff_100%)] p-6 shadow-[0_18px_50px_rgba(15,23,42,0.06),0_8px_20px_rgba(249,115,22,0.05)]">
+                <div className="inline-flex rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold uppercase tracking-[0.15em] text-slate-600 shadow-[0_8px_18px_rgba(15,23,42,0.05)]">
                   Tra cứu vé
                 </div>
                 <h1 className="mt-4 text-2xl font-black text-slate-950">Kiểm tra đơn hàng</h1>
@@ -147,7 +147,7 @@ export default function BookingLookupPage({
                     <label htmlFor="lookup-booking-code" className="mb-2 block text-xs font-bold uppercase tracking-[0.15em] text-slate-600">
                       Mã đặt chỗ
                     </label>
-                    <div className="flex items-center rounded-[1.25rem] border border-sky-100 bg-sky-50/70 px-4 transition focus-within:border-orange-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100">
+                    <div className="flex items-center rounded-[1.25rem] border border-slate-200 bg-white px-4 shadow-[0_8px_22px_rgba(15,23,42,0.04)] transition focus-within:border-orange-300 focus-within:ring-4 focus-within:ring-orange-100">
                       <Ticket className="mr-3 h-5 w-5 shrink-0 text-slate-400" />
                       <input
                         id="lookup-booking-code"
@@ -165,7 +165,7 @@ export default function BookingLookupPage({
                     <label htmlFor="lookup-phone" className="mb-2 block text-xs font-bold uppercase tracking-[0.15em] text-slate-600">
                       Số điện thoại
                     </label>
-                    <div className="flex items-center rounded-[1.25rem] border border-sky-100 bg-sky-50/70 px-4 transition focus-within:border-orange-300 focus-within:bg-white focus-within:ring-4 focus-within:ring-orange-100">
+                    <div className="flex items-center rounded-[1.25rem] border border-slate-200 bg-white px-4 shadow-[0_8px_22px_rgba(15,23,42,0.04)] transition focus-within:border-orange-300 focus-within:ring-4 focus-within:ring-orange-100">
                       <Phone className="mr-3 h-5 w-5 shrink-0 text-slate-400" />
                       <input
                         id="lookup-phone"
@@ -201,7 +201,7 @@ export default function BookingLookupPage({
                 </form>
               </div>
 
-              <div className="flex min-h-[320px] flex-col rounded-[1.75rem] border border-slate-200 bg-slate-50/80 p-4 sm:p-6">
+              <div className="flex min-h-[320px] flex-col rounded-[1.75rem] border border-slate-200 bg-white p-4 shadow-[0_16px_42px_rgba(15,23,42,0.05)] sm:p-6">
                 {errorMessage ? (
                   <div className="mb-5 flex items-start gap-3 rounded-[1.25rem] border border-rose-200 bg-rose-50 px-5 py-4 text-sm font-medium text-rose-700">
                     <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-rose-500" />

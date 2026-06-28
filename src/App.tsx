@@ -1337,9 +1337,9 @@ function App() {
   const siteHeader = () => {
     const navItems = [
       { label: 'Trang chủ', onClick: () => handleNavigateHomeSection('top') },
-      { label: 'Lịch trình', onClick: () => handleNavigateHomeSection('lich-trinh') },
       { label: 'Tuyến phổ biến', onClick: () => handleNavigateHomeSection('tuyen-pho-bien') },
       { label: 'Liên hệ', onClick: () => handleNavigateHomeSection('lien-he') },
+      { label: 'Tra cứu', onClick: () => navigate('/booking-lookup') },
     ]
 
     return (
@@ -1377,14 +1377,6 @@ function App() {
                 <Phone className="h-4 w-4" />
                 1900 1010
               </a>
-
-              <button
-                type="button"
-                onClick={() => navigate('/booking-lookup')}
-                className="hidden rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 md:inline-flex"
-              >
-                Tra cứu vé
-              </button>
 
               <div ref={userMenuRef} className="relative">
                 <button

@@ -17,8 +17,8 @@ export default function ServiceReasonsSection() {
             const Icon = reason.icon
 
             return (
-              <article key={reason.title} className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-orange-500">
+              <article key={reason.title} className="rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-[0_16px_42px_rgba(15,23,42,0.05)]">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 shadow-[0_8px_18px_rgba(15,23,42,0.05)]">
                   <Icon className="h-6 w-6" />
                 </div>
                 <h3 className="mt-4 text-xl font-black text-slate-950">{reason.title}</h3>

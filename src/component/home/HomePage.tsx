@@ -23,7 +23,7 @@ export default function HomePage(props: HomePageProps) {
     <div className="min-h-screen bg-[linear-gradient(180deg,_#f8fbff_0%,_#edf5ff_32%,_#ffffff_100%)] text-slate-900">
       <div className="pointer-events-none fixed inset-0 -z-10">
         <div className="absolute left-[-10rem] top-[-8rem] h-80 w-80 rounded-full bg-sky-200/45 blur-3xl" />
-        <div className="absolute right-[-10rem] top-32 h-96 w-96 rounded-full bg-orange-200/30 blur-3xl" />
+        <div className="absolute right-[-10rem] top-32 h-96 w-96 rounded-full bg-slate-200/35 blur-3xl" />
       </div>
 
       <div className="relative z-10 flex min-h-screen flex-col">
@@ -34,8 +34,8 @@ export default function HomePage(props: HomePageProps) {
             currentSlide={currentSlide}
             onNavigateSection={onNavigateSection}
             onOpenLookup={onOpenLookup}
+            searchSection={<TripSearchSection {...props} />}
           />
-          <TripSearchSection {...props} />
           <TripResultsSection {...props} />
           <PopularRoutesSection
             popularRoutes={props.popularRoutes}
