@@ -1,5 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Clock3, Copy, Download, QrCode, X } from 'lucide-react'
+import {
+  CheckCircle2,
+  Clock3,
+  Copy,
+  Download,
+  Loader2,
+  QrCode,
+  X,
+} from 'lucide-react'
 import { bookingsAPI } from '../api/config'
 import type { BookingResponse } from '../api/config'
 import {
@@ -53,14 +61,10 @@ const resolvePaymentExpiryTimestamp = (booking: BookingResponse) => {
     ? new Date(booking.paymentExpiry).getTime()
     : Number.NaN
 
-  if (!Number.isNaN(paymentExpiryTimestamp)) {
-    return paymentExpiryTimestamp
-  }
+  if (!Number.isNaN(paymentExpiryTimestamp)) return paymentExpiryTimestamp
 
   const bookingTimestamp = new Date(booking.bookingTime).getTime()
-  if (Number.isNaN(bookingTimestamp)) {
-    return Number.NaN
-  }
+  if (Number.isNaN(bookingTimestamp)) return Number.NaN
 
   return bookingTimestamp + DEFAULT_PAYMENT_HOLD_HOURS * 60 * 60 * 1000
 }
@@ -107,6 +111,7 @@ export default function BookingSuccessModal({
     }
 
     const expiredAt = resolvePaymentExpiryTimestamp(booking)
+
     if (Number.isNaN(expiredAt)) {
       setRemainingSeconds(DEFAULT_PAYMENT_HOLD_HOURS * 60 * 60)
       return
@@ -119,6 +124,7 @@ export default function BookingSuccessModal({
 
     updateCountdown()
     const timer = window.setInterval(updateCountdown, 1000)
+
     return () => window.clearInterval(timer)
   }, [booking, show])
 
@@ -145,11 +151,10 @@ export default function BookingSuccessModal({
       if (hasConfirmedPaymentRef.current) return
 
       try {
-        if (isMounted) {
-          setIsCheckingPayment(true)
-        }
+        if (isMounted) setIsCheckingPayment(true)
 
         const response = await bookingsAPI.getPaymentStatus(booking.bookingCode)
+
         if (!isMounted || hasConfirmedPaymentRef.current) return
 
         if (response.success && response.status === 1) {
@@ -159,9 +164,7 @@ export default function BookingSuccessModal({
       } catch (error) {
         console.error('Error checking booking payment status:', error)
       } finally {
-        if (isMounted) {
-          setIsCheckingPayment(false)
-        }
+        if (isMounted) setIsCheckingPayment(false)
       }
     }
 
@@ -177,10 +180,9 @@ export default function BookingSuccessModal({
   if (!show || !booking) return null
 
   const resolvedPaymentExpiryTimestamp = resolvePaymentExpiryTimestamp(booking)
-  const resolvedPaymentExpiryDisplay =
-    Number.isNaN(resolvedPaymentExpiryTimestamp)
-      ? null
-      : new Date(resolvedPaymentExpiryTimestamp).toISOString()
+  const resolvedPaymentExpiryDisplay = Number.isNaN(resolvedPaymentExpiryTimestamp)
+    ? null
+    : new Date(resolvedPaymentExpiryTimestamp).toISOString()
 
   const handleCopy = async (value: string, field: string) => {
     try {
@@ -217,176 +219,204 @@ export default function BookingSuccessModal({
           type="button"
           onClick={onClose}
           className="absolute right-3 top-3 z-20 rounded-full bg-white p-2 text-slate-500 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-100 hover:text-slate-900 sm:right-4 sm:top-4"
-          aria-label="Dong"
+          aria-label="Đóng"
         >
           <X className="h-5 w-5 shrink-0" strokeWidth={2} />
         </button>
 
-        <div className="border-b border-slate-200 px-4 pb-5 pt-6 text-center sm:px-8 sm:pb-6 sm:pt-7">
-          <div className="mx-auto inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold uppercase tracking-[0.18em] text-slate-700 ring-1 ring-slate-200 sm:px-4 sm:text-sm sm:normal-case sm:tracking-normal">
-            <QrCode className="h-4 w-4 shrink-0" strokeWidth={2} />
-            Dat cho thanh cong
+        <div className="border-b border-slate-100 px-4 pb-4 pt-5 text-center sm:px-8 sm:pb-5 sm:pt-6">
+          <div className="mx-auto inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-1.5 text-sm font-bold text-emerald-700 ring-1 ring-emerald-100">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            Đặt chỗ thành công
           </div>
 
-          <h2 className="mt-3 text-xl font-black text-slate-950 sm:mt-4 sm:text-3xl">
-            Thanh toan truoc khi het han giu cho
+          <h2 className="mt-3 text-xl font-black text-slate-950 sm:text-3xl">
+            Thanh toán trước khi hết hạn giữ chỗ
           </h2>
 
-          <p className="mt-2 hidden text-sm leading-6 text-slate-500 sm:block">
-            Quet ma QR hoac chuyen khoan dung thong tin de he thong xac nhan ve tu dong.
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            Quét mã QR hoặc chuyển khoản đúng nội dung để hệ thống xác nhận tự động.
           </p>
 
-          <div className="mt-3 text-xs font-medium text-slate-500 sm:text-sm">
-            Han giu cho: <span className="font-semibold text-slate-700">{formatDateTime(resolvedPaymentExpiryDisplay)}</span>
-          </div>
-
-          <div className="mt-2 text-xs font-medium text-slate-500 sm:text-sm">
-            {isCheckingPayment
-              ? 'He thong dang kiem tra trang thai thanh toan...'
-              : 'He thong se tu dong cap nhat sau khi nhan duoc thanh toan.'}
+          <div className="mt-3 text-sm font-medium text-slate-500">
+            Hạn giữ chỗ:{' '}
+            <span className="font-bold text-slate-800">
+              {formatDateTime(resolvedPaymentExpiryDisplay)}
+            </span>
           </div>
 
           <div
-            className={`mt-4 grid gap-2 rounded-2xl px-4 py-3 text-left sm:mx-auto sm:mt-5 sm:inline-flex sm:w-fit sm:min-w-[360px] sm:items-center sm:justify-center sm:gap-4 sm:text-center ${
-              isExpired
+            className={`mx-auto mt-4 flex w-fit min-w-[300px] items-center justify-center gap-4 rounded-2xl px-5 py-3 ${isExpired
                 ? 'bg-red-50 text-red-700 ring-1 ring-red-200'
                 : 'bg-amber-50 text-amber-700 ring-1 ring-amber-200'
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2 text-sm font-bold">
-              <Clock3 className="h-4 w-4 shrink-0 sm:h-5 sm:w-5" strokeWidth={2} />
-              <span>{isExpired ? 'Da het thoi gian thanh toan' : 'Thoi gian con lai'}</span>
+              <Clock3 className="h-5 w-5 shrink-0" strokeWidth={2} />
+              {isExpired ? 'Đã hết hạn' : 'Còn lại'}
             </div>
-            <div className="text-2xl font-black tabular-nums sm:text-3xl">
+            <div className="text-3xl font-black tabular-nums">
               {formatCountdown(remainingSeconds)}
             </div>
           </div>
+
+          <div className="mt-3 flex items-center justify-center gap-2 text-xs font-semibold text-slate-500">
+            {isCheckingPayment ? (
+              <>
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                Đang kiểm tra trạng thái thanh toán...
+              </>
+            ) : (
+              <>
+                <span className="h-2 w-2 rounded-full bg-amber-500" />
+                Đang chờ thanh toán
+              </>
+            )}
+          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-8 sm:py-6">
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
-            <section className="order-2 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 sm:p-5 lg:order-1">
-              <div className="flex items-center justify-between gap-3">
+        <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-8 sm:py-5">
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_330px]">
+            <section className="order-2 space-y-3 rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 lg:order-1">
+              <div className="flex items-start justify-between gap-4">
                 <div>
-                  <div className="text-sm font-bold text-slate-900">Thông tin thanh toán</div>
-                  <div className="mt-1 hidden text-xs text-slate-500 sm:block">
-                    Ma dat ve: {booking.bookingCode}
+                  <div className="text-sm font-black text-slate-950">
+                    Thông tin thanh toán
+                  </div>
+                  <div className="mt-1 text-xs text-slate-500">
+                    Mã đặt vé: {booking.bookingCode}
                   </div>
                 </div>
-                <div className="hidden text-right sm:block">
-                  <div className="text-xs uppercase tracking-[0.16em] text-slate-400">So tien</div>
+
+                <div className="text-right">
+                  <div className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                    Số tiền
+                  </div>
                   <div className="mt-1 text-xl font-black text-slate-950">
                     {formatCurrency(booking.totalAmount)}
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 space-y-3">
-                <div className="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200 sm:hidden">
-                  <div className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
-                    So tien
-                  </div>
-                  <div className="mt-1 text-2xl font-black text-slate-950">
-                    {formatCurrency(booking.totalAmount)}
-                  </div>
+              <div className="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200">
+                <div className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                  Nội dung chuyển khoản
                 </div>
 
-                <div className="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200">
-                  <div className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
-                    Noi dung chuyen khoan
+                <div className="mt-2 flex items-center justify-between gap-3">
+                  <div className="min-w-0 break-all text-lg font-black tracking-wide text-slate-950">
+                    {transferContent}
                   </div>
-                  <div className="mt-2 flex items-center justify-between gap-3">
-                    <div className="min-w-0 break-all text-base font-black tracking-wide text-slate-950 sm:text-lg">
-                      {transferContent}
+
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(transferContent, 'transferContent')}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-100"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                    Copy
+                  </button>
+                </div>
+
+                {copiedField === 'transferContent' ? (
+                  <div className="mt-2 text-xs font-semibold text-emerald-600">
+                    Đã sao chép nội dung chuyển khoản
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200">
+                <div className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                  Số tài khoản
+                </div>
+
+                <div className="mt-2 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <div className="text-lg font-black tracking-wide text-slate-950">
+                      {PAYMENT_ACCOUNT_NO}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleCopy(transferContent, 'transferContent')}
-                      className="rounded-full bg-slate-50 p-2 text-slate-500 ring-1 ring-slate-200 transition hover:bg-slate-100 hover:text-slate-900"
-                      aria-label="Sao chép nội dung chuyển khoản"
-                    >
-                      <Copy className="h-4 w-4 shrink-0" strokeWidth={2} />
-                    </button>
+                    <div className="mt-1 text-sm font-medium text-slate-500">
+                      {PAYMENT_ACCOUNT_NAME}
+                    </div>
                   </div>
-                  {copiedField === 'transferContent' ? (
-                    <div className="mt-2 text-xs font-semibold text-emerald-600">
-                      Đã sao chép nội dung chuyển khoản
+
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(PAYMENT_ACCOUNT_NO, 'accountNo')}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-2 text-xs font-bold text-slate-700 ring-1 ring-slate-200 transition hover:bg-slate-100"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                    Copy
+                  </button>
+                </div>
+
+                {copiedField === 'accountNo' ? (
+                  <div className="mt-2 text-xs font-semibold text-emerald-600">
+                    Đã sao chép số tài khoản
+                  </div>
+                ) : null}
+              </div>
+
+              <div className="rounded-[1.25rem] bg-white p-4 text-sm text-slate-600 ring-1 ring-slate-200">
+                <div className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                  Liên hệ nhận vé
+                </div>
+
+                <div className="mt-2 space-y-1.5">
+                  <div className="font-semibold text-slate-900">
+                    {booking.contactName || '--'}
+                  </div>
+                  <div>{booking.contactPhone || '--'}</div>
+                  <div>{booking.contactEmail || '--'}</div>
+
+                  {booking.note ? (
+                    <div className="pt-1 text-xs text-slate-500">
+                      Ghi chú: {booking.note}
                     </div>
                   ) : null}
                 </div>
+              </div>
 
-                <div className="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200">
-                  <div className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
-                    So tai khoan
-                  </div>
-                  <div className="mt-2 flex items-center justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-base font-black tracking-wide text-slate-950 sm:text-lg">
-                        {PAYMENT_ACCOUNT_NO}
-                      </div>
-                      <div className="mt-1 text-sm text-slate-500">
-                        {PAYMENT_ACCOUNT_NAME}
-                      </div>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleCopy(PAYMENT_ACCOUNT_NO, 'accountNo')}
-                      className="rounded-full bg-slate-50 p-2 text-slate-500 ring-1 ring-slate-200 transition hover:bg-slate-100 hover:text-slate-900"
-                      aria-label="Sao chép số tài khoản"
-                    >
-                      <Copy className="h-4 w-4 shrink-0" strokeWidth={2} />
-                    </button>
-                  </div>
-                  {copiedField === 'accountNo' ? (
-                    <div className="mt-2 text-xs font-semibold text-emerald-600">
-                      Đã sao chép số tài khoản
-                    </div>
-                  ) : null}
+              <div className="rounded-[1.25rem] bg-white p-4 ring-1 ring-slate-200">
+                <div className="text-sm font-black text-slate-950">
+                  Hướng dẫn thanh toán
                 </div>
 
-                <div className="rounded-[1.25rem] bg-white p-4 text-sm text-slate-600 ring-1 ring-slate-200">
-                  Chuyển khoản đúng số tiền và đúng nội dung để hệ thống đối soát tự động.
-                </div>
-
-                <div className="rounded-[1.25rem] bg-white p-4 text-sm text-slate-600 ring-1 ring-slate-200">
-                  <div className="text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
-                    Thông tin liên hệ
-                  </div>
-                  <div className="mt-2 space-y-1">
-                    <div>
-                      Người liên hệ:{' '}
-                      <span className="font-semibold text-slate-900">{booking.contactName || '--'}</span>
-                    </div>
-                    <div>
-                      Số điện thoại:{' '}
-                      <span className="font-semibold text-slate-900">{booking.contactPhone || '--'}</span>
-                    </div>
-                    <div>
-                      Email:{' '}
-                      <span className="font-semibold text-slate-900">{booking.contactEmail || '--'}</span>
-                    </div>
-                    {booking.note ? (
-                      <div>
-                        Ghi chu:{' '}
-                        <span className="font-semibold text-slate-900">{booking.note}</span>
-                      </div>
-                    ) : null}
-                  </div>
+                <div className="mt-2 grid gap-2 text-xs leading-relaxed text-slate-500">
+                  <div>1. Mở ứng dụng ngân hàng.</div>
+                  <div>2. Quét mã QR hoặc chuyển khoản thủ công.</div>
+                  <div>3. Chuyển đúng số tiền và đúng nội dung.</div>
+                  <div>4. Chờ vài giây để hệ thống tự động xác nhận.</div>
                 </div>
               </div>
             </section>
 
-            <section className="order-1 rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-[0_12px_36px_rgba(15,23,42,0.08)] lg:order-2">
-              <div className="mx-auto max-w-[280px] rounded-[1.5rem] border border-slate-200 bg-white p-3">
+            <section className="order-1 rounded-[1.5rem] border border-slate-200 bg-white p-4 text-center shadow-[0_12px_36px_rgba(15,23,42,0.08)] lg:order-2">
+              <div className="mx-auto max-w-[300px] rounded-[1.5rem] border border-slate-200 bg-white p-3">
                 <img
                   src={vietQrUrl}
-                  alt="Ma QR thanh toan"
+                  alt="Mã QR thanh toán"
                   className="aspect-square w-full rounded-[1.25rem] bg-white object-contain"
                 />
               </div>
 
-              <div className="mt-3 text-center text-xs leading-5 text-slate-500 sm:text-sm">
-                Quet bang ung dung ngan hang de thanh toan nhanh hon.
+              <div className="mt-3 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                Số tiền cần thanh toán
+              </div>
+
+              <div className="mt-1 text-3xl font-black text-orange-500">
+                {formatCurrency(booking.totalAmount)}
+              </div>
+
+              <div className="mt-2 text-sm leading-5 text-slate-500">
+                Quét bằng ứng dụng ngân hàng để thanh toán nhanh hơn.
+              </div>
+
+              <div className="mt-4 rounded-2xl bg-slate-50 p-3 text-left text-xs leading-relaxed text-slate-500">
+                <div className="flex items-center gap-2 font-semibold text-slate-700">
+                  <QrCode className="h-4 w-4 text-orange-500" />
+                  VietQR hỗ trợ hầu hết ngân hàng tại Việt Nam.
+                </div>
               </div>
             </section>
           </div>
@@ -395,7 +425,7 @@ export default function BookingSuccessModal({
             <button
               type="button"
               onClick={() => handleCopy(transferContent, 'transferContent')}
-              className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] bg-slate-950 px-4 py-3.5 text-sm font-bold text-white transition hover:bg-slate-800"
+              className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] bg-slate-950 px-4 py-4 text-sm font-bold text-white transition hover:bg-slate-800"
             >
               <Copy className="h-4 w-4 shrink-0" strokeWidth={2} />
               Sao chép nội dung CK
@@ -404,10 +434,10 @@ export default function BookingSuccessModal({
             <button
               type="button"
               onClick={handleDownloadQr}
-              className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-slate-200 bg-white px-4 py-3.5 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
+              className="inline-flex items-center justify-center gap-2 rounded-[1.25rem] border border-slate-200 bg-white px-4 py-4 text-sm font-bold text-slate-700 transition hover:bg-slate-50"
             >
               <Download className="h-4 w-4 shrink-0" strokeWidth={2} />
-              Tai ma QR
+              Tải mã QR
             </button>
           </div>
         </div>
