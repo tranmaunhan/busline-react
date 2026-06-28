@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import {
   ArrowRight,
   BusFront,
@@ -13,10 +14,33 @@ import { formatCurrency } from './data'
 
 type TripResultsSectionProps = Pick<
   HomePageProps,
-  'loadingTrips' | 'hasSearchedTrips' | 'trips' | 'resultsRef' | 'onSelectTrip'
+  'date' | 'loadingTrips' | 'hasSearchedTrips' | 'trips' | 'resultsRef' | 'onSelectTrip'
 >
 
 type TripItem = HomePageProps['trips'][number]
+
+interface TimeSlotDefinition {
+  key: string
+  label: string
+  startHour: number
+  endHour: number
+}
+
+const TIME_SLOTS: TimeSlotDefinition[] = [
+  { key: 'early-morning', label: '00:00 - 05:59', startHour: 0, endHour: 6 },
+  { key: 'morning', label: '06:00 - 11:59', startHour: 6, endHour: 12 },
+  { key: 'afternoon', label: '12:00 - 17:59', startHour: 12, endHour: 18 },
+  { key: 'evening', label: '18:00 - 23:59', startHour: 18, endHour: 24 },
+]
+
+const toLocalDateISO = (date: Date) => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const resolveTripStartTime = (trip: TripItem) => trip.pickupTime || trip.departureTime
 
 const formatTime = (iso?: string | null) => {
   if (!iso) return '--:--'
@@ -39,6 +63,39 @@ const formatDuration = (minutes?: number | null) => {
   if (!hours) return `${remainingMinutes} phút`
   if (!remainingMinutes) return `${hours} giờ`
   return `${hours} giờ ${remainingMinutes} phút`
+}
+
+const isTripStillAvailableForSearch = (
+  trip: TripItem,
+  searchDate: string,
+  now = new Date(),
+) => {
+  if (searchDate !== toLocalDateISO(now)) {
+    return true
+  }
+
+  const tripStartValue = resolveTripStartTime(trip)
+  if (!tripStartValue) {
+    return true
+  }
+
+  const tripStartTime = new Date(tripStartValue)
+  if (Number.isNaN(tripStartTime.getTime())) {
+    return true
+  }
+
+  return tripStartTime.getTime() >= now.getTime()
+}
+
+const matchesTimeSlot = (trip: TripItem, slot: TimeSlotDefinition) => {
+  const tripStartValue = resolveTripStartTime(trip)
+  if (!tripStartValue) return false
+
+  const tripStartTime = new Date(tripStartValue)
+  if (Number.isNaN(tripStartTime.getTime())) return false
+
+  const hour = tripStartTime.getHours()
+  return hour >= slot.startHour && hour < slot.endHour
 }
 
 function TripInfoChip({
@@ -182,12 +239,40 @@ function TripCard({
 }
 
 export default function TripResultsSection({
+  date,
   loadingTrips,
   hasSearchedTrips,
   trips,
   resultsRef,
   onSelectTrip,
 }: TripResultsSectionProps) {
+  const [selectedSlotKey, setSelectedSlotKey] = useState<string | null>(null)
+
+  const visibleTrips = trips.filter((trip) => isTripStillAvailableForSearch(trip, date))
+  const slotItems = TIME_SLOTS
+    .map((slot) => ({
+      ...slot,
+      trips: visibleTrips.filter((trip) => matchesTimeSlot(trip, slot)),
+    }))
+    .filter((slot) => slot.trips.length > 0)
+
+  useEffect(() => {
+    if (!slotItems.length) {
+      if (selectedSlotKey !== null) {
+        setSelectedSlotKey(null)
+      }
+      return
+    }
+
+    if (!selectedSlotKey || !slotItems.some((slot) => slot.key === selectedSlotKey)) {
+      setSelectedSlotKey(slotItems[0].key)
+    }
+  }, [selectedSlotKey, slotItems])
+
+  const activeSlot =
+    slotItems.find((slot) => slot.key === selectedSlotKey) || slotItems[0] || null
+  const hasExpiredTripsHidden = trips.length > 0 && visibleTrips.length < trips.length
+
   if (!hasSearchedTrips && !loadingTrips) {
     return null
   }
@@ -210,8 +295,7 @@ export default function TripResultsSection({
               </h3>
 
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
-                Chọn chuyến phù hợp với thời gian, điểm đón, điểm trả và số ghế
-                còn trống để tiếp tục đặt vé.
+                Chọn khung giờ phù hợp để xem các chuyến còn nhận khách và tiếp tục đặt vé.
               </p>
             </div>
 
@@ -224,7 +308,7 @@ export default function TripResultsSection({
               ) : (
                 <>
                   <Ticket className="h-4 w-4 text-orange-500" />
-                  {trips.length} chuyến phù hợp
+                  {visibleTrips.length} chuyến còn khả dụng
                 </>
               )}
             </div>
@@ -239,19 +323,50 @@ export default function TripResultsSection({
                 Đang tìm chuyến xe phù hợp
               </h4>
               <p className="mt-2 max-w-md text-sm leading-6 text-slate-500">
-                Hệ thống đang kiểm tra lịch trình, số ghế trống và giá vé cho
-                hành trình của bạn.
+                Hệ thống đang kiểm tra lịch trình, số ghế trống và giá vé cho hành trình của bạn.
               </p>
             </div>
-          ) : trips.length > 0 ? (
-            <div className="grid gap-4">
-              {trips.map((trip) => (
-                <TripCard
-                  key={trip.tripId}
-                  trip={trip}
-                  onSelectTrip={onSelectTrip}
-                />
-              ))}
+          ) : visibleTrips.length > 0 && activeSlot ? (
+            <div>
+              <div className="mb-5 flex gap-2 overflow-x-auto pb-2">
+                {slotItems.map((slot) => {
+                  const isActive = slot.key === activeSlot.key
+
+                  return (
+                    <button
+                      key={slot.key}
+                      type="button"
+                      onClick={() => setSelectedSlotKey(slot.key)}
+                      className={`shrink-0 rounded-2xl border px-4 py-3 text-left transition ${
+                        isActive
+                          ? 'border-orange-500 bg-orange-500 text-white shadow-[0_14px_28px_rgba(249,115,22,0.2)]'
+                          : 'border-slate-200 bg-slate-50 text-slate-700 hover:border-orange-200 hover:bg-orange-50'
+                      }`}
+                    >
+                      <div className="text-sm font-black">{slot.label}</div>
+                      <div className={`mt-1 text-xs font-semibold ${isActive ? 'text-orange-100' : 'text-slate-500'}`}>
+                        {slot.trips.length} chuyến
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {hasExpiredTripsHidden ? (
+                <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  Một số chuyến đã qua giờ chạy nên được ẩn khỏi kết quả hiện tại.
+                </div>
+              ) : null}
+
+              <div className="grid gap-4">
+                {activeSlot.trips.map((trip) => (
+                  <TripCard
+                    key={trip.tripId}
+                    trip={trip}
+                    onSelectTrip={onSelectTrip}
+                  />
+                ))}
+              </div>
             </div>
           ) : (
             <div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-slate-50 px-6 py-14 text-center">
@@ -260,12 +375,15 @@ export default function TripResultsSection({
               </div>
 
               <h4 className="mt-5 text-xl font-black text-slate-900">
-                Chưa tìm thấy chuyến phù hợp
+                {trips.length > 0
+                  ? 'Không còn chuyến nào phù hợp trong các khung giờ còn lại'
+                  : 'Chưa tìm thấy chuyến phù hợp'}
               </h4>
 
               <p className="mx-auto mt-2 max-w-xl text-sm leading-7 text-slate-500">
-                Hãy thử đổi ngày đi, điểm đón, điểm trả hoặc kiểm tra lại lịch
-                trình để xem thêm các lựa chọn khác.
+                {trips.length > 0
+                  ? 'Các chuyến đã quá giờ chạy sẽ được ẩn trên giao diện. Bạn có thể đổi ngày đi hoặc thử lại ở hành trình khác.'
+                  : 'Hãy thử đổi ngày đi, điểm đón, điểm trả hoặc kiểm tra lại lịch trình để xem thêm các lựa chọn khác.'}
               </p>
             </div>
           )}
