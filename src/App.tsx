@@ -1348,7 +1348,7 @@ function App() {
     ]
 
     return (
-        <header id="site-header" className="sticky top-0 z-40 border-b border-white/70 bg-white/82 backdrop-blur-xl">
+        <header id="site-header" className="sticky top-0 z-40 border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
